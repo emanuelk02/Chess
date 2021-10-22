@@ -5,3 +5,6 @@
 .bsp
 target/
 .game/
+.metals
+.bloop
+metals.sbt
