@@ -19,3 +19,13 @@ val house = House(Vector(cell1, cell2))
 
 house.cells(0).value
 house.cells(0).isSet
+
+case class Tile(color: String, width: Int, height: Int) {
+  def tileString = {
+    color * width + eol
+    + () * (height - 2)
+  }
+}
+
+val tile1 = Tile("#", 3, 3)
+println(tile1.tileString)
