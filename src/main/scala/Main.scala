@@ -1,7 +1,7 @@
-object main {
-  @main def hello: Unit =
+ @main def hello: Unit = {
     println(oname)
   println(mesh())
+ }
 
   def oname = "Welcome to a new game of chess"
   val eol = sys.props("line.separator")
@@ -14,5 +14,3 @@ object main {
       cellWidth,
       cellNum
     )
-
-}
