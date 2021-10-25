@@ -20,12 +20,102 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-case class Tile(color: String, width: Int, height: Int) {
-  def tileString = {
-    color * width + eol
-    + () * (height - 2)
+
+
+
+
+/*val eol = sys.props("line.separator")
+
+def line(color: String, width: Int) : String = color * width
+def wall(color: String, width: Int) : String = color + " " * (width - 2) + color
+
+def rankTop(white: Boolean,  whiteColor: String, blackColor: String, width: Int, rankLen: Int) : String = {
+  var r = ""
+  if (white) {
+    for (i <- 1 to rankLen) {
+      if (i % 2 == 1)
+        r = r + line(whiteColor, width)
+      else
+        r = r + line(blackColor, width)
+    }
   }
+  else {
+    for (i <- 1 to rankLen) {
+      if (i % 2 == 1)
+        r = r + line(blackColor, width)
+      else
+        r = r + line(whiteColor, width)
+    }
+  }
+  r + eol
+  //if (white)
+  //  (line(whiteColor, width) + line(blackColor, width)) * (rankLen / 2)
+  //else
+  //  (line(blackColor, width) + line(whiteColor, width)) * (rankLen / 2)
+}
+def rankWall(white: Boolean,  whiteColor: String, blackColor: String, width: Int, height: Int, rankLen: Int) : String = {
+  var r = ""
+  if (white) {
+    for (i <- 1 to rankLen) {
+      if (i % 2 == 1)
+        r = r + wall(whiteColor, width)
+      else
+        r = r + wall(blackColor, width)
+    }
+  }
+  else {
+    for (i <- 1 to rankLen) {
+      if (i % 2 == 1)
+        r = r + wall(blackColor, width)
+      else
+        r = r + wall(whiteColor, width)
+    }
+  }
+  (r + eol) * height
+  //if (white)
+  //  ((wall(whiteColor, width) + wall(blackColor, width)) * (rankLen / 2) + eol) * height
+  //else
+  //  ((wall(blackColor, width) + wall(whiteColor, width)) * (rankLen / 2) + eol) * height
 }
 
-val tile1 = Tile("#", 3, 3)
-println(tile1.tileString)
+def rank(white: Boolean, whiteColor: String, blackColor: String, width: Int, height: Int, rankLen: Int) : String = {
+  rankTop(white, whiteColor, blackColor, width, rankLen)
+  + rankWall(white, whiteColor, blackColor, width, height, rankLen)
+  + rankTop(white, whiteColor, blackColor, width, rankLen)
+}
+
+def board(white: Boolean, whiteColor: String, blackColor: String, width: Int, height: Int, rankLen: Int, fileHeight: Int) : String = {
+  var r = ""
+  for (i <- 1 to fileHeight) {
+    if (i % 2 == 1) {
+      r = r + rank(white, whiteColor, blackColor, width, height, rankLen)
+    }
+    else
+      r = r + rank(!white, whiteColor, blackColor, width, height, rankLen)
+  }
+  r
+}*/
+import model.ChessBoard._
+
+print(rank(true, "#", "-", 9, 3, 8))
+
+val str = board(true, "#", "-", 9, 5, 8, 8)
+
+board(true, "#", "-", 2, 2, 2, 2)
+
+str.head
+
+rankTop(true, "", "-", 1, 1)
+
+rankTop(true, "#", "-", 3, 3).length
+rankTop(false, "#", "-", 3, 3).length
+
+rank(true, "#", "-", 1, 1, 1)
+
+rank(true, "#", "-", 1, 2, 2)
+rankWall(true, "#", "-", 1, 1, 1)
+wall("#", 1)
+
+rank(true, "", "#", 1, 1, 1)
+
+rankWall(true, "#", "-", 2, 2, 2)
