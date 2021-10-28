@@ -20,9 +20,11 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
+enum ChessPieces:
+  case Rook, Queen, King, Pawn, Knight, Bishop
 
-
-
+enum PieceColor:
+  case Black, White
 
 /*val eol = sys.props("line.separator")
 
