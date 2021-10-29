@@ -20,11 +20,50 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-enum ChessPieces:
+
+
+enum PieceType:
   case Rook, Queen, King, Pawn, Knight, Bishop
 
 enum PieceColor:
   case Black, White
+
+
+enum Piece(color: PieceColor, name: PieceType):
+  case W_KING extends Piece(PieceColor.White, PieceType.King)
+  case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen)
+  case W_ROOK extends Piece(PieceColor.White, PieceType.Rook)
+  case W_BISHOP extends Piece(PieceColor.White, PieceType.Bishop)
+  case W_KNIGHT extends Piece(PieceColor.White, PieceType.Knight)
+  case W_PAWN extends Piece(PieceColor.White, PieceType.Pawn)
+  case B_KING extends Piece(PieceColor.Black, PieceType.King)
+  case B_QUEEN extends Piece(PieceColor.Black, PieceType.Queen)
+  case B_ROOK extends Piece(PieceColor.Black, PieceType.Rook)
+  case B_BISHOP extends Piece(PieceColor.Black, PieceType.Bishop)
+  case B_KNIGHT extends Piece(PieceColor.Black, PieceType.Knight)
+  case B_PAWN extends Piece(PieceColor.Black, PieceType.Pawn)
+
+  def getType : PieceType = name
+  def getColor : PieceColor = color
+
+
+Piece.B_KING
+
+Piece.B_KING.getType
+
+val p = Piece.B_BISHOP
+p.getColor
+
+val line: Vector[Option[Piece]] = Vector.fill(8)(None)
+
+val pieces: Vector[Vector[Option[Piece]]] = Vector.fill(8)(line)
+
+pieces(4)(5)
+
+
+val pieces3: Vector[Vector[(Piece, Int)]] = Vector(Vector((Piece.B_KING,3), (Piece.B_QUEEN, 4), (Piece.W_BISHOP, 5)), Vector.fill(7))
+
+
 
 /*val eol = sys.props("line.separator")
 
@@ -96,7 +135,7 @@ def board(white: Boolean, whiteColor: String, blackColor: String, width: Int, he
       r = r + rank(!white, whiteColor, blackColor, width, height, rankLen)
   }
   r
-}*/
+}
 import model.ChessBoard._
 
 print(rank(true, "#", "-", 9, 3, 8))
@@ -120,4 +159,4 @@ wall("#", 1)
 
 rank(true, "", "#", 1, 1, 1)
 
-rankWall(true, "#", "-", 2, 2, 2)
+rankWall(true, "#", "-", 2, 2, 2)*/
