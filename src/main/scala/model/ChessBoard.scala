@@ -1,5 +1,28 @@
 package model
 
+enum PieceType:
+  case Rook, Queen, King, Pawn, Knight, Bishop
+
+enum PieceColor:
+  case Black, White
+
+enum Piece(color: PieceColor, name: PieceType):
+  case W_KING extends Piece(PieceColor.White, PieceType.King)
+  case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen)
+  case W_ROOK extends Piece(PieceColor.White, PieceType.Rook)
+  case W_BISHOP extends Piece(PieceColor.White, PieceType.Bishop)
+  case W_KNIGHT extends Piece(PieceColor.White, PieceType.Knight)
+  case W_PAWN extends Piece(PieceColor.White, PieceType.Pawn)
+  case B_KING extends Piece(PieceColor.Black, PieceType.King)
+  case B_QUEEN extends Piece(PieceColor.Black, PieceType.Queen)
+  case B_ROOK extends Piece(PieceColor.Black, PieceType.Rook)
+  case B_BISHOP extends Piece(PieceColor.Black, PieceType.Bishop)
+  case B_KNIGHT extends Piece(PieceColor.Black, PieceType.Knight)
+  case B_PAWN extends Piece(PieceColor.Black, PieceType.Pawn)
+
+  def getType : PieceType = name
+  def getColor : PieceColor = color
+
 object ChessBoard {
     val eol = sys.props("line.separator")
     val corner = "+"

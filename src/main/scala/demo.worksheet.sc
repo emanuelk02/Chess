@@ -60,9 +60,50 @@ val pieces: Vector[Vector[Option[Piece]]] = Vector.fill(8)(line)
 
 pieces(4)(5)
 
+import Piece._
 
-val pieces3: Vector[Vector[(Piece, Int)]] = Vector(Vector((Piece.B_KING,3), (Piece.B_QUEEN, 4), (Piece.W_BISHOP, 5)), Vector.fill(7))
+B_KING
 
+
+
+//val pieces3: Vector[Vector[(Piece, Int)]] = Vector(Vector((Piece.B_KING,3), (Piece.B_QUEEN, 4), (Piece.W_BISHOP, 5)), Vector.fill(7))
+
+
+case class Matrix[T](rows: Vector[Vector[T]]):
+  def this(size: Int, filling: T) = this(Vector.tabulate(size, size) { (rows, col) => filling})
+  val size: Int = rows.size
+  def cell(row: Int, col: Int): T = rows(row)(col)
+  def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
+  def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))
+
+import Matrix._
+
+val boardData = new Matrix[Option[Piece]](8, None)
+boardData.replace(4, 3, Some(B_ROOK))
+boardData.size
+boardData.fill(Some(W_QUEEN))
+
+
+val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
+matr.rows.size
+matr.size
+
+val m = new Matrix[Option[Piece]](8, None)
+m.rows.size
+m.size
+m.fill(Some(B_KING))
+
+
+var matrix = new Matrix[Option[Piece]](2, None)
+matrix = matrix.fill(Some(B_KING))
+matrix.cell(0,0)
+matrix.cell(0,1)
+matrix.cell(1,0)
+matrix.cell(1,1)
+
+val matri = new Matrix[Option[Piece]](8, None)
+val newMatr = matri.replace(1, 1, Some(B_KING))
+matri.cell(1,1)
 
 
 /*val eol = sys.props("line.separator")
