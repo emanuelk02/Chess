@@ -20,31 +20,8 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-
-
-enum PieceType:
-  case Rook, Queen, King, Pawn, Knight, Bishop
-
-enum PieceColor:
-  case Black, White
-
-
-enum Piece(color: PieceColor, name: PieceType):
-  case W_KING extends Piece(PieceColor.White, PieceType.King)
-  case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen)
-  case W_ROOK extends Piece(PieceColor.White, PieceType.Rook)
-  case W_BISHOP extends Piece(PieceColor.White, PieceType.Bishop)
-  case W_KNIGHT extends Piece(PieceColor.White, PieceType.Knight)
-  case W_PAWN extends Piece(PieceColor.White, PieceType.Pawn)
-  case B_KING extends Piece(PieceColor.Black, PieceType.King)
-  case B_QUEEN extends Piece(PieceColor.Black, PieceType.Queen)
-  case B_ROOK extends Piece(PieceColor.Black, PieceType.Rook)
-  case B_BISHOP extends Piece(PieceColor.Black, PieceType.Bishop)
-  case B_KNIGHT extends Piece(PieceColor.Black, PieceType.Knight)
-  case B_PAWN extends Piece(PieceColor.Black, PieceType.Pawn)
-
-  def getType : PieceType = name
-  def getColor : PieceColor = color
+import model.Piece
+import model.Piece._
 
 
 Piece.B_KING
@@ -60,7 +37,7 @@ val pieces: Vector[Vector[Option[Piece]]] = Vector.fill(8)(line)
 
 pieces(4)(5)
 
-import Piece._
+
 
 B_KING
 
@@ -69,14 +46,14 @@ B_KING
 //val pieces3: Vector[Vector[(Piece, Int)]] = Vector(Vector((Piece.B_KING,3), (Piece.B_QUEEN, 4), (Piece.W_BISHOP, 5)), Vector.fill(7))
 
 
-case class Matrix[T](rows: Vector[Vector[T]]):
+/*case class Matrix[T](rows: Vector[Vector[T]]):
   def this(size: Int, filling: T) = this(Vector.tabulate(size, size) { (rows, col) => filling})
   val size: Int = rows.size
   def cell(row: Int, col: Int): T = rows(row)(col)
   def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
-  def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))
-
-import Matrix._
+  def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))*/
+import model._
+import model.Matrix._
 
 val boardData = new Matrix[Option[Piece]](8, None)
 boardData.replace(4, 3, Some(B_ROOK))
@@ -87,6 +64,13 @@ boardData.fill(Some(W_QUEEN))
 val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
 matr.rows.size
 matr.size
+matr.cell(0, 0)
+
+5 / 2
+4 / 2
+
+2 / 2
+
 
 val m = new Matrix[Option[Piece]](8, None)
 m.rows.size
@@ -201,3 +185,46 @@ wall("#", 1)
 rank(true, "", "#", 1, 1, 1)
 
 rankWall(true, "#", "-", 2, 2, 2)*/
+
+import model.ChessBoard._
+
+val tmp = new Matrix[Option[Piece]](8, None)
+var pieceMatr = tmp.replace(0, 3, Some(W_KNIGHT))
+pieceMatr = pieceMatr.replace(0, 4, Some(B_BISHOP))
+pieceMatr = pieceMatr.replace(0, 7, Some(W_QUEEN))
+pieceMatr = pieceMatr.replace(1, 1, Some(W_QUEEN))
+pieceMatr = pieceMatr.replace(4, 1, Some(W_QUEEN))
+pieceMatr = pieceMatr.replace(5, 3, Some(W_QUEEN))
+wall(1, Some(B_ROOK)) + "|"
+wall(2, Some(B_ROOK)) + "|"
+wall(3, Some(B_ROOK)) + "|"
+wall(4, Some(B_ROOK)) + "|"
+wall(5, Some(B_ROOK)) + "|"
+wall(6, Some(B_ROOK)) + "|"
+
+//print(rank(3, 1, pieceMatr.rows(0)))
+
+//pieceMatr.rows.map( v => rank(3, 1, v)).mkString
+
+val str1 = "aaa"
+val str2 = "z"
+val str3 = "bc"
+val str4 = "cb"
+val str5 = "zzzz"
+
+val v = Vector(Vector(Some(str2), Some(str3), None), Vector(Some(str1), None, Some(str4)), Vector(None, Some(str5), None))
+val v2 = Vector(Vector(None, None), Vector(None, None))
+val v3 = new Matrix[Option[Any]](4, None)
+val max = v.maxBy(f = s => s.toString.length).maxBy(f = s => s.toString.length).getOrElse(" ").length
+val max2 = v2.maxBy(f = s => s.toString.length).maxBy(f = s => s.toString.length).getOrElse(" ").length
+val max3 = v3.rows.map(s => s.toString)
+v.map(r => r.maxBy(f = s => s.toString.length).getOrElse(" ").toString.length).max
+
+val v4 = Matrix(v)
+print(board(3, 3, v4))
+
+print(board(3, 1, pieceMatr))
+
+val matrF = new Matrix[Option[Piece]](1, Some(B_KING))
+print(board(1, 1, matrF))
+

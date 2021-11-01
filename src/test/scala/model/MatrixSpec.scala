@@ -24,7 +24,7 @@ class MatrixSpec extends AnyWordSpec {
             "return an empty vector if receiving negative or zero values as size" in {
                 val matr = new Matrix[Int](0, 1)
                 matr.rows should be(Vector())
-                an [AssertionError] should be thrownBy matr.cell(0, 0)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell(0, 0)
             }
         }
         "filled" should {
@@ -40,9 +40,9 @@ class MatrixSpec extends AnyWordSpec {
             }
             "throw an AssertionError when trying to access fields outside of the matrix" in {
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(-1, 3)
-                the [AssertionError] thrownBy matr.cell(3, -1) should have message("assertion failed: Illegal column value: Negative")
-                the [AssertionError] thrownBy matr.cell(4, 3) should have message("assertion failed: Illegal row value: Out of bounds")
-                the [AssertionError] thrownBy matr.cell(3, 4) should have message("assertion failed: Illegal column value: Out of bounds")
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell(3, -1)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell(4, 3)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell(3, 4)
             }
             "allow to replace single cells at any location and return the new matrix" in {
             val matr = new Matrix[Option[Piece]](8, None)

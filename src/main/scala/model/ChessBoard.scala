@@ -1,27 +1,31 @@
 package model
 
+import Matrix._
+import Piece._
+
 enum PieceType:
   case Rook, Queen, King, Pawn, Knight, Bishop
 
 enum PieceColor:
   case Black, White
 
-enum Piece(color: PieceColor, name: PieceType):
-  case W_KING extends Piece(PieceColor.White, PieceType.King)
-  case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen)
-  case W_ROOK extends Piece(PieceColor.White, PieceType.Rook)
-  case W_BISHOP extends Piece(PieceColor.White, PieceType.Bishop)
-  case W_KNIGHT extends Piece(PieceColor.White, PieceType.Knight)
-  case W_PAWN extends Piece(PieceColor.White, PieceType.Pawn)
-  case B_KING extends Piece(PieceColor.Black, PieceType.King)
-  case B_QUEEN extends Piece(PieceColor.Black, PieceType.Queen)
-  case B_ROOK extends Piece(PieceColor.Black, PieceType.Rook)
-  case B_BISHOP extends Piece(PieceColor.Black, PieceType.Bishop)
-  case B_KNIGHT extends Piece(PieceColor.Black, PieceType.Knight)
-  case B_PAWN extends Piece(PieceColor.Black, PieceType.Pawn)
+enum Piece(color: PieceColor, ptype: PieceType, name: String):
+  case W_KING extends Piece(PieceColor.White, PieceType.King, "K")
+  case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen, "Q")
+  case W_ROOK extends Piece(PieceColor.White, PieceType.Rook, "R")
+  case W_BISHOP extends Piece(PieceColor.White, PieceType.Bishop, "B")
+  case W_KNIGHT extends Piece(PieceColor.White, PieceType.Knight, "N")
+  case W_PAWN extends Piece(PieceColor.White, PieceType.Pawn, "P")
+  case B_KING extends Piece(PieceColor.Black, PieceType.King, "k")
+  case B_QUEEN extends Piece(PieceColor.Black, PieceType.Queen, "q")
+  case B_ROOK extends Piece(PieceColor.Black, PieceType.Rook, "r")
+  case B_BISHOP extends Piece(PieceColor.Black, PieceType.Bishop, "b")
+  case B_KNIGHT extends Piece(PieceColor.Black, PieceType.Knight, "n")
+  case B_PAWN extends Piece(PieceColor.Black, PieceType.Pawn, "p")
 
-  def getType : PieceType = name
   def getColor : PieceColor = color
+  def getType : PieceType = ptype
+  override def toString : String = name
 
 object ChessBoard {
     val eol = sys.props("line.separator")
@@ -30,12 +34,15 @@ object ChessBoard {
     val side = "|"
 
     def line(width: Int) : String = {
-        assert(width > 0)
+        assert(width > 0, "Illegal width")
         corner + top * width
     }
-    def wall(width: Int) : String = {
-        assert(width > 0)
-        side + " " * width
+    def wall[T](width: Int, piece: Option[T]) : String = {
+        assert(width > 0, "Illegal width")
+        piece match {
+            case None => side + " " * width
+            case _ => side + " " * (width/2) + piece.get.toString + " " * ((if (width % 2 == 1) width else width - 1)/2)
+        }
     }
 
     def rankTop(width: Int, rankLen: Int) : String = {
@@ -45,28 +52,29 @@ object ChessBoard {
         (line(width) * rankLen) + corner + eol
     }
 
-    def rankWall(width: Int, height: Int, rankLen: Int) : String = {
+    def rankWall[T](width: Int, height: Int, pieces: Vector[Option[T]], pieceWidth: Int) : String = {
         assert(height > 0, "Illegal height")
         assert(width > 0, "Illegal width")
-        assert(rankLen > 0, "Illegal rank length")
 
-        ((wall(width) * rankLen) + side + eol) * (height)
+        ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * (height/2)) +
+        pieces.map( p => wall(width + (pieceWidth - p.getOrElse(" ").toString.length), p)).mkString + side + eol +
+        ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * ((if (height % 2 == 1) height else height - 1)/2))
     }
 
-    def rank(width: Int, height: Int, rankLen: Int) : String = {
+    def rank[T](width: Int, height: Int, pieces: Vector[Option[T]], pieceWidth: Int) : String = {
         assert(height > 0, "Illegal height")
         assert(width > 0, "Illegal width")
-        assert(rankLen > 0, "Illegal rank length")
 
-        rankTop(width, rankLen) + rankWall(width, height, rankLen)
-    }
+        rankTop(width + pieceWidth - 1, pieces.size) + rankWall(width, height, pieces, pieceWidth)
+   }
 
-    def board(width: Int, height: Int, rankLen: Int, fileHeight: Int) : String = {
+    def board[T](width: Int, height: Int, pieces: Matrix[Option[T]]) : String = {
         assert(height > 0, "Illegal height")
         assert(width > 0, "Illegal width")
-        assert(rankLen > 0, "Illegal rank length")
-        assert(fileHeight > 0, "Illegal file height")
+        //ensure that matrix has quadratic dimension across all vectors?
 
-        rank(width, height, rankLen) * fileHeight + rankTop(width, rankLen)
+        val pieceWidth = pieces.rows.map(r => r.maxBy(f = t => t.toString.length).getOrElse(" ").toString.length).max
+
+        pieces.rows.map( v => rank(width, height, v, pieceWidth)).mkString + rankTop(width + pieceWidth - 1, pieces.size)
     }
 }
