@@ -251,7 +251,8 @@ class ChessBoardSpec extends AnyWordSpec {
 
             val v = Vector(Vector(Some(str1), Some(str2)), Vector(Some(str3), Some(str4)))
             val matrF3 = Matrix[Option[String]](v)
-            "automatically adjust cell width to the longest string representation among the elements in the matrix" in {
+            "automatically adjust cell width to the longest element in the matrix so that" + eol + 
+            "    for this element the number of whitespaces is the same as if all string-lengths were 1" in {
                 board(1, 1, matrF3) should be(
                     "+----+----+" + eol +
                     "| aaa|  z |" + eol +
