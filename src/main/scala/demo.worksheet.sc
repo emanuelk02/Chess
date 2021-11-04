@@ -1,3 +1,4 @@
+import scala.collection.immutable.TreeMap
 1 + 2
 case class Cell(value: Int) {
   def isSet: Boolean = value != 0
@@ -202,6 +203,11 @@ wall(4, Some(B_ROOK)) + "|"
 wall(5, Some(B_ROOK)) + "|"
 wall(6, Some(B_ROOK)) + "|"
 
+wall[Option[Piece]](2, None)
+side + " " * (2/2) + Some(B_ROOK).get.toString + " " * ((if (2 % 2 == 1) 2 else 2 - 1)/2)
+
+rankWall(5, 1, Vector(None, None, Some(B_KNIGHT)), 1)
+
 //print(rank(3, 1, pieceMatr.rows(0)))
 
 //pieceMatr.rows.map( v => rank(3, 1, v)).mkString
@@ -223,14 +229,16 @@ v.map(r => r.maxBy(f = s => s.toString.length).getOrElse(" ").toString.length).m
 val v4 = Matrix(v)
 print(board(3, 3, v4))
 
-print(board(3, 1, pieceMatr))
+v4.cell('A', 1)
+
+print(model.ChessBoard.board(3, 1, pieceMatr))
 
 val matrF = new Matrix[Option[Piece]](1, Some(B_KING))
 print(board(1, 1, matrF))
 
 
 val field = new Matrix[Option[Piece]](8, Some(W_QUEEN))
-field.cell("A", 1)
-field.replace("B", 2, Some(B_KING))
+field.cell('A', 1)
+field.replace('B', 2, Some(B_KING))
 
 "A".toLowerCase.head.toInt - 'a'.toInt

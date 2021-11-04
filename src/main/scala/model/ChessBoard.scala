@@ -14,10 +14,11 @@ object ChessBoard {
     }
     def wall[T](width: Int, piece: Option[T]) : String = {
         assert(width > 0, "Illegal width")
-        piece match {
-            case None => side + " " * width
-            case _ => side + " " * (width/2) + piece.get.toString + " " * ((if (width % 2 == 1) width else width - 1)/2)
-        }
+        //piece match {
+        //    case None => side + " " * width
+        //    case _ => side + " " * (width/2) + piece.get.toString + " " * ((if (width % 2 == 1) width else width - 1)/2)
+        //}
+        side + " " * (width/2) + piece.getOrElse(" ").toString + " " * ((if (width % 2 == 1) width else width - 1)/2)
     }
 
     def rankTop(width: Int, rankLen: Int) : String = {

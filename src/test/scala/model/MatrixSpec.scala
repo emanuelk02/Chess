@@ -20,8 +20,8 @@ class MatrixSpec extends AnyWordSpec {
                 matr.size should be(1)
                 matr.cell(0, 0).get should be(W_PAWN)
                 matr.cell(0, 1).get should be(B_KING)
-                matr.cell("A", 1).get should be(W_PAWN)
-                matr.cell("B", 1).get should be(B_KING)
+                matr.cell('A', 1).get should be(W_PAWN)
+                matr.cell('B', 1).get should be(B_KING)
             }
             "return an empty vector if receiving negative or zero values as size" in {
                 val matr = new Matrix[Int](0, 1)
@@ -36,15 +36,15 @@ class MatrixSpec extends AnyWordSpec {
                 matr.cell(0, 1) should be(Some(W_BISHOP))
                 matr.cell(1, 0) should be(Some(W_BISHOP))
                 matr.cell(1, 1) should be(Some(W_BISHOP))
-                matr.cell("A", 1) should be(Some(W_BISHOP))
-                matr.cell("B", 1) should be(Some(W_BISHOP))
-                matr.cell("A", 2) should be(Some(W_BISHOP))
-                matr.cell("B", 2) should be(Some(W_BISHOP))
+                matr.cell('A', 1) should be(Some(W_BISHOP))
+                matr.cell('B', 1) should be(Some(W_BISHOP))
+                matr.cell('A', 2) should be(Some(W_BISHOP))
+                matr.cell('B', 2) should be(Some(W_BISHOP))
             }
             "not return a diferent size based on contents" in {
                 matr.size should be(2)
                 matr.replace(1, 1, Some(B_KING)).size should be(matr.size)
-                matr.replace("B", 2, Some(B_KING)).size should be(matr.size)
+                matr.replace('B', 2, Some(B_KING)).size should be(matr.size)
                 matr.fill(None).size should be(matr.size)
             }
             "throw an IndexOutOfBoundsException when trying to access fields outside of the matrix" in {
@@ -52,16 +52,16 @@ class MatrixSpec extends AnyWordSpec {
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(1, -1)
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(2, 1)
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(1, 2)
-                an [IndexOutOfBoundsException] should be thrownBy matr.cell("B", 0)
-                an [IndexOutOfBoundsException] should be thrownBy matr.cell("C", 2)
-                an [IndexOutOfBoundsException] should be thrownBy matr.cell("B", 3)
-                an [IndexOutOfBoundsException] should be thrownBy matr.cell("Z", 2)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell('B', 0)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell('C', 2)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell('B', 3)
+                an [IndexOutOfBoundsException] should be thrownBy matr.cell('Z', 2)
             }
             "allow to replace single cells at any location and return the new matrix" in { 
                 matr.replace(0, 0, Some(B_KING)) should be(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(W_BISHOP)))))
                 matr.replace(1, 1, Some(B_KING)) should be(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(B_KING)))))
-                matr.replace("A", 1, Some(B_KING)) should be(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(W_BISHOP)))))
-                matr.replace("B", 2, Some(B_KING)) should be(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(B_KING)))))
+                matr.replace('A', 1, Some(B_KING)) should be(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(W_BISHOP)))))
+                matr.replace('B', 2, Some(B_KING)) should be(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(B_KING)))))
             }
             "allow to be fully filled with a single element" in {
                 matr.fill(Some(B_KING)) should be(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING)))))
