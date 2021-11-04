@@ -163,7 +163,7 @@ class ChessBoardSpec extends AnyWordSpec {
             }
         }
         "receiving an empty matrix" should {
-            "produce a full chess board consisting of as many numbers of ranks as the dimension of given matrix" in {
+            "produce an empty chess board consisting of as many numbers of ranks as the dimension of given matrix" in {
                 board(1, 1, matr) should be(
                     "+-+" + eol +
                     "| |" + eol +
@@ -206,7 +206,7 @@ class ChessBoardSpec extends AnyWordSpec {
         var matrF2 = matr2.replace(0, 0, Some(W_QUEEN))
         matrF2 = matrF2.replace(1, 1, Some(B_KING))
         "receiving a filled matrix" should {
-            "produce a full chess board consisting of as many numbers of ranks as the dimension of given matrix" in {
+            "produce a filled chess board consisting of as many numbers of ranks as the dimension of given matrix" in {
                 board(1, 1, matrF) should be(
                     "+-+" + eol +
                     "|k|" + eol +
