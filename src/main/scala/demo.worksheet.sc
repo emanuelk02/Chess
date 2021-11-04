@@ -232,3 +232,5 @@ print(board(1, 1, matrF))
 val field = new Matrix[Option[Piece]](8, Some(W_QUEEN))
 field.cell("A", 1)
 field.replace("B", 2, Some(B_KING))
+
+"A".toLowerCase.head.toInt - 'a'.toInt

@@ -31,7 +31,7 @@ class MatrixSpec extends AnyWordSpec {
         }
         "filled" should {
             val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-            "return contents from single cells" in {
+            "return contents from single cells using either row and col or rank and file parameters" in {
                 matr.cell(0, 0) should be(Some(W_BISHOP))
                 matr.cell(0, 1) should be(Some(W_BISHOP))
                 matr.cell(1, 0) should be(Some(W_BISHOP))
