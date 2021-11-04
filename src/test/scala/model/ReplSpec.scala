@@ -3,4 +3,6 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import Piece._
 import Matrix._
-class ReplSpec {}
+import Repl._
+import scala.io.StdIn.readLine
+class ReplSpec extends AnyWordSpec {}

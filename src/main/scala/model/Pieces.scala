@@ -22,6 +22,10 @@ enum Piece(color: PieceColor, ptype: PieceType, name: String):
 
   def getColor: PieceColor = color
   def getType: PieceType = ptype
+
+  override def toString: String = name
+
+object Piece:
   def fromStr(piece: String): Option[Piece] = {
     piece match {
       case "W_KING" | "W_QUEEN" | "W_ROOK" | "W_BISHOP" | "W_KNIGHT" |
@@ -34,6 +38,6 @@ enum Piece(color: PieceColor, ptype: PieceType, name: String):
           print("Please enter valid piece")
           None
         else Some(Piece.fromOrdinal(n))
+
     }
   }
-  override def toString: String = name
