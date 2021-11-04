@@ -1,9 +1,6 @@
 package model
 
 import Matrix._
-import Piece._
-
-
 
 object ChessBoard {
     val eol = sys.props("line.separator")
