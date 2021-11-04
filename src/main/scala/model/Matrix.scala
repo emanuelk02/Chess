@@ -14,8 +14,9 @@ case class Matrix[T](rows: Vector[Vector[T]]):
       case "F" => 5
       case "G" => 6
       case "H" => 7
+      case _ => -1
     }
-    rows(rank)(row)
+    rows(rank - 1)(row)
   }
   def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
   def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))
@@ -29,6 +30,7 @@ case class Matrix[T](rows: Vector[Vector[T]]):
       case "F" => 5
       case "G" => 6
       case "H" => 7
+      case _ => -1
     }
-    copy(rows.updated(rank, rows(rank).updated(row, fill)))
+    copy(rows.updated(rank - 1, rows(rank - 1).updated(row, fill)))
   }
