@@ -2,54 +2,36 @@ package de.htwg.se.chess
 package controller
 
 import model.Piece
-import model.Tile
-import model.Move
-import model.ChessBoard._
-import model.Matrix
+import model.ChessField
+import model.ChessBoard.board
 import util.Observable
 
 
 import scala.io.StdIn.readLine
 
-case class Controller(var field: Matrix[Option[Piece]]) extends Observable {
-    def move(move: Move, piece: Option[Piece]): Unit = {
+case class Controller(var field: ChessField) extends Observable {
+    def this() = this(new ChessField())
+
+    def move(tile1: Array[Char], tile2: Array[Char]): Unit = {
         //returns Matrix with changed tiles
-        field = field.replace(move.end.getFile, move.end.getRank, piece)
-        field = field.replace(move.start.getFile, move.start.getRank, None)
-        notifyObservers()
+        assert(tile1.size == 2)
+        assert(tile2.size == 2)
+        field = field.move(tile1, tile2)
+        notifyObservers
     }
 
-    def put(tile: Tile, piece: Option[Piece]): Unit = {
-        field = field.replace(tile.getFile, tile.getRank, piece)
-        notifyObservers()
+    def put(tile: Array[Char], piece: String): Unit = {
+        assert(tile.size == 2)
+        field = field.replace(tile(0), tile(1).toInt - '0'.toInt, piece)
+        notifyObservers
     }
 
     def put(fen: String): Unit = {
-        var segCount = 1;
-        var charCount = 1;
-        var pieceCount = 1;
-        val formatFen = fen.split("/")
-
-        for (s: String <- formatFen) {
-        while (pieceCount <= 8) {
-            val n = s.charAt(charCount - 1)
-            if (n.toInt - '0' <= 8) pieceCount = pieceCount + n
-            else
-            field = field.replace(
-                segCount - 1,
-                pieceCount - 1,
-                Piece.fromStr(n.toString)
-            )
-            pieceCount = pieceCount + 1
-            charCount = charCount + 1
-        }
-        charCount = 1
-        pieceCount = 1
-        segCount = segCount + 1
-        }
+        field = field.loadFromFEN(fen)
+        notifyObservers
     }
 
-    def fieldToString(): String = {
-        board(3, 1, field)
+    def fieldToString: String = {
+        field.toString
     }
 }
