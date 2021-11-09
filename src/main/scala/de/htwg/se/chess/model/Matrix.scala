@@ -1,3 +1,4 @@
+package de.htwg.se.chess
 package model
 
 case class Matrix[T](rows: Vector[Vector[T]]):
