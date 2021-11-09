@@ -22,49 +22,9 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-enum PieceType:
-  case Rook, Queen, King, Pawn, Knight, Bishop
-
-enum PieceColor:
-  case Black, White
-
-enum Piece(color: PieceColor, ptype: PieceType, name: String):
-  case W_KING extends Piece(PieceColor.White, PieceType.King, "K")
-  case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen, "Q")
-  case W_ROOK extends Piece(PieceColor.White, PieceType.Rook, "R")
-  case W_BISHOP extends Piece(PieceColor.White, PieceType.Bishop, "B")
-  case W_KNIGHT extends Piece(PieceColor.White, PieceType.Knight, "N")
-  case W_PAWN extends Piece(PieceColor.White, PieceType.Pawn, "P")
-  case B_KING extends Piece(PieceColor.Black, PieceType.King, "k")
-  case B_QUEEN extends Piece(PieceColor.Black, PieceType.Queen, "q")
-  case B_ROOK extends Piece(PieceColor.Black, PieceType.Rook, "r")
-  case B_BISHOP extends Piece(PieceColor.Black, PieceType.Bishop, "b")
-  case B_KNIGHT extends Piece(PieceColor.Black, PieceType.Knight, "n")
-  case B_PAWN extends Piece(PieceColor.Black, PieceType.Pawn, "p")
-
-  def getColor: PieceColor = color
-  def getType: PieceType = ptype
-
-  override def toString: String = name
-
-object Piece:
-  def fromStr(piece: String): Option[Piece] = {
-    piece match {
-      case "W_KING" | "W_QUEEN" | "W_ROOK" | "W_BISHOP" | "W_KNIGHT" |
-          "W_PAWN" | "B_KING" | "B_QUEEN" | "B_ROOK" | "B_BISHOP" | "B_KNIGHT" |
-          "B_PAWN" =>
-        Some(Piece.valueOf(piece))
-      case _ =>
-        val n = Piece.values.map(p => p.toString).indexOf(piece)
-        if (n < 0)
-          print("Please enter valid piece")
-          None
-        else Some(Piece.fromOrdinal(n))
-
-  }
-}
-
-import Piece._
+import de.htwg.se.chess._
+import model.Piece
+import model.Piece._
 
 Piece.B_KING
 
@@ -94,21 +54,9 @@ B_KING
   def cell(row: Int, col: Int): T = rows(row)(col)
   def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
   def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))*/
-case class Matrix[T](rows: Vector[Vector[T]]):
-  def this(size: Int, filling: T) = this(Vector.tabulate(size, size) { (rows, col) => filling})
-  val size: Int = rows.size
-  def cell(row: Int, col: Int): T = rows(row)(col)
-  def cell(file: Char, rank: Int): T = {
-    val row = file.toLower.toInt - 'a'.toInt
-    rows(rank - 1)(row)
-  }
-  def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
-  def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))
-  def replace(file: Char, rank: Int, fill: T): Matrix[T] = {
-    val row = file.toLower.toInt - 'a'.toInt
-    copy(rows.updated(rank - 1, rows(rank - 1).updated(row, fill)))
-  }
-import Matrix._
+
+import model.Matrix
+import model.Matrix._
 
 val boardData = new Matrix[Option[Piece]](8, None)
 boardData.replace(4, 3, Some(B_ROOK))
@@ -145,59 +93,7 @@ val newMatr = matri.replace(1, 1, Some(B_KING))
 matri.cell(1,1)
 
 
-object ChessBoard {
-    val eol = sys.props("line.separator")
-    val corner = "+"
-    val top = "-"
-    val side = "|"
-
-    def line(width: Int) : String = {
-        assert(width > 0, "Illegal width")
-        corner + top * width
-    }
-    def wall[T](width: Int, piece: Option[T]) : String = {
-        assert(width > 0, "Illegal width")
-        //piece match {
-        //    case None => side + " " * width
-        //    case _ => side + " " * (width/2) + piece.get.toString + " " * ((if (width % 2 == 1) width else width - 1)/2)
-        //}
-        side + " " * (width/2) + piece.getOrElse(" ").toString + " " * ((if (width % 2 == 1) width else width - 1)/2)
-    }
-
-    def rankTop(width: Int, rankLen: Int) : String = {
-        assert(width > 0, "Illegal width")
-        assert(rankLen > 0, "Illegal rank length")
-        
-        (line(width) * rankLen) + corner + eol
-    }
-
-    def rankWall[T](width: Int, height: Int, pieces: Vector[Option[T]], pieceWidth: Int) : String = {
-        assert(height > 0, "Illegal height")
-        assert(width > 0, "Illegal width")
-
-        ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * (height/2)) +
-        pieces.map( p => wall(width + (pieceWidth - p.getOrElse(" ").toString.length), p)).mkString + side + eol +
-        ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * ((if (height % 2 == 1) height else height - 1)/2))
-    }
-
-    def rank[T](width: Int, height: Int, pieces: Vector[Option[T]], pieceWidth: Int) : String = {
-        assert(height > 0, "Illegal height")
-        assert(width > 0, "Illegal width")
-
-        rankTop(width + pieceWidth - 1, pieces.size) + rankWall(width, height, pieces, pieceWidth)
-   }
-
-    def board[T](width: Int, height: Int, pieces: Matrix[Option[T]]) : String = {
-        assert(height > 0, "Illegal height")
-        assert(width > 0, "Illegal width")
-        //ensure that matrix has quadratic dimension across all vectors?
-
-        val pieceWidth = pieces.rows.map(r => r.maxBy(f = t => t.toString.length).getOrElse(" ").toString.length).max
-
-        pieces.rows.map( v => rank(width, height, v, pieceWidth)).mkString + rankTop(width + pieceWidth - 1, pieces.size)
-    }
-}
-import ChessBoard._
+import model.ChessBoard._
 
 val tmp = new Matrix[Option[Piece]](8, None)
 var pieceMatr = tmp.replace(0, 3, Some(W_KNIGHT))
@@ -239,17 +135,10 @@ v.map(r => r.maxBy(f = s => s.toString.length).getOrElse(" ").toString.length).m
 val v4 = Matrix(v)
 print(board(3, 3, v4))
 
-v4.cell('A', 1)
-
 print(board(3, 1, pieceMatr))
 
 val matrF = new Matrix[Option[Piece]](1, Some(B_KING))
 print(board(1, 1, matrF))
-
-
-val field = new Matrix[Option[Piece]](8, Some(W_QUEEN))
-field.cell('A', 1)
-field.replace('B', 2, Some(B_KING))
 
 "A".toLowerCase.head.toInt - 'a'.toInt
 
@@ -285,5 +174,102 @@ val ctrl = new Controller()
 ctrl.put("A1".toCharArray, "k")
 ctrl.field
 
+val tile1 = "A1".toCharArray
+val tile2 = "B3".toCharArray
+
 ctrl.move("A1".toCharArray, "B3".toCharArray)
 ctrl.field
+
+val file = 'B'
+
+val fen = "rnbqkbnr/pp2p3/8/8/8/8/PPPPPPPP/RNBQKBNR".split("/")
+
+
+//val chars = fen(1).toCharArray
+
+var arr: List[Option[Piece]] = List()
+        
+var pieceCount = 0
+/*while (pieceCount < 8) {
+  val nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+  val nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).toList
+  val emptySpaces: List[Option[Piece]] = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+  pieceCount += nextPieces.size + (if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)
+  arr = nextPieces:::emptySpaces
+}*/
+arr.toSeq
+pieceCount
+
+import model.ChessField
+import model.ChessField._
+
+def fenSegToVector(fen: String): Vector[Option[Piece]] = {
+        val chars = fen.toCharArray
+
+        if (fen.size == 0)
+            Vector()
+        else
+            var nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+            var nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).take(1).toList
+            var emptySpaces: List[Option[Piece]] = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+            val fenRest = fen.takeRight(fen.size - (nextPieces.size + 1))
+            (nextPieces:::emptySpaces:::fenSegToVector(fenRest).toList).toVector
+    }
+
+var strin = "p1qp2pB"
+var chars = strin.toCharArray
+chars.takeWhile(c => !c.isDigit).toList
+var nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+var nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).take(1).toList
+var emptySpaces: List[Option[Piece]] = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+strin = strin.takeRight(strin.size - (nextPieces.size + 1))
+strin
+chars = strin.toCharArray
+var vec = (nextPieces:::emptySpaces).toVector
+
+nextPieces = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+nextDigit = chars.dropWhile(c => !c.isDigit).take(1).toList
+nextPieces
+nextDigit
+emptySpaces = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+emptySpaces
+strin.size - (if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)
+strin = strin.takeRight(strin.size - (nextPieces.size + 1))
+strin
+vec = (vec.toList:::nextPieces:::emptySpaces).toVector
+vec
+chars = strin.toCharArray
+chars.toSeq
+
+nextPieces = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+nextDigit = chars.dropWhile(c => !c.isDigit).take(1).toList
+nextPieces
+nextDigit
+emptySpaces = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+emptySpaces
+strin = strin.takeRight(strin.size - (nextPieces.size + 1))
+strin
+vec = (vec.toList:::nextPieces:::emptySpaces).toVector
+vec
+chars = strin.toCharArray
+chars.toSeq
+
+nextPieces = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+nextDigit = chars.dropWhile(c => !c.isDigit).take(1).toList
+nextPieces
+nextDigit
+emptySpaces = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+emptySpaces
+strin = strin.takeRight(strin.size - (nextPieces.size + 1))
+strin
+vec = (vec.toList:::nextPieces:::emptySpaces).toVector
+vec
+chars = strin.toCharArray
+chars.toSeq
+
+
+Array('p', 'g').dropWhile(c => !c.isDigit).take(1).toList
+
+val vecc = fenSegToVector("p3rK1Q")
+
+97.toChar
