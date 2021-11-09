@@ -99,6 +99,7 @@ class TUI(controller: Controller) extends Observer {
       case "i" | "insert" | "put" => print("Usage: i/insert/put <tile: 'A1'> <piece>\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the ' '")
       case "m" | "move" => print("Usage: m/move <tile1: 'A1'> <tile2: 'B2'>\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the ' '")
       case "fen" | "FEN" | "loadFen" => print("fen/FEN/loadFEN <fen-string>\nSee 'https://www.chessprogramming.org/Forsyth-Edwards_Notation' for detailed information\nOn what FEN strings do")
+      case _ => "Unknown command. See 'help' for more information"
     }
   }
 
