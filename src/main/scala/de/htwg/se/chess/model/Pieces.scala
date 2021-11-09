@@ -1,3 +1,4 @@
+package de.htwg.se.chess
 package model
 
 enum PieceType:
