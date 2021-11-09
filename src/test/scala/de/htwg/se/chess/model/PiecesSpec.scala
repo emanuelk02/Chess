@@ -1,14 +1,14 @@
+package de.htwg.se.chess
 package model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import Piece._
+import PieceColor._
+import PieceType._
 
 class PiecesSpec extends AnyWordSpec {
   "A Piece" should {
-    import Piece._
-    import PieceType._
-    import PieceColor._
     "consist of one of 6 types (King, Queen, Rook, Bishop, Knight, Pawn) and a color (Black, White)" in {
       val whites: Array[Piece] = Piece.values.filter(p => p.getColor == White)
       whites.size should be(6)
