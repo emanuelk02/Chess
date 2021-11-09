@@ -1,9 +1,7 @@
 package de.htwg.se.chess
 package controller
 
-import model.Piece
 import model.ChessField
-import model.ChessBoard.board
 import util.Observable
 
 
