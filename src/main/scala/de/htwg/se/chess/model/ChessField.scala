@@ -46,22 +46,24 @@ case class ChessField(field: Matrix[Option[Piece]]):
         copy(Matrix(
                 for (r <- field.rows) yield {
                     rankCount += 1
-                    fillRank(rankCount, fenSegToVector(formatFen(rankCount)))
+                    fillRank(rankCount, fenSegToVector(formatFen(rankCount, Vector())))
                 }
             )
         )
     }
-    def fenSegToVector(fen: String): Vector[Option[Piece]] = {
+    @tailrec
+    final def fenSegToVector(fen: String, vec: Vector[Option[Piece]]): Vector[Option[Piece]] = {
         val chars = fen.toCharArray
 
         if (fen.size == 0)
-            Vector()
+            Vector.fill(8 - vec.size)(None)
         else
             var nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
             var nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).take(1).toList
             var emptySpaces: List[Option[Piece]] = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
             val fenRest = fen.takeRight(fen.size - (nextPieces.size + 1))
-            (nextPieces:::emptySpaces:::fenSegToVector(fenRest).toList).toVector
+            val retVec = (nextPieces:::emptySpaces:::vec.toList).toVector
+            fenSegToVector(fenRest, retVec)
     }
 
     override def toString: String  = {

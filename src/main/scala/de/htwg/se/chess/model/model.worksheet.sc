@@ -216,7 +216,7 @@ def fenSegToVector(fen: String): Vector[Option[Piece]] = {
             (nextPieces:::emptySpaces:::fenSegToVector(fenRest).toList).toVector
     }
 
-var strin = "p3rK1Q"
+var strin = "p1qp2pB"
 var chars = strin.toCharArray
 chars.takeWhile(c => !c.isDigit).toList
 var nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
