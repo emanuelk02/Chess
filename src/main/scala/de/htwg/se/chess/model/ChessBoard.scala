@@ -48,7 +48,7 @@ object ChessBoard {
     def board[T](width: Int, height: Int, pieces: Matrix[Option[T]]) : String = {
         assert(height > 0, "Illegal height")
         assert(width > 0, "Illegal width")
-        //ensure that matrix has quadratic dimension across all vectors?
+        //ensure that matrix has quadratic/symmetric dimension across all vectors?
 
         val pieceWidth = pieces.rows.map(r => r.maxBy(f = t => t.toString.length).getOrElse(" ").toString.length).max
 

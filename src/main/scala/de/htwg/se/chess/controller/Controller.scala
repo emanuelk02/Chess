@@ -24,7 +24,7 @@ case class Controller(var field: ChessField) extends Observable {
         notifyObservers
     }
 
-    def put(fen: String): Unit = {
+    def putWithFen(fen: String): Unit = {
         field = field.loadFromFEN(fen)
         notifyObservers
     }

@@ -48,7 +48,7 @@ class TUI(controller: Controller) extends Observer {
             print("Not enough arguments:")
             printHelp(in(0))
           else
-            controller.put(in(1))
+            controller.putWithFen(in(1))
         }
         case "exit" => exit = true
         case _ => {
