@@ -1,4 +1,3 @@
-import scala.collection.immutable.TreeMap
 import de.htwg.se.chess._
 1 + 2
 case class Cell(value: Int) {
@@ -22,7 +21,6 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-import de.htwg.se.chess._
 import model.Piece
 import model.Piece._
 
