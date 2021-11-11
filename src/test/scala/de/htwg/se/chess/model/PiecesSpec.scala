@@ -40,6 +40,10 @@ class PiecesSpec extends AnyWordSpec {
       W_KING.getType should be(PieceType.King)
       B_KING.getType should be(PieceType.King)
       W_QUEEN.getType should be(PieceType.Queen)
+      W_ROOK.getType should be(PieceType.Rook)
+      W_BISHOP.getType should be(PieceType.Bishop)
+      W_KNIGHT.getType should be(PieceType.Knight)
+      W_PAWN.getType should be(PieceType.Pawn)
     }
     "have a unique String representation" in {
       Piece.values.map(p => p.toString).toSet.size should be(12)

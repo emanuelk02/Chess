@@ -147,11 +147,6 @@ print(board(1, 1, matrF))
 'A'.toInt
 'B'.toInt
 
-import de.htwg.se.chess.model.Tile
-
-val t1 = Tile('B', 1)
-t1.file.toInt >= 'A'
-
 val inputString = "i A1 B4"
 val in = inputString.split(" ")
 
@@ -169,14 +164,24 @@ import controller.Controller
 
 val ctrl = new Controller()
 
-ctrl.put("A1".toCharArray, "k")
+ctrl.put("A1", "k")
 ctrl.field
 
 val tile1 = "A1".toCharArray
 val tile2 = "B3".toCharArray
 
-ctrl.move("A1".toCharArray, "B3".toCharArray)
-ctrl.field
+ctrl.move("A1", "B3")
+print(ctrl.fieldToString)
+
+val strw = "m B3 H7"
+
+val next = strw.split(" ")
+
+next(2)(0)
+next(2)(1)
+
+ctrl.move(next(1), next(2))
+print(ctrl.fieldToString)
 
 val file = 'B'
 
@@ -271,3 +276,12 @@ Array('p', 'g').dropWhile(c => !c.isDigit).take(1).toList
 val vecc = fenSegToVector("p3rK1Q")
 
 97.toChar
+
+val matrx = new Matrix[Option[Piece]](2, Some(W_BISHOP))
+val cfx = ChessField(matrx)
+val ctrlx = Controller(cfx)
+
+ctrlx.fill("B_KING")
+print(ctrlx.fieldToString)
+ctrlx.put("A1", "W_KING")
+print(ctrlx.fieldToString)
