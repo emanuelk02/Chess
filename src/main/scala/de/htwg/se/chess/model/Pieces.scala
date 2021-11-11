@@ -28,11 +28,11 @@ enum Piece(color: PieceColor, ptype: PieceType, name: String):
 
 object Piece:
   def fromString(piece: String): Option[Piece] = {
-    piece match {
+    piece.toUpperCase match {
       case "W_KING" | "W_QUEEN" | "W_ROOK" | "W_BISHOP" | "W_KNIGHT" |
           "W_PAWN" | "B_KING" | "B_QUEEN" | "B_ROOK" | "B_BISHOP" | "B_KNIGHT" |
           "B_PAWN" =>
-        Some(Piece.valueOf(piece))
+        Some(Piece.valueOf(piece.toUpperCase))
       case _ =>
         val n = Piece.values.map(p => p.toString).indexOf(piece)
         if (n < 0) then None else Some(Piece.fromOrdinal(n))

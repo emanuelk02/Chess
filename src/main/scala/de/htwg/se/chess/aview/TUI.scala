@@ -7,18 +7,33 @@ import util.Observer
 import scala.annotation.tailrec
 
 class TUI(controller: Controller) extends Observer {
+  val EXIT_VAL = 0
+  val ERR_VAL = -1
+  val SUCCESS_VAL = 1
   controller.add(this)
   print("||== Welcome to Chess ==||\nType 'help' for more information on available commands\n\n")
   print(controller.fieldToString)
   print("\n\n")
-  val input = readLine(">> ")
-  this.run(input)
 
   def this() = this(new Controller())
 
   @tailrec
-  final def run(inputString: String): Unit = {
-    var exit = false
+  final def run: Unit = {
+    val input = readLine(">> ")
+
+    eval(input) match {
+      case EXIT_VAL => print("Shutting down...\nGoodbye\n")
+      case ERR_VAL => { 
+        printHelp(input.split(" ")(0))
+        run
+      }
+      case SUCCESS_VAL => {
+        print("\n\n")
+        run
+      }
+      case _ => print("Unexpected Problem occured\n")
+    }
+    /*var exit = false
     if (inputString.size == 0)
       printHelp()
     else
@@ -83,7 +98,86 @@ class TUI(controller: Controller) extends Observer {
     else
       print("\n\n")
       val nextInput = readLine(">> ")
-      run(nextInput)
+      run(nextInput)*/
+  }
+
+  def eval(inputString: String): Int = {
+    if (inputString.size == 0)
+      print("No input found.\n")
+      printHelp()
+      ERR_VAL
+    else
+      val in = inputString.split(" ")
+      in(0).toLowerCase match {
+          case "h" | "help" => {              //----------------------- Help
+            if (in.size > 1) then
+              printHelp(in(1))
+              SUCCESS_VAL
+            else
+              printHelp()
+              SUCCESS_VAL
+          }
+          case "i" | "insert" | "put" => {    //----------------------- Insert / Put
+            if (in.size < 3) then
+              print("Not enough arguments:")
+              //printHelp(in(0))
+              ERR_VAL
+            else
+              controller.put(in(1), in(2))
+              SUCCESS_VAL
+          }
+          case "m" | "move" => {              //----------------------- Move
+            if (in.size < 3) then
+              print("Not enough arguments:")
+              //printHelp(in(0))
+              ERR_VAL
+            else
+              controller.move(in(1), in(2))
+              SUCCESS_VAL
+          }
+          case "f" | "fill" => {              //----------------------- Fill
+            if (in.size < 2) then
+              print("Not enough arguments:")
+              //printHelp(in(0))
+              ERR_VAL
+            else
+              controller.fill(in(1))
+              SUCCESS_VAL
+          }
+          case "rank" | "fillrank" => {       //----------------------- Fill Rank
+            if (in.size < 3) then
+              print("Not enough arguments:")
+              //printHelp(in(0))
+              ERR_VAL
+            else
+              controller.fillRank(in(1).toInt, in(2))
+              SUCCESS_VAL
+          }
+          case "file" | "fillfile" => {       //----------------------- Fill file
+            if (in.size < 3) then
+              print("Not enough arguments:")
+              //printHelp((in(0)))
+              ERR_VAL
+            else
+              controller.fillFile(in(1).head, in(2))
+              SUCCESS_VAL
+          }
+          case "fen" | "loadfen" => {         //----------------------- FenString
+            if (in.size < 2) then
+              print("Not enough arguments:")
+              //printHelp(in(0))
+              ERR_VAL
+            else
+              controller.putWithFen(in(1))
+              SUCCESS_VAL
+          }
+          case "exit" => EXIT_VAL             //----------------------- Exit
+          case _ => {                         //----------------------- Invalid
+            print("Unknown Command: " + in(0) + "\n")
+            print("For more information type 'h'")
+            ERR_VAL
+          }
+      }
   }
 
   def printHelp(): Unit = {
@@ -116,7 +210,7 @@ class TUI(controller: Controller) extends Observer {
                         fills a whole rank with given Piece or clears it, if you
                         specify "None"
 
-    file / fillFile <file: "A"> <piece
+    file / fillFile <file: "A"> <piece>
                         fills an entire file with given Piece or clears it, if you
                         specify "None"
 

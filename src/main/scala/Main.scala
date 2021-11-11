@@ -3,4 +3,5 @@ import scala.io.StdIn.readLine
 import aview.TUI
 @main def main: Unit = {
     val tui = new TUI()
+    tui.run
 }
