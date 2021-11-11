@@ -16,7 +16,10 @@ class TUISpec extends AnyWordSpec {
         val ctrl = Controller(cf)
         val tui = TUI(ctrl)
         "created" should {
-            "be instantiated with a Controller storing a full ChessField containing a Matrix given as a Vector of Vectors" in {
+            "be created using the explicit constructor" in {
+                val tui2 = new TUI()
+            }
+            "alternatively be instantiated with a Controller storing a full ChessField containing a Matrix given as a Vector of Vectors" in {
                 ctrl.field.field.size should be(1)
                 ctrl.field.field.cell(0, 0).get should be(W_PAWN)
                 ctrl.field.field.cell(0, 1).get should be(B_KING)
