@@ -48,5 +48,28 @@ class PiecesSpec extends AnyWordSpec {
     "have a unique String representation" in {
       Piece.values.map(p => p.toString).toSet.size should be(12)
     }
+    "be created by either passing a String or a Char" in {
+      Piece.fromString("B_KING") should be (Some(B_KING))
+      Piece.fromString("W_KING") should be (Some(W_KING))
+      Piece.fromString("W_QUEEN") should be (Some(W_QUEEN))
+      Piece.fromString("W_rook") should be (Some(W_ROOK))
+      Piece.fromString("w_BiShOp") should be (Some(W_BISHOP))
+      Piece.fromString("w_knighT") should be (Some(W_KNIGHT))
+      Piece.fromString("w_PAWN") should be (Some(W_PAWN))
+      Piece.fromString("BKING") should be(None)
+      Piece.fromString("W") should be(None)
+
+      Piece.values.map(p => p.toString).map(p => Piece.fromString(p)).map(p => p.getOrElse(None)) should be(Piece.values)
+
+      Piece.fromChar('k') should be (Some(B_KING))
+      Piece.fromChar('K') should be (Some(W_KING))
+      Piece.fromChar('Q') should be (Some(W_QUEEN))
+      Piece.fromChar('R') should be (Some(W_ROOK))
+      Piece.fromChar('B') should be (Some(W_BISHOP))
+      Piece.fromChar('N') should be (Some(W_KNIGHT))
+      Piece.fromChar('P') should be (Some(W_PAWN))
+      Piece.fromChar('a') should be(None)
+      Piece.fromChar('W') should be(None)
+    }
   }
 }

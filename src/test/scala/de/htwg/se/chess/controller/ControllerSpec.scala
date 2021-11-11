@@ -12,9 +12,9 @@ class ControllerSpec extends AnyWordSpec {
     "A Controller" when {
         "empty" should {
             "be created calling the explicit Constructor" in {
-                val cf = new Controller()
-                cf.field.field.size should be(8)
-                cf.field.field.rows.forall(r => r.forall(p => p == None)) should be(true)
+                val ctrl = new Controller()
+                ctrl.field.field.size should be(8)
+                ctrl.field.field.rows.forall(r => r.forall(p => p == None)) should be(true)
             }
             "be instantiated with a full ChessField containing a Matrix given as a Vector of Vectors" in {
                 val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
