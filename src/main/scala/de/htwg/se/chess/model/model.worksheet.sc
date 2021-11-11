@@ -1,3 +1,4 @@
+import scala.compiletime.ops.boolean
 import de.htwg.se.chess._
 1 + 2
 case class Cell(value: Int) {
@@ -37,14 +38,9 @@ val pieces: Vector[Vector[Option[Piece]]] = Vector.fill(8)(line)
 
 pieces(4)(5)
 
-
-
 B_KING
 
-
-
 //val pieces3: Vector[Vector[(Piece, Int)]] = Vector(Vector((Piece.B_KING,3), (Piece.B_QUEEN, 4), (Piece.W_BISHOP, 5)), Vector.fill(7))
-
 
 /*case class Matrix[T](rows: Vector[Vector[T]]):
   def this(size: Int, filling: T) = this(Vector.tabulate(size, size) { (rows, col) => filling})
@@ -61,7 +57,6 @@ boardData.replace(4, 3, Some(B_ROOK))
 boardData.size
 boardData.fill(Some(W_QUEEN))
 
-
 val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
 matr.rows.size
 matr.size
@@ -72,24 +67,21 @@ matr.cell(0, 0)
 
 2 / 2
 
-
 val m = new Matrix[Option[Piece]](8, None)
 m.rows.size
 m.size
 m.fill(Some(B_KING))
 
-
 var matrix = new Matrix[Option[Piece]](2, None)
 matrix = matrix.fill(Some(B_KING))
-matrix.cell(0,0)
-matrix.cell(0,1)
-matrix.cell(1,0)
-matrix.cell(1,1)
+matrix.cell(0, 0)
+matrix.cell(0, 1)
+matrix.cell(1, 0)
+matrix.cell(1, 1)
 
 val matri = new Matrix[Option[Piece]](8, None)
 val newMatr = matri.replace(1, 1, Some(B_KING))
-matri.cell(1,1)
-
+matri.cell(1, 1)
 
 import model.ChessBoard._
 
@@ -108,7 +100,8 @@ wall(5, Some(B_ROOK)) + "|"
 wall(6, Some(B_ROOK)) + "|"
 
 wall[Option[Piece]](2, None)
-side + " " * (2/2) + Some(B_ROOK).get.toString + " " * ((if (2 % 2 == 1) 2 else 2 - 1)/2)
+side + " " * (2 / 2) + Some(B_ROOK).get.toString + " " * ((if (2 % 2 == 1) 2
+                                                           else 2 - 1) / 2)
 
 rankWall(5, 1, Vector(None, None, Some(B_KNIGHT)), 1)
 
@@ -122,13 +115,26 @@ val str3 = "bc"
 val str4 = "cb"
 val str5 = "zzzz"
 
-val v = Vector(Vector(Some(str2), Some(str3), None), Vector(Some(str1), None, Some(str4)), Vector(None, Some(str5), None))
+val v = Vector(
+  Vector(Some(str2), Some(str3), None),
+  Vector(Some(str1), None, Some(str4)),
+  Vector(None, Some(str5), None)
+)
 val v2 = Vector(Vector(None, None), Vector(None, None))
 val v3 = new Matrix[Option[Any]](4, None)
-val max = v.maxBy(f = s => s.toString.length).maxBy(f = s => s.toString.length).getOrElse(" ").length
-val max2 = v2.maxBy(f = s => s.toString.length).maxBy(f = s => s.toString.length).getOrElse(" ").length
+val max = v
+  .maxBy(f = s => s.toString.length)
+  .maxBy(f = s => s.toString.length)
+  .getOrElse(" ")
+  .length
+val max2 = v2
+  .maxBy(f = s => s.toString.length)
+  .maxBy(f = s => s.toString.length)
+  .getOrElse(" ")
+  .length
 val max3 = v3.rows.map(s => s.toString)
-v.map(r => r.maxBy(f = s => s.toString.length).getOrElse(" ").toString.length).max
+v.map(r => r.maxBy(f = s => s.toString.length).getOrElse(" ").toString.length)
+  .max
 
 val v4 = Matrix(v)
 print(board(3, 3, v4))
@@ -187,11 +193,10 @@ val file = 'B'
 
 val fen = "rnbqkbnr/pp2p3/8/8/8/8/PPPPPPPP/RNBQKBNR".split("/")
 
-
 //val chars = fen(1).toCharArray
 
 var arr: List[Option[Piece]] = List()
-        
+
 var pieceCount = 0
 /*while (pieceCount < 8) {
   val nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
@@ -207,39 +212,47 @@ import model.ChessField
 import model.ChessField._
 
 def fenSegToVector(fen: String): Vector[Option[Piece]] = {
-        val chars = fen.toCharArray
+  val chars = fen.toCharArray
 
-        if (fen.size == 0)
-            Vector()
-        else
-            var nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
-            var nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).take(1).toList
-            var emptySpaces: List[Option[Piece]] = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
-            val fenRest = fen.takeRight(fen.size - (nextPieces.size + 1))
-            (nextPieces:::emptySpaces:::fenSegToVector(fenRest).toList).toVector
-    }
+  if (fen.size == 0) Vector()
+  else
+    var nextPieces: List[Option[Piece]] =
+      chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+    var nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).take(1).toList
+    var emptySpaces: List[Option[Piece]] = List.fill(
+      if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0
+    )(None)
+    val fenRest = fen.takeRight(fen.size - (nextPieces.size + 1))
+    (nextPieces ::: emptySpaces ::: fenSegToVector(fenRest).toList).toVector
+}
 
 var strin = "p1qp2pB"
 var chars = strin.toCharArray
 chars.takeWhile(c => !c.isDigit).toList
-var nextPieces: List[Option[Piece]] = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
+var nextPieces: List[Option[Piece]] =
+  chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
 var nextDigit: List[Char] = chars.dropWhile(c => !c.isDigit).take(1).toList
-var emptySpaces: List[Option[Piece]] = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+var emptySpaces: List[Option[Piece]] = List.fill(
+  if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0
+)(None)
 strin = strin.takeRight(strin.size - (nextPieces.size + 1))
 strin
 chars = strin.toCharArray
-var vec = (nextPieces:::emptySpaces).toVector
+var vec = (nextPieces ::: emptySpaces).toVector
 
 nextPieces = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
 nextDigit = chars.dropWhile(c => !c.isDigit).take(1).toList
 nextPieces
 nextDigit
-emptySpaces = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+emptySpaces = List.fill(
+  if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0
+)(None)
 emptySpaces
-strin.size - (if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)
+strin.size - (if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt
+              else 0)
 strin = strin.takeRight(strin.size - (nextPieces.size + 1))
 strin
-vec = (vec.toList:::nextPieces:::emptySpaces).toVector
+vec = (vec.toList ::: nextPieces ::: emptySpaces).toVector
 vec
 chars = strin.toCharArray
 chars.toSeq
@@ -248,11 +261,13 @@ nextPieces = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
 nextDigit = chars.dropWhile(c => !c.isDigit).take(1).toList
 nextPieces
 nextDigit
-emptySpaces = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+emptySpaces = List.fill(
+  if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0
+)(None)
 emptySpaces
 strin = strin.takeRight(strin.size - (nextPieces.size + 1))
 strin
-vec = (vec.toList:::nextPieces:::emptySpaces).toVector
+vec = (vec.toList ::: nextPieces ::: emptySpaces).toVector
 vec
 chars = strin.toCharArray
 chars.toSeq
@@ -261,15 +276,16 @@ nextPieces = chars.takeWhile(c => !c.isDigit).map(p => Piece.fromChar(p)).toList
 nextDigit = chars.dropWhile(c => !c.isDigit).take(1).toList
 nextPieces
 nextDigit
-emptySpaces = List.fill(if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0)(None)
+emptySpaces = List.fill(
+  if nextDigit.size == 1 then nextDigit.head.toInt - '0'.toInt else 0
+)(None)
 emptySpaces
 strin = strin.takeRight(strin.size - (nextPieces.size + 1))
 strin
-vec = (vec.toList:::nextPieces:::emptySpaces).toVector
+vec = (vec.toList ::: nextPieces ::: emptySpaces).toVector
 vec
 chars = strin.toCharArray
 chars.toSeq
-
 
 Array('p', 'g').dropWhile(c => !c.isDigit).take(1).toList
 
@@ -285,3 +301,49 @@ ctrlx.fill("B_KING")
 print(ctrlx.fieldToString)
 ctrlx.put("A1", "W_KING")
 print(ctrlx.fieldToString)
+
+val testmtr = new Matrix[Option[Piece]](2, Some(W_KING))
+
+/* def isSet(file: Char, rank: Int): Boolean = {
+  if (testmtr.cell(file, rank) == None) {
+    false
+  } else {
+    val pccolor = testmtr.cell(file, rank).getColor
+    true
+  }
+}
+testmtr.isSet(A, 1)
+ */
+/* def moveIsValid(piece : Option[Piece]): boolean = {
+  piece match
+  case  B_ROOK =>
+}
+ */
+def oobcheckCF(tile1: Array[Char], tile2: Array[Char]): Boolean = {
+  //rank check start tile
+  if (tile1(1).toLower.toInt < 97 && tile1(1).toLower.toInt > 104)
+    print("Illegal input")
+    false
+  //file check start tile
+  else if (tile1(0).toInt < 49 && tile1(0).toInt > 56)
+    print("Illegal input")
+    false
+  //rank check destination tile
+  else if (tile2(1).toLower.toInt < 97 && tile2(1).toLower.toInt > 104)
+    print("Illegal input")
+    false
+  // file check destination tile
+  else if (tile2(0).toInt < 49 && tile2(0).toInt > 56)
+    print("Illegal input")
+    false
+  else true
+
+}
+'a'.toInt
+'A'.toInt
+'A'.toLower.toInt
+'a'.toLower
+'b'.toInt
+'h'.toInt
+'1'.toInt
+'8'.toInt
