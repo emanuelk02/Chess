@@ -4,7 +4,6 @@ package controller
 import model.ChessField
 import util.Observable
 
-
 import scala.io.StdIn.readLine
 
 case class Controller(var field: ChessField) extends Observable {
