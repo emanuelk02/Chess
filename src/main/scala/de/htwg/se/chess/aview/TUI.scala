@@ -168,4 +168,5 @@ class TUI(controller: Controller) extends Observer {
   }
 
   override def update: Unit = print("\n" + controller.fieldToString)
+  override def updateOnError(message: String): Unit = print("\n" + message + "\n")
 }
