@@ -12,3 +12,4 @@ lazy val root = project
       "org.scalactic" %% "scalactic" % "3.2.10",
       "org.scalatest" %% "scalatest" % "3.2.10" % "test")
   )
+  .enablePlugins(JacocoCoverallsPlugin)
