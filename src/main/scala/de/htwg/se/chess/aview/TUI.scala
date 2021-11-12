@@ -11,7 +11,9 @@ class TUI(controller: Controller) extends Observer {
   val ERR_VAL = -1
   val SUCCESS_VAL = 1
   controller.add(this)
-  print("||== Welcome to Chess ==||\nType 'help' for more information on available commands\n\n")
+  print(
+    "||== Welcome to Chess ==||\nType 'help' for more information on available commands\n\n"
+  )
   print(controller.fieldToString)
   print("\n\n")
 
@@ -23,7 +25,7 @@ class TUI(controller: Controller) extends Observer {
 
     eval(input) match {
       case EXIT_VAL => print("Shutting down...\nGoodbye\n")
-      case ERR_VAL => { 
+      case ERR_VAL => {
         printHelp(input.split(" ")(0))
         run
       }
@@ -43,80 +45,79 @@ class TUI(controller: Controller) extends Observer {
     else
       val in = inputString.split(" ")
       in(0).toLowerCase match {
-          case "h" | "help" => {              //----------------------- Help
-            if (in.size > 1) then
-              printHelp(in(1))
-              SUCCESS_VAL
-            else
-              printHelp()
-              SUCCESS_VAL
-          }
-          case "i" | "insert" | "put" => {    //----------------------- Insert / Put
-            if (in.size < 3) then
-              print("Not enough arguments:")
-              //printHelp(in(0))
-              ERR_VAL
-            else
-              controller.put(in(1), in(2))
-              SUCCESS_VAL
-          }
-          case "m" | "move" => {              //----------------------- Move
-            if (in.size < 3) then
-              print("Not enough arguments:")
-              //printHelp(in(0))
-              ERR_VAL
-            else
-              controller.move(in(1), in(2))
-              SUCCESS_VAL
-          }
-          case "f" | "fill" => {              //----------------------- Fill
-            if (in.size < 2) then
-              print("Not enough arguments:")
-              //printHelp(in(0))
-              ERR_VAL
-            else
-              controller.fill(in(1))
-              SUCCESS_VAL
-          }
-          case "rank" | "fillrank" => {       //----------------------- Fill Rank
-            if (in.size < 3) then
-              print("Not enough arguments:")
-              //printHelp(in(0))
-              ERR_VAL
-            else
-              controller.fillRank(in(1).toInt, in(2))
-              SUCCESS_VAL
-          }
-          case "file" | "fillfile" => {       //----------------------- Fill file
-            if (in.size < 3) then
-              print("Not enough arguments:")
-              //printHelp((in(0)))
-              ERR_VAL
-            else
-              controller.fillFile(in(1).head, in(2))
-              SUCCESS_VAL
-          }
-          case "fen" | "loadfen" => {         //----------------------- FenString
-            if (in.size < 2) then
-              print("Not enough arguments:")
-              //printHelp(in(0))
-              ERR_VAL
-            else
-              controller.putWithFen(in(1))
-              SUCCESS_VAL
-          }
-          case "exit" => EXIT_VAL             //----------------------- Exit
-          case _ => {                         //----------------------- Invalid
-            print("Unknown Command: " + in(0) + "\n")
-            print("For more information type 'h'")
+        case "h" | "help" => { //----------------------- Help
+          if (in.size > 1) then
+            printHelp(in(1))
+            SUCCESS_VAL
+          else
+            printHelp()
+            SUCCESS_VAL
+        }
+        case "i" | "insert" | "put" => { //----------------------- Insert / Put
+          if (in.size < 3) then
+            print("Not enough arguments:")
+            //printHelp(in(0))
             ERR_VAL
-          }
+          else
+            controller.put(in(1), in(2))
+            SUCCESS_VAL
+        }
+        case "m" | "move" => { //----------------------- Move
+          if (in.size < 3) then
+            print("Not enough arguments:")
+            //printHelp(in(0))
+            ERR_VAL
+          else
+            controller.move(in(1), in(2))
+            SUCCESS_VAL
+        }
+        case "f" | "fill" => { //----------------------- Fill
+          if (in.size < 2) then
+            print("Not enough arguments:")
+            //printHelp(in(0))
+            ERR_VAL
+          else
+            controller.fill(in(1))
+            SUCCESS_VAL
+        }
+        case "rank" | "fillrank" => { //----------------------- Fill Rank
+          if (in.size < 3) then
+            print("Not enough arguments:")
+            //printHelp(in(0))
+            ERR_VAL
+          else
+            controller.fillRank(in(1).toInt, in(2))
+            SUCCESS_VAL
+        }
+        case "file" | "fillfile" => { //----------------------- Fill file
+          if (in.size < 3) then
+            print("Not enough arguments:")
+            //printHelp((in(0)))
+            ERR_VAL
+          else
+            controller.fillFile(in(1).head, in(2))
+            SUCCESS_VAL
+        }
+        case "fen" | "loadfen" => { //----------------------- FenString
+          if (in.size < 2) then
+            print("Not enough arguments:")
+            //printHelp(in(0))
+            ERR_VAL
+          else
+            controller.putWithFen(in(1))
+            SUCCESS_VAL
+        }
+        case "exit" => EXIT_VAL //----------------------- Exit
+        case _ => { //----------------------- Invalid
+          print("Unknown Command: " + in(0) + "\n")
+          print("For more information type 'h'")
+          ERR_VAL
+        }
       }
   }
 
   def printHelp(): Unit = {
-    print(
-    """
+    print("""
     Usage: <command> [options]
     Commands:
     help [command]      show this help message
@@ -157,16 +158,29 @@ class TUI(controller: Controller) extends Observer {
 
   def printHelp(cmd: String) = {
     cmd.toLowerCase match {
-      case "i" | "insert" | "put" => print("\nUsage: i / insert / put <tile: \"A1\"> <piece>\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"")
-      case "m" | "move" => print("\nUsage: m / move <tile1: \"A1\"> <tile2: \"B2\">\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"")
-      case "f" | "fill" => print("\nUsage: f / fill <piece>")
-      case "rank" | "fillrank" => print("\nUsage: rank / fillrank <rank: \"1\"> <piece>")
-      case "file" | "fillfile" => print("\nUsage: file / fillFile <file: \"A\"> <piece")
-      case "fen" | "loadfen" => print("\nfen / FEN / Fen / loadFEN <fen-string>\nSee 'https://www.chessprogramming.org/Forsyth-Edwards_Notation' for detailed information\non what FEN strings do")
-      case _ => print("\nUnknown command. See 'help' for more information")
+      case "i" | "insert" | "put" =>
+        print(
+          "\nUsage: i / insert / put <tile: \"A1\"> <piece>\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"\n"
+        )
+      case "m" | "move" =>
+        print(
+          "\nUsage: m / move <tile1: \"A1\"> <tile2: \"B2\">\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"\n"
+        )
+      case "f" | "fill" => print("\nUsage: f / fill <piece>\n")
+      case "rank" | "fillrank" =>
+        print("\nUsage: rank / fillrank <rank: \"1\"> <piece>\n")
+      case "file" | "fillfile" =>
+        print("\nUsage: file / fillFile <file: \"A\"> <piece\n")
+      case "fen" | "loadfen" =>
+        print(
+          "\nfen / FEN / Fen / loadFEN <fen-string>\nSee 'https://www.chessprogramming.org/Forsyth-Edwards_Notation' for detailed information\non what FEN strings do\n"
+        )
+      case _ => print("\nUnknown command. See 'help' for more information\n")
     }
   }
 
   override def update: Unit = print("\n" + controller.fieldToString)
-  override def updateOnError(message: String): Unit = print("\n" + message + "\n")
+  override def updateOnError(message: String): Unit = print(
+    "\n" + message + "\n"
+  )
 }
