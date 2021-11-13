@@ -10,9 +10,7 @@ class ObserverSpec extends AnyWordSpec {
     val observed = observable
     var num = 0
     override def update: Unit = { num = num + 1 }
-    override def updateOnError(message: String): Unit = print(
-      "\n" + message + "\n"
-    )
+    override def updateOnError(message: String): Unit = { num = num - 1 }
   }
 
   "An Observer" should {
@@ -26,13 +24,18 @@ class ObserverSpec extends AnyWordSpec {
       observer2.observed.add(observer2)
       observable.subscribers should contain(observer2)
 
+      observable.notfiyOnError
+      
+      observer1.num should be(-1)
+      observer2.num should be(-1)
+      
       observable.remove(observer2)
       observable.subscribers should not contain (observer2)
 
       observable.notifyObservers
 
-      observer1.num should be(1)
-      observer2.num should be(0)
+      observer1.num should be(0)
+      observer2.num should be(-1)
     }
   }
 }
