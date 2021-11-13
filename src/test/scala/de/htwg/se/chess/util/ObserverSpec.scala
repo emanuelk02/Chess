@@ -24,7 +24,7 @@ class ObserverSpec extends AnyWordSpec {
       observer2.observed.add(observer2)
       observable.subscribers should contain(observer2)
 
-      observable.notfiyOnError("")
+      observable.notifyOnError("")
       
       observer1.num should be(-1)
       observer2.num should be(-1)
