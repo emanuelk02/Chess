@@ -1,24 +1,24 @@
-# **Chess** {#0}
+# **Chess**
 
 ![Build_Status](https://github.com/biselli-mar/Chess/actions/workflows/scala.yml/badge.svg?branch=main)
 [![Coverage Status](https://coveralls.io/repos/github/biselli-mar/Chess/badge.svg?branch=main)](https://coveralls.io/github/biselli-mar/Chess?branch=main)
 
-## Table of Contents {#1}
+## Table of Contents
 
 ---
 
 | **Feature** | **Content** | **Code** |
 | :------     | :------     |   -----: |
-| [Textual User Interface](#2) | [Usage](#3) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) |
+| [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information:) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) |
 
 ---
 
-## Using the **TUI** {#2}
+## Using the **TUI**
 
 The text interface allows for following commands and inputs:
 
 | Syntax | Description |
-| :---------- | :----------------------------------------------------: |
+| :---------- | :---------: |
 | **insert** | Inserts a piece into the matrix |
 | **move** | Moves an already inserted piece to another location |
 | **fill** | Fills the entire board with one piece |
@@ -26,7 +26,7 @@ The text interface allows for following commands and inputs:
 | **fillFile** | Fills an entire file of the board with one piece |
 | **fen** | Loads a Chess position from a given FEN-String |    
 
-### See also command *help* for more information: {#3}
+### See also command *help* for more information:
 
 ```
     Usage: <command> [options]
@@ -66,7 +66,9 @@ The text interface allows for following commands and inputs:
     exit                quits the program
 ```
 
-### Board Representation {#4}
+---
+
+### Board Representation
 
 Game runs on console by printing an 8x8 matrix of boxes with letters - representing Chess pieces - inside them:
 
