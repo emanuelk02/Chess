@@ -18,6 +18,8 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+    - name: compile
+      run: sbt compile
   coverage:
     runs-on: ubuntu-latest
     
