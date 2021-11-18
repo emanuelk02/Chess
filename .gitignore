@@ -3,8 +3,8 @@
 .metals/
 .vscode
 .bsp
-target/
 .game/
+target/
 .metals
 .bloop
 metals.sbt

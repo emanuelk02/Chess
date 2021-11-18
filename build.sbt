@@ -10,6 +10,7 @@ lazy val root = project
 
     libraryDependencies ++= Seq("com.novocode" % "junit-interface" % "0.11" % "test",
       "org.scalactic" %% "scalactic" % "3.2.10",
-      "org.scalatest" %% "scalatest" % "3.2.10" % "test")
+      "org.scalatest" %% "scalatest" % "3.2.10" % "test"),
+    
   )
   .enablePlugins(JacocoCoverallsPlugin)
