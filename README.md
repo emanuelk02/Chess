@@ -1,19 +1,19 @@
-# **Chess** {#title}
+# **Chess** {#0}
 
 ![Build_Status](https://github.com/biselli-mar/Chess/actions/workflows/scala.yml/badge.svg?branch=main)
 [![Coverage Status](https://coveralls.io/repos/github/biselli-mar/Chess/badge.svg?branch=main)](https://coveralls.io/github/biselli-mar/Chess?branch=main)
 
-## Table of Contents {#toc}
+## Table of Contents {#1}
 
 ---
 
 | **Feature** | **Content** | **Code** |
 | :------     | :------     |   -----: |
-| [Textual User Interface](#tui) | [Usage](#help_cmd) | [TUI.scala](src\main\scala\de\htwg\se\chess\TUI.scala) |
+| [Textual User Interface](#2) | [Usage](#3) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) |
 
 ---
 
-## Using the **TUI** {#tui}
+## Using the **TUI** {#2}
 
 The text interface allows for following commands and inputs:
 
@@ -34,7 +34,7 @@ The text interface allows for following commands and inputs:
  - **fillFile**:  Fills an entire file of the board with one piece
  - **fen**:       Loads a Chess position from a given FEN-String
 
-### See also command *help* for more information: {#help_cmd}
+### See also command *help* for more information: {#3}
 
 ```
     Usage: <command> [options]
@@ -74,7 +74,7 @@ The text interface allows for following commands and inputs:
     exit                quits the program
 ```
 
-### Board Representation {#board_string}
+### Board Representation {#4}
 
 Game runs on console by printing an 8x8 matrix of boxes with letters - representing Chess pieces - inside them:
 
@@ -98,7 +98,7 @@ Game runs on console by printing an 8x8 matrix of boxes with letters - represent
 +---+---+---+---+---+---+---+---+
 ```
 
-The pieces match the representation in the **Forsyth-Edwards Notation ([FEN](https://www.chessprogramming.org/Forsyth-Edwards_Notation))**.
+The pieces match the representation in the **[Forsyth-Edwards Notation (FEN)](https://www.chessprogramming.org/Forsyth-Edwards_Notation)**.
 
 ---
 
