@@ -7,9 +7,10 @@
 
 ---
 
-| **Feature** | **Content** | **Code** |
-| :------     | :------     |   -----: |
-| [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) |
+| **Feature** | **Content** | **Code** | **Tests** |
+| :------     | :------     |   -----: |   ------: |
+| [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [aview.TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [aview.TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
+| | [Format](#board-representation) | [model.ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [model.ChessBoardSpec.scala](src/main/scala/de/htwg/se/chess/model/ChessBoardSpec.scala)
 
 ---
 
