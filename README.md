@@ -9,8 +9,6 @@
 
 ## Table of Contents
 
----
-
 | **Feature** | **Content** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
 | [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
