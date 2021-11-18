@@ -11,7 +11,7 @@ class ChessBoardSpec extends AnyWordSpec {
         "produce a String of the form '+---' as a ceiling for tiles" in {
             an [AssertionError] should be thrownBy line(0)
             line(1) should be("+-")
-            line(2) should be("+--")
+            line(2) should be("+----")
         }
     }
     "wall(color: String, width: Int)" when {
