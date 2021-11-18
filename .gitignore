@@ -3,7 +3,6 @@
 .metals/
 .vscode
 .bsp
-target/
 .game/
 .metals
 .bloop
