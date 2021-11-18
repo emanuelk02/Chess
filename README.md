@@ -1,7 +1,7 @@
 # **Chess**
 
-![Build_Status](https://github.com/biselli-mar/Chess/actions/workflows/scala.yml/badge.svg?branch=main)
-[![Coverage Status](https://coveralls.io/repos/github/biselli-mar/Chess/badge.svg?branch=main)](https://coveralls.io/github/biselli-mar/Chess?branch=main)
+![Build_Status](https://github.com/emanuelk02/Chess/actions/workflows/scala.yml/badge.svg?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/emanuelk02/Chess/badge.svg?branch=main)](https://coveralls.io/github/emanuelk02/Chess?branch=main)
 
 ## *README is a work in progress!*
 
