@@ -20,5 +20,9 @@ jobs:
         distribution: 'adopt'
     - name: Run tests
       run: sbt test
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
     - name: Coverage
       run: sbt jacoco
