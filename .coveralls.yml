@@ -1,0 +1,4 @@
+service_name: github-actions
+branch: sys.env.get("CI_BRANCH")
+pull_request: sys.env.get("GITHUB_EVENT_NAME")
+repo_token: sys.env.get("COVERALLS_REPO_TOKEN")
