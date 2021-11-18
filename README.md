@@ -13,7 +13,7 @@
 
 | **Feature** | **Content** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
-| [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [aview.TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
+| [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
 | | [Format](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala)
 
 ---
