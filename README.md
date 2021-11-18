@@ -26,14 +26,6 @@ The text interface allows for following commands and inputs:
 | **fillFile** | Fills an entire file of the board with one piece |
 | **fen** | Loads a Chess position from a given FEN-String |    
 
-
- - **insert**:    Inserts a piece into the matrix
- - **move**:      Moves an already inserted piece to another location
- - **fill**:      Fills the entire board with one piece
- - **fillRank**:  Fills an entire rank of the board with one piece
- - **fillFile**:  Fills an entire file of the board with one piece
- - **fen**:       Loads a Chess position from a given FEN-String
-
 ### See also command *help* for more information: {#3}
 
 ```
