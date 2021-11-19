@@ -36,7 +36,6 @@ The text interface allows for following commands and inputs:
 
 #### Inserting Pieces
 
- - Tiles:
  1. destination tile:
  consists of its file described by a char ('A' to 'H')
  and its rank described by an integer (1 to 8)
