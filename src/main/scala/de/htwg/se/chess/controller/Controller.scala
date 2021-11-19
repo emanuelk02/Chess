@@ -14,8 +14,7 @@ case class Controller(var field: ChessField) extends Observable {
         field.checkTile(tile2) match
           case ""        => field = field.move(tile1, tile2)
           case s: String => notifyOnError(s)
-      case s: String => notifyOnError(s)
-    }
+      case s: String => notifyOnError(s) }
     notifyObservers
   }
 
@@ -23,8 +22,7 @@ case class Controller(var field: ChessField) extends Observable {
     field.checkTile(tile) match {
       case "" =>
         field = field.replace(tile, piece)
-      case s: String => notifyOnError(s)
-    }
+      case s: String => notifyOnError(s) }
     notifyObservers
   }
 
@@ -36,16 +34,14 @@ case class Controller(var field: ChessField) extends Observable {
   def fillRank(rank: Int, piece: String): Unit = {
     field.checkRank(rank) match {
       case ""        => field = field.fillRank(rank, piece)
-      case s: String => notifyOnError(s)
-    }
+      case s: String => notifyOnError(s) }
     notifyObservers
   }
 
   def fillFile(file: Char, piece: String): Unit = {
     field.checkFile(file) match {
       case ""        => field = field.fillFile(file, piece)
-      case s: String => notifyOnError(s)
-    }
+      case s: String => notifyOnError(s) }
     notifyObservers
   }
 

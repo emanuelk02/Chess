@@ -33,8 +33,7 @@ case class ChessField(field: Matrix[Option[Piece]]):
   def fillRank(rank: Int, filling: Vector[Option[Piece]]): ChessField = {
     assert(
       filling.size == field.size,
-      "Illegal vector length: not equal to stored field"
-    )
+      "Illegal vector length: not equal to stored field")
     copy(field.copy(field.rows.updated(rank - 1, filling)))
   }
   def fillRank(rank: Int, filling: Option[Piece]): ChessField = {
@@ -46,8 +45,7 @@ case class ChessField(field: Matrix[Option[Piece]]):
   def fillFile(file: Char, filling: Vector[Option[Piece]]): ChessField = {
     assert(
       filling.size == field.size,
-      "Illegal vector length: not equal to stored field"
-    )
+      "Illegal vector length: not equal to stored field")
     copy(field.copy(Vector.tabulate(field.size, field.size) { (row, col) =>
       if col == (file.toLower.toInt - 'a'.toInt) then filling(row)
       else field.cell(row, col)
