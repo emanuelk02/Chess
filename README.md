@@ -40,6 +40,10 @@ The text interface allows for following commands and inputs:
  and its rank described by an integer (1 to 8)
  2. desired piece:
  string describing a valid [piece](#inputs-for-pieces)
+
+#### Moving Pieces
+
+ 1. source
 ---
 
 ### Inputs for Pieces
