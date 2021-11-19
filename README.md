@@ -12,6 +12,7 @@
 | **Feature** | **Content** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
 | [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
+| | [Inputs](#valid-input) | [ChessField.scala](src/main/scala/de/htwg/se/chess/model/ChessField.scala) | [ChessField.scala](src/test/scala/de/htwg/se/chess/model/ChessFieldSpec.scala)
 | | [Format](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala)
 
 ---
@@ -35,10 +36,30 @@ The text interface allows for following commands and inputs:
 
 #### Inserting Pieces
 
- - Tiles: |
- - 1. destination tile: |
- - consists of its file described by a char ('A' to 'H')
- - and its rank described by an integer (1 to 8)
+ - Tiles:
+ 1. destination tile:
+ consists of its file described by a char ('A' to 'H')
+ and its rank described by an integer (1 to 8)
+ 2. desired piece:
+ string describing a valid [piece](#inputs-for-pieces)
+---
+
+### Inputs for Pieces
+
+| **Piece** | **String** | **Alt.** |
+| Black King | B_KING | k |
+| Black Queen | B_QUEEN | q |
+| Black Rook | B_ROOK | r |
+| Black Bishop | B_BISHOP | b |
+| Black Knight | B_KNIGHT | n |
+| Black Pawn | B_PAWN | p |
+| White King | W_KING | K |
+| White Queen | W_QUEEN | Q |
+| white Rook | W_ROOK | R |
+| White Bishop | W_BISHOP | B |
+| White Knight | W_KNIGHT | N |
+| White Pawn | W_PAWN | P |
+
 ---
 
 ### See also command *help* for more information:
