@@ -29,6 +29,18 @@ The text interface allows for following commands and inputs:
 | **fillFile** | Fills an entire file of the board with one piece |
 | **fen** | Loads a Chess position from a given FEN-String |    
 
+---
+
+### Valid input
+
+#### Inserting Pieces
+
+ - Tiles: |
+ - 1. destination tile: |
+ - consists of its file described by a char ('A' to 'H')
+ - and its rank described by an integer (1 to 8)
+---
+
 ### See also command *help* for more information:
 
 ```
