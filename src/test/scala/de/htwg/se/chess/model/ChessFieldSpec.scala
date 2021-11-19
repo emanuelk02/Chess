@@ -76,6 +76,13 @@ class ChessFieldSpec extends AnyWordSpec {
 
                 cf.fillRank(1, "k") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
                 cf.fillRank(2, "k") should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(B_KING), Some(B_KING))))))
+
+            }
+            "FillRank and FillFile should throw an AssertionError when size of Vector doesn't match matrix size" in {
+                an [AssertionError] should be thrownBy cf.fillRank(5, Vector(Some(B_KING)))
+                an [AssertionError] should be thrownBy cf.fillRank (5, Vector(Some(B_BISHOP), Some(B_ROOK), Some(B_KNIGHT)))
+                an [AssertionError] should be thrownBy cf.fillFile('A', Vector(Some(B_KING)))
+                an [AssertionError] should be thrownBy cf.fillFile ('A', Vector(Some(B_BISHOP), Some(B_ROOK), Some(B_KNIGHT)))
             }
             "allow to fill singe files with a specified element (either Vector of Options, a single Option or String)" in {
                 cf.fillFile('A', Vector(Some(B_KING), Some(B_QUEEN))) should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_QUEEN), Some(W_BISHOP))))))
@@ -107,6 +114,19 @@ class ChessFieldSpec extends AnyWordSpec {
 
                 cf.loadFromFen("Qk/Br") should be(ChessField(Matrix(Vector(Vector(Some(W_QUEEN), Some(B_KING)), Vector(Some(W_BISHOP), Some(B_ROOK))))))
                 cf.loadFromFen("kQ/rB") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_QUEEN)), Vector(Some(B_ROOK), Some(W_BISHOP))))))
+            }
+            "allow to check validity of inputs" in {
+                cf.checkFile('A') should be ("")
+                cf.checkFile('B') should be ("")
+                cf.checkFile('C') should be ("Tile file is invalid")
+                cf.checkRank(1) should be ("")
+                cf.checkRank(2) should be ("")
+                cf.checkRank(3) should be ("Tile rank is invalid")
+                cf.checkTile("A1") should be ("")
+                cf.checkTile("A2") should be ("")
+                cf.checkTile("A9") should be ("Tile rank is invalid")
+                cf.checkTile("K1") should be ("TIle file is invalid")
+                cf.checkTile("K9") should be ("TIle file is invalid")
             }
             "have a string representation like specified in ChessBoard" in {
                 import model.ChessBoard.board

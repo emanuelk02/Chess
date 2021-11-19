@@ -63,6 +63,18 @@ class PiecesSpec extends AnyWordSpec {
       Piece.fromString("B_BISHOP") should be(Some(B_BISHOP))
       Piece.fromString("B_KNIGHT") should be(Some(B_KNIGHT))
       Piece.fromString("B_PAWN") should be(Some(B_PAWN))
+      Piece.fromString("b") should be(Some(B_BISHOP))
+      Piece.fromString("r") should be(Some(B_ROOK))
+      Piece.fromString("p") should be(Some(B_PAWN))
+      Piece.fromString("q") should be(Some(B_QUEEN))
+      Piece.fromString("n") should be(Some(B_KNIGHT))
+      Piece.fromString("k") should be(Some(B_KING))
+      Piece.fromString("B") should be(Some(W_BISHOP))
+      Piece.fromString("R") should be(Some(W_ROOK))
+      Piece.fromString("P") should be(Some(W_PAWN))
+      Piece.fromString("Q") should be(Some(W_QUEEN))
+      Piece.fromString("N") should be(Some(W_KNIGHT))
+      Piece.fromString("K") should be(Some(W_KING))
 
       Piece.values
         .map(p => p.toString)

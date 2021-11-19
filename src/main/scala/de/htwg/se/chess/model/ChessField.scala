@@ -48,7 +48,6 @@ case class ChessField(field: Matrix[Option[Piece]]):
       filling.size == field.size,
       "Illegal vector length: not equal to stored field"
     )
-    var i = 0
     copy(field.copy(Vector.tabulate(field.size, field.size) { (row, col) =>
       if col == (file.toLower.toInt - 'a'.toInt) then filling(row)
       else field.cell(row, col)
