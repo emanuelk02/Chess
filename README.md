@@ -47,6 +47,7 @@ The text interface allows for following commands and inputs:
 ### Inputs for Pieces
 
 | **Piece** | **String** | **Alt.** |
+| :-------  | :--------  | :------  |
 | Black King | B_KING | k |
 | Black Queen | B_QUEEN | q |
 | Black Rook | B_ROOK | r |
