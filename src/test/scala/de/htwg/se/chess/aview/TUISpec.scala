@@ -45,7 +45,7 @@ class TUISpec extends AnyWordSpec {
         ctrl.field.field.size should be(matr.size)
         tui.eval("i B2 b") shouldBe tui.SUCCESS_VAL
         ctrl.field.field.size should be(matr.size)
-        tui.eval("f g") shouldBe tui.SUCCESS_VAL
+        tui.eval("fen 1B/kQ") shouldBe tui.SUCCESS_VAL
         ctrl.field.field.size should be(matr.size)
       }
 
@@ -55,11 +55,6 @@ class TUISpec extends AnyWordSpec {
         tui.eval("i A1") shouldBe tui.ERR_VAL
         tui.eval("m") shouldBe tui.ERR_VAL
         tui.eval("m A1") shouldBe tui.ERR_VAL
-        tui.eval("f") shouldBe tui.ERR_VAL
-        tui.eval("rank") shouldBe tui.ERR_VAL
-        tui.eval("rank 1") shouldBe tui.ERR_VAL
-        tui.eval("file") shouldBe tui.ERR_VAL
-        tui.eval("file A") shouldBe tui.ERR_VAL
         tui.eval("fen") shouldBe tui.ERR_VAL
       }
       "detect invalid commands" in {
@@ -77,7 +72,7 @@ class TUISpec extends AnyWordSpec {
         tui.eval("h show") shouldBe tui.SUCCESS_VAL
       }
       "allow to replace single cells at any location by String and keep the changes" in {
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("i A1 B_KING") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
           ChessField(
@@ -100,8 +95,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("put A1 k") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
           ChessField(
@@ -125,15 +119,17 @@ class TUISpec extends AnyWordSpec {
           )
         )
       }
-      "allow to be fully fill a board a single element specified and keep the changes" in {
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
-        tui.eval("f B_KING") shouldBe tui.SUCCESS_VAL
+      "allow to be fully cleared" in {
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("cl") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("clear") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
+                Vector(None, None),
+                Vector(None, None)
               )
             )
           )
@@ -143,137 +139,27 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(W_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
+                Vector(Some(W_KING), None),
+                Vector(None, None)
               )
             )
           )
         )
-
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
-        tui.eval("fill k") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("clear") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-        tui.eval("i A1 K") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(W_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-      }
-      "allow to fill singe ranks with a specified element and keep the changes" in {
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
-        tui.eval("rank 1 B_KING") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        tui.eval("fillrank 2 B_KING") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
-        tui.eval("RANK 1 k") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        tui.eval("fillRANK 2 k") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-      }
-      "allow to fill single files with a specified element and keep the changes" in {
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
-        tui.eval("file A B_KING") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(B_KING), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        tui.eval("fillfile b B_KING") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
-        tui.eval("FILE a k") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(B_KING), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        tui.eval("fillFILE B k") shouldBe tui.SUCCESS_VAL
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
+                Vector(None, None),
+                Vector(None, None)
               )
             )
           )
         )
       }
       "allow to move contents of one tile into another and store the changes" in {
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("i A1 k") shouldBe tui.SUCCESS_VAL
         tui.eval("m A1 A2") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
@@ -294,8 +180,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-
-        tui.eval("F B") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("I A1 k") shouldBe tui.SUCCESS_VAL
         tui.eval("M A1 b1") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
@@ -318,7 +203,7 @@ class TUISpec extends AnyWordSpec {
         )
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
-        tui.eval("f B") shouldBe tui.SUCCESS_VAL
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("fen /") shouldBe tui.SUCCESS_VAL
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))

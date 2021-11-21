@@ -30,24 +30,20 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field.cell('B', 1).get should be(B_KING)
       }
     }
+    val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
+    val cf = ChessField(matr)
+    val ctrl = Controller(cf)
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
         ctrl.field.field.size should be(2)
         ctrl.put("A1", "B_KING")
         ctrl.field.field.size should be(matr.size)
         ctrl.put("B2", "b")
         ctrl.field.field.size should be(matr.size)
-        ctrl.fill("")
         ctrl.field.field.size should be(matr.size)
       }
-
       "allow to replace single cells at any location by String and store the changes" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.put("A1", "B_KING")
         ctrl.field should be(
           ChessField(
@@ -70,9 +66,9 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        val ctrl2 = Controller(cf)
-        ctrl2.put("A1", "k")
-        ctrl2.field should be(
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.put("A1", "k")
+        ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
@@ -82,8 +78,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl2.put("B2", "k")
-        ctrl2.field should be(
+        ctrl.put("B2", "k")
+        ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
@@ -94,17 +90,15 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
       }
-      "allow to be fully filled with a single element specified by a String and store the changes" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
-        ctrl.fill("B_KING")
+      "allow to be fully cleared" in {
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.clear()
         ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
+                Vector(None, None),
+                Vector(None, None)
               )
             )
           )
@@ -114,140 +108,16 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(W_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-        val ctrl2 = Controller(cf)
-        ctrl2.fill("k")
-        ctrl2.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-        ctrl2.put("A1", "K")
-        ctrl2.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(W_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-      }
-      "allow to fill singe ranks with a specified element (by String) and store the changes" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
-        ctrl.fillRank(1, "B_KING")
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        ctrl.fillRank(2, "B_KING")
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-        val ctrl2 = Controller(cf)
-        ctrl2.fillRank(1, "k")
-        ctrl2.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        ctrl2.fillRank(2, "k")
-        ctrl2.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-      }
-      "allow to fill singe files with a specified element (by String) and store the changes" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
-        ctrl.fillFile('A', "B_KING")
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(B_KING), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        ctrl.fillFile('B', "B_KING")
-        ctrl.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
-              )
-            )
-          )
-        )
-        val ctrl2 = Controller(cf)
-        ctrl2.fillFile('A', "k")
-        ctrl2.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(B_KING), Some(W_BISHOP))
-              )
-            )
-          )
-        )
-        ctrl2.fillFile('B', "k")
-        ctrl2.field should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(B_KING)),
-                Vector(Some(B_KING), Some(B_KING))
+                Vector(Some(W_KING), None),
+                Vector(None, None)
               )
             )
           )
         )
       }
       "allow to move contents of one tile into another and store the changes" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr.replace(0, 0, Some(B_KING)))
-        val ctrl = Controller(cf)
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.put("A1", "B_KING")
         ctrl.move("A1", "A2")
         ctrl.field should be(
           ChessField(
@@ -267,9 +137,10 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        val ctrl2 = Controller(cf)
-        ctrl2.move("A1", "B1")
-        ctrl2.field should be(
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.put("A1", "B_KING")
+        ctrl.move("A1", "B1")
+        ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
@@ -279,8 +150,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl2.move("B1", "A2")
-        ctrl2.field should be(
+        ctrl.move("B1", "A2")
+        ctrl.field should be(
           ChessField(
             Matrix(
               Vector(Vector(None, None), Vector(Some(B_KING), Some(W_BISHOP)))
@@ -289,9 +160,7 @@ class ControllerSpec extends AnyWordSpec {
         )
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.putWithFen("/")
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
@@ -357,9 +226,7 @@ class ControllerSpec extends AnyWordSpec {
         )
       }
       "have a string representation like specified in ChessBoard" in {
-        val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         import model.ChessBoard.board
         ctrl.fieldToString should be(cf.toString)
         ctrl.fieldToString should be(board(3, 1, cf.field))

@@ -64,39 +64,6 @@ class ChessFieldSpec extends AnyWordSpec {
                 cf.fill("B_KING") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
                 cf.fill("k") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
             }
-            "allow to fill singe ranks with a specified element (either Vector of Options, a single Option or String)" in {
-                cf.fillRank(1, Vector(Some(B_KING), Some(B_QUEEN))) should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_QUEEN)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                cf.fillRank(2, Vector(Some(B_KING), Some(B_QUEEN))) should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(B_KING), Some(B_QUEEN))))))
-
-                cf.fillRank(1, Some(B_KING))should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                cf.fillRank(2, Some(B_KING)) should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(B_KING), Some(B_KING))))))
-
-                cf.fillRank(1, "B_KING") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                cf.fillRank(2, "B_KING") should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(B_KING), Some(B_KING))))))
-
-                cf.fillRank(1, "k") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                cf.fillRank(2, "k") should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(W_BISHOP)), Vector(Some(B_KING), Some(B_KING))))))
-
-            }
-            "FillRank and FillFile should throw an AssertionError when size of Vector doesn't match matrix size" in {
-                an [AssertionError] should be thrownBy cf.fillRank(5, Vector(Some(B_KING)))
-                an [AssertionError] should be thrownBy cf.fillRank (5, Vector(Some(B_BISHOP), Some(B_ROOK), Some(B_KNIGHT)))
-                an [AssertionError] should be thrownBy cf.fillFile('A', Vector(Some(B_KING)))
-                an [AssertionError] should be thrownBy cf.fillFile ('A', Vector(Some(B_BISHOP), Some(B_ROOK), Some(B_KNIGHT)))
-            }
-            "allow to fill singe files with a specified element (either Vector of Options, a single Option or String)" in {
-                cf.fillFile('A', Vector(Some(B_KING), Some(B_QUEEN))) should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_QUEEN), Some(W_BISHOP))))))
-                cf.fillFile('B', Vector(Some(B_KING), Some(B_QUEEN))) should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(B_KING)), Vector(Some(W_BISHOP), Some(B_QUEEN))))))
-
-                cf.fillFile('A', Some(B_KING))should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_KING), Some(W_BISHOP))))))
-                cf.fillFile('B', Some(B_KING)) should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(B_KING)), Vector(Some(W_BISHOP), Some(B_KING))))))
-
-                cf.fillFile('A', "B_KING") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_KING), Some(W_BISHOP))))))
-                cf.fillFile('B', "B_KING") should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(B_KING)), Vector(Some(W_BISHOP), Some(B_KING))))))
-
-                cf.fillFile('A', "k") should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_KING), Some(W_BISHOP))))))
-                cf.fillFile('B', "k") should be(ChessField(Matrix(Vector(Vector(Some(W_BISHOP), Some(B_KING)), Vector(Some(W_BISHOP), Some(B_KING))))))
-            }
             "allow to move contents of one tile into another" in {
                 val cf = ChessField(matr.replace(0, 0, Some(B_KING)))
                 cf.move("A1".toCharArray, "B1".toCharArray) should be(ChessField(Matrix(Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))

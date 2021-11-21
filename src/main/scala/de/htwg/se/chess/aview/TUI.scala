@@ -71,32 +71,9 @@ class TUI(controller: Controller) extends Observer {
             controller.move(in(1), in(2))
             SUCCESS_VAL
         }
-        case "f" | "fill" => { //----------------------- Fill
-          if (in.size < 2) then
-            print("Not enough arguments:")
-            //printHelp(in(0))
-            ERR_VAL
-          else
-            controller.fill(in(1))
-            SUCCESS_VAL
-        }
-        case "rank" | "fillrank" => { //----------------------- Fill Rank
-          if (in.size < 3) then
-            print("Not enough arguments:")
-            //printHelp(in(0))
-            ERR_VAL
-          else
-            controller.fillRank(in(1).toInt, in(2))
-            SUCCESS_VAL
-        }
-        case "file" | "fillfile" => { //----------------------- Fill file
-          if (in.size < 3) then
-            print("Not enough arguments:")
-            //printHelp((in(0)))
-            ERR_VAL
-          else
-            controller.fillFile(in(1).head, in(2))
-            SUCCESS_VAL
+        case "cl" | "clear" => { //----------------------- Fill
+          controller.clear()
+          SUCCESS_VAL
         }
         case "fen" | "loadfen" => { //----------------------- FenString
           if (in.size < 2) then
@@ -138,16 +115,7 @@ class TUI(controller: Controller) extends Observer {
     m / move <tile1: "A1"> <tile2: "B2">
                         moves piece at position of tile1 to the position of tile2
 
-    f / fill <piece>    fills entire board with given Piece or clears it, if you
-                        specify "None"
-
-    rank / fillRank <rank: "1"> <piece>
-                        fills a whole rank with given Piece or clears it, if you
-                        specify "None"
-
-    file / fillFile <file: "A"> <piece>
-                        fills an entire file with given Piece or clears it, if you
-                        specify "None"
+    cl / clear          clears entire board
 
     fen / FEN / Fen / loadFEN <fen-string>
                         initializes a chess position from given FEN-String
@@ -166,11 +134,7 @@ class TUI(controller: Controller) extends Observer {
         print(
           "\nUsage: m / move <tile1: \"A1\"> <tile2: \"B2\">\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"\n"
         )
-      case "f" | "fill" => print("\nUsage: f / fill <piece>\n")
-      case "rank" | "fillrank" =>
-        print("\nUsage: rank / fillrank <rank: \"1\"> <piece>\n")
-      case "file" | "fillfile" =>
-        print("\nUsage: file / fillFile <file: \"A\"> <piece\n")
+      case "cl" | "clear" => print("\nUsage: cl / clear\n")
       case "fen" | "loadfen" =>
         print(
           "\nfen / FEN / Fen / loadFEN <fen-string>\nSee 'https://www.chessprogramming.org/Forsyth-Edwards_Notation' for detailed information\non what FEN strings do\n"

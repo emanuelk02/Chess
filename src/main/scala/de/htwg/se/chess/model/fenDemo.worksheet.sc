@@ -44,5 +44,3 @@ matr.field.rows(4).size
 matr.field.rows(5).size
 matr.field.rows(6).size
 matr.field.rows(7).size
-
-print(ChessField(matr.fillFile('C', Vector(Some(B_KING), Some(B_KING), Some(B_KING), Some(B_KING), Some(B_KING), Some(B_KING), Some(B_KING), Some(W_KING)))))

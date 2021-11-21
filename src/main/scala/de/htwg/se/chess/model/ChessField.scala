@@ -30,33 +30,6 @@ case class ChessField(field: Matrix[Option[Piece]]):
   }
   def fill(filling: Option[Piece]): ChessField = copy(field.fill(filling))
   def fill(filling: String): ChessField = fill(Piece.fromString(filling))
-  def fillRank(rank: Int, filling: Vector[Option[Piece]]): ChessField = {
-    assert(
-      filling.size == field.size,
-      "Illegal vector length: not equal to stored field")
-    copy(field.copy(field.rows.updated(rank - 1, filling)))
-  }
-  def fillRank(rank: Int, filling: Option[Piece]): ChessField = {
-    fillRank(rank, Vector.fill(field.size)(filling))
-  }
-  def fillRank(rank: Int, filling: String): ChessField = {
-    fillRank(rank, Vector.fill(field.size)(Piece.fromString(filling)))
-  }
-  def fillFile(file: Char, filling: Vector[Option[Piece]]): ChessField = {
-    assert(
-      filling.size == field.size,
-      "Illegal vector length: not equal to stored field")
-    copy(field.copy(Vector.tabulate(field.size, field.size) { (row, col) =>
-      if col == (file.toLower.toInt - 'a'.toInt) then filling(row)
-      else field.cell(row, col)
-    }))
-  }
-  def fillFile(file: Char, filling: Option[Piece]): ChessField = {
-    fillFile(file, Vector.fill(field.size)(filling))
-  }
-  def fillFile(file: Char, filling: String): ChessField = {
-    fillFile(file, Vector.fill(field.size)(Piece.fromString(filling)))
-  }
   def move(tile1: Array[Char], tile2: Array[Char]): ChessField = {
     assert(tile1.size == 2)
     assert(tile2.size == 2)
@@ -66,15 +39,15 @@ case class ChessField(field: Matrix[Option[Piece]]):
     )
     copy(
       field
-        .replace( // Puts piece at destination
-          tile2(1).toInt - '0'.toInt - 1, // Rank / Row
+        .replace(
+          tile2(1).toInt - '0'.toInt - 1,
           tile2(0).toLower.toInt - 'a'.toInt,
-          piece // File / Col
+          piece
         )
-        .replace( // Clears piece entry from starting tile
-          tile1(1).toInt - '0'.toInt - 1, // Rank / Row
+        .replace(
+          tile1(1).toInt - '0'.toInt - 1,
           tile1(0).toLower.toInt - 'a'.toInt,
-          None // File / Col
+          None
         )
     )
   }

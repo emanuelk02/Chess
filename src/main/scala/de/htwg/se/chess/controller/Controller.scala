@@ -26,22 +26,8 @@ case class Controller(var field: ChessField) extends Observable {
     notifyObservers
   }
 
-  def fill(piece: String): Unit = {
-    field = field.fill(piece)
-    notifyObservers
-  }
-
-  def fillRank(rank: Int, piece: String): Unit = {
-    field.checkRank(rank) match {
-      case ""        => field = field.fillRank(rank, piece)
-      case s: String => notifyOnError(s) }
-    notifyObservers
-  }
-
-  def fillFile(file: Char, piece: String): Unit = {
-    field.checkFile(file) match {
-      case ""        => field = field.fillFile(file, piece)
-      case s: String => notifyOnError(s) }
+  def clear(): Unit = {
+    field = field.fill(None)
     notifyObservers
   }
 
