@@ -78,9 +78,7 @@ case class ChessField(field: Matrix[Option[Piece]]):
   }
 
   def checkFile(check: Char): String = {
-    if (
-      check.toLower.toInt - 'a'.toInt < 0 || check.toLower.toInt - 'a'.toInt > field.size - 1
-    )
+    if (check.toLower.toInt - 'a'.toInt < 0 || check.toLower.toInt - 'a'.toInt > field.size - 1)
       return ("Tile file is invalid")
     return ("")
   }
@@ -98,4 +96,24 @@ case class ChessField(field: Matrix[Option[Piece]]):
         case s: String => return s
       }
     } else return ("Invalid format")
+  }
+  def checkFen(check: String): String = {
+    val splitted = check.split('/')
+
+    var count = 0
+    var ind = -1
+
+    val res = for ( s <- splitted) yield {
+      count = 0
+      ind = ind + 1
+      if s.isEmpty then count = field.size
+      else
+          s.foreach( c => {
+              if c.isDigit then count = count + c.toLower.toInt - '0'.toInt
+              else count = count + 1
+          })
+      if count > field.size then "Invalid string: \"" + splitted(ind).mkString + "\" at index " + ind.toString + "\n"
+      else ""
+    }
+    res.mkString
   }

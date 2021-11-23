@@ -86,14 +86,28 @@ class ChessFieldSpec extends AnyWordSpec {
                 cf.checkFile('A') should be ("")
                 cf.checkFile('B') should be ("")
                 cf.checkFile('C') should be ("Tile file is invalid")
+
                 cf.checkRank(1) should be ("")
                 cf.checkRank(2) should be ("")
                 cf.checkRank(3) should be ("Tile rank is invalid")
+
                 cf.checkTile("A1") should be ("")
                 cf.checkTile("A2") should be ("")
                 cf.checkTile("A9") should be ("Tile rank is invalid")
                 cf.checkTile("K1") should be ("Tile file is invalid")
                 cf.checkTile("K9") should be ("Tile file is invalid")
+
+                cf.checkFen("/") should be ("")
+                cf.checkFen("2/2") should be ("")
+                cf.checkFen("kk/QQ") should be ("")
+                cf.checkFen("1B/") should be ("")
+                cf.checkFen("/n1") should be ("")
+                cf.checkFen("3/") should be ("Invalid string: \"3\" at index 0\n")
+                cf.checkFen("/3") should be ("Invalid string: \"3\" at index 1\n")
+                cf.checkFen("2b/qq") should be ("Invalid string: \"2b\" at index 0\n")
+                cf.checkFen("qq/bbb") should be ("Invalid string: \"bbb\" at index 1\n")
+                cf.checkFen("3/3") should be ("Invalid string: \"3\" at index 0\nInvalid string: \"3\" at index 1\n")
+                cf.checkFen("bbb/k2") should be ("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
             }
             "have a string representation like specified in ChessBoard" in {
                 import model.ChessBoard.board

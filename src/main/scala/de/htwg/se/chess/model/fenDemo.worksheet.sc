@@ -44,3 +44,24 @@ matr.field.rows(4).size
 matr.field.rows(5).size
 matr.field.rows(6).size
 matr.field.rows(7).size
+
+val fieldsize = 8
+val check = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
+val splitted = check.split('/').map( s => s.toCharArray.toList ).toList
+
+var count = 0
+var ind = -1
+
+val res = for ( s <- splitted) yield {
+    count = 0
+    ind = ind + 1
+    if s.isEmpty then count = fieldsize
+    else
+        s.foreach( c => {
+            if c.isDigit then count = count + c.toLower.toInt - '0'.toInt
+            else count = count + 1
+        })
+    if count > fieldsize then "Invalid string: \"" + splitted(ind).mkString + "\" at index " + ind.toString + "\n"
+    else ""
+}
+
