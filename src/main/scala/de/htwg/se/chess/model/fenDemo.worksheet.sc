@@ -65,3 +65,14 @@ val res = for ( s <- splitted) yield {
     else ""
 }
 
+import controller.Controller
+import model.MoveCommand
+
+val matr2 = new Matrix[Option[Piece]](2, Some(W_BISHOP))
+val cf = ChessField(matr2).replace("A1", "B_KING").replace("B2", "B_KING")
+val ctrl = Controller(cf)
+val move = MoveCommand("A1", "A2", ctrl)
+
+move.prevPiece
+
+

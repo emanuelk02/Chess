@@ -1,23 +1,20 @@
 package de.htwg.se.chess
-package util
+package model
 
 import model.Piece
 import model.ChessField
 import controller.Controller
+import util.ChessCommand
 
-trait ChessCommand {
-    def execute: ChessField
-    def undo: ChessField
-    def redo: ChessField
-}
-
-case class PutCommand(file: Char, rank: Int, piece: Option[Piece], prevPiece: Option[Piece], controller: Controller) extends ChessCommand {
+case class PutCommand(file: Char, rank: Int, piece: Option[Piece], controller: Controller) extends ChessCommand {
+    val prevPiece = controller.field.cell(file, rank)
     override def execute: ChessField = controller.field.replace(file, rank, piece)
     override def undo: ChessField    = controller.field.replace(file, rank, prevPiece)
     override def redo: ChessField    = execute 
 }
 
-case class MoveCommand(tile1: String, tile2: String, prevPiece: Option[Piece], controller: Controller) extends ChessCommand {
+case class MoveCommand(tile1: String, tile2: String, controller: Controller) extends ChessCommand {
+    val prevPiece = controller.field.cell(tile2(0), tile2(1).toInt - '0'.toInt)
     override def execute: ChessField = controller.field.move(tile1, tile2)
     override def undo: ChessField    = { 
         controller.field = controller.field.move(tile2, tile1)
@@ -26,13 +23,15 @@ case class MoveCommand(tile1: String, tile2: String, prevPiece: Option[Piece], c
     override def redo: ChessField    = execute
 }
 
-case class ClearCommand(prevField: ChessField, controller: Controller) extends ChessCommand {
+case class ClearCommand(controller: Controller) extends ChessCommand {
+    val prevField = controller.field
     override def execute: ChessField = controller.field.fill(None)
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
 }
 
-case class FenCommand(fen: String, prevField: ChessField, controller: Controller) extends ChessCommand {
+case class FenCommand(fen: String, controller: Controller) extends ChessCommand {
+    val prevField = controller.field
     override def execute: ChessField = controller.field.loadFromFen(fen)
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
