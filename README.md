@@ -12,7 +12,7 @@
 | **Feature** | **Content** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
 | [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
-| | [Format](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala)
+| | [Format](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala) |
 
 ---
 
@@ -24,9 +24,7 @@ The text interface allows for following commands and inputs:
 | :---------- | :---------: |
 | **insert** | Inserts a piece into the matrix |
 | **move** | Moves an already inserted piece to another location |
-| **fill** | Fills the entire board with one piece |
-| **fillRank** | Fills an entire rank of the board with one piece |
-| **fillFile** | Fills an entire file of the board with one piece |
+| **clear** | Clears all pieces from board |
 | **fen** | Loads a Chess position from a given FEN-String |    
 
 ---
@@ -88,16 +86,7 @@ The text interface allows for following commands and inputs:
     m / move <tile1: "A1"> <tile2: "B2">
                         moves piece at position of tile1 to the position of tile2
 
-    f / fill <piece>    fills entire board with given Piece or clears it, if you
-                        specify "None"
-
-    rank / fillRank <rank: "1"> <piece>
-                        fills a whole rank with given Piece or clears it, if you
-                        specify "None"
-
-    file / fillFile <file: "A"> <piece>
-                        fills an entire file with given Piece or clears it, if you
-                        specify "None"
+    cl / clear          clears entire board
 
     fen / FEN / Fen / loadFEN <fen-string>
                         initializes a chess position from given FEN-String
