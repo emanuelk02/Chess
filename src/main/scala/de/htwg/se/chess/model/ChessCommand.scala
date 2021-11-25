@@ -5,58 +5,46 @@ import model.Piece
 import model.ChessField
 import controller.Controller
 import util.ChessCommand
+import util.Observable
 
-case class PutCommand(file: Char, rank: Int, piece: Option[Piece], controller: Controller) extends ChessCommand {
+case class PutCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
+    val file = args(0)(0)
+    val rank = args(0)(1).toInt - '0'.toInt
     val prevPiece = controller.field.cell(file, rank)
-    override def execute: ChessField = controller.field.replace(file, rank, piece)
+    override def execute: ChessField = controller.field.replace(file, rank, Piece.fromString(args(1)))
     override def undo: ChessField    = controller.field.replace(file, rank, prevPiece)
     override def redo: ChessField    = execute 
 }
 
-case class MoveCommand(tile1: String, tile2: String, controller: Controller) extends ChessCommand {
-    val prevPiece = controller.field.cell(tile2(0), tile2(1).toInt - '0'.toInt)
-    override def execute: ChessField = controller.field.move(tile1, tile2)
-    override def undo: ChessField    = { 
-        controller.field = controller.field.move(tile2, tile1)
-        controller.field.replace(tile2, prevPiece)
+case class MoveCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
+    val prevPiece = controller.field.cell(args(1)(0), args(1)(1).toInt - '0'.toInt)
+    override def execute: ChessField = controller.field.move(args(0), args(1))
+    override def undo: ChessField    = {
+        controller.field = controller.field.move(args(1), args(0))
+        controller.field.replace(args(0), prevPiece)
     }
     override def redo: ChessField    = execute
 }
 
-case class ClearCommand(controller: Controller) extends ChessCommand {
+case class ClearCommand(controller: Controller) extends ChessCommand(controller) {
     val prevField = controller.field
     override def execute: ChessField = controller.field.fill(None)
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
 }
 
-case class FenCommand(fen: String, controller: Controller) extends ChessCommand {
+case class FenCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
     val prevField = controller.field
-    override def execute: ChessField = controller.field.loadFromFen(fen)
+    override def execute: ChessField = controller.field.loadFromFen(args(0))
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
 }
 
-abstract class CheckedChessCommand(command: ChessCommand) extends ChessCommand {
-    def check: String
-    override def execute = command.execute
-    override def undo = command.undo
-    override def redo = command.redo
-}
-
-case class CheckedPutCommand(command: PutCommand) extends CheckedChessCommand(command) {
-    override def check: String = command.controller.field.checkTile(command.file.toString + command.rank.toString)
-}
-
-case class CheckedMoveCommand(command: MoveCommand) extends CheckedChessCommand(command) {
-    override def check: String = {
-        command.controller.field.checkTile(command.tile1) match {
-            case "" => command.controller.field.checkTile(command.tile2)
-            case s: String => s
-        }
+case class ErrorCommand(errorMessage: String, controller: Controller) extends ChessCommand(controller) {
+    override def execute: ChessField = {
+        controller.notifyOnError(errorMessage)
+        controller.field
     }
-}
-
-case class CheckedFenCommand(command: FenCommand) extends CheckedChessCommand(command) {
-    override def check: String = command.controller.field.checkFen(command.fen)
+    override def undo: ChessField    = controller.field
+    override def redo: ChessField    = execute
 }

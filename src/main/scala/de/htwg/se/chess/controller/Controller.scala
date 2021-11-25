@@ -1,40 +1,31 @@
 package de.htwg.se.chess
 package controller
 
-import model.ChessField
-import util.Observable
+import util._
+import model._
 import scala.io.StdIn.readLine
 
 case class Controller(var field: ChessField) extends Observable {
   def this() = this(new ChessField())
 
-  def move(tile1: String, tile2: String): Unit = {
-    field.checkTile(tile1) match {
-      case "" =>
-        field.checkTile(tile2) match
-          case ""        => field = field.move(tile1, tile2)
-          case s: String => notifyOnError(s)
-      case s: String => notifyOnError(s) }
+  val commandHandler = new CommandInvoker
+
+  def executeAndNotify(command: List[String] => ChessCommand, args: List[String]): Unit = {
+    field = commandHandler.doStep(command(args))
+    notifyObservers
+  }
+  def executeAndNotify(command: () => ChessCommand): Unit = {
+    field = commandHandler.doStep(command())
     notifyObservers
   }
 
-  def put(tile: String, piece: String): Unit = {
-    field.checkTile(tile) match {
-      case "" =>
-        field = field.replace(tile, piece)
-      case s: String => notifyOnError(s) }
-    notifyObservers
-  }
+  def move(args: List[String]): ChessCommand = commandHandler.handle(MoveCommand(args, this))
 
-  def clear(): Unit = {
-    field = field.fill(None)
-    notifyObservers
-  }
+  def put(args: List[String]): ChessCommand = commandHandler.handle(PutCommand(args, this))
 
-  def putWithFen(fen: String): Unit = {
-    field = field.loadFromFen(fen)
-    notifyObservers
-  }
+  def clear(): ChessCommand = commandHandler.handle(ClearCommand(this))
+
+  def putWithFen(args: List[String]): ChessCommand = commandHandler.handle(FenCommand(args, this))
 
   def fieldToString: String = {
     field.toString

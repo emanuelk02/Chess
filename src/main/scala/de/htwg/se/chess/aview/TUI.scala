@@ -56,32 +56,29 @@ class TUI(controller: Controller) extends Observer {
         case "i" | "insert" | "put" => { //----------------------- Insert / Put
           if (in.size < 3) then
             print("Not enough arguments:")
-            //printHelp(in(0))
             ERR_VAL
           else
-            controller.put(in(1), in(2))
+            controller.executeAndNotify(controller.put, List(in(1), in(2)))
             SUCCESS_VAL
         }
         case "m" | "move" => { //----------------------- Move
           if (in.size < 3) then
             print("Not enough arguments:")
-            //printHelp(in(0))
             ERR_VAL
           else
-            controller.move(in(1), in(2))
+            controller.executeAndNotify(controller.move, List(in(1), in(2)))
             SUCCESS_VAL
         }
         case "cl" | "clear" => { //----------------------- Fill
-          controller.clear()
+          controller.executeAndNotify(controller.clear)
           SUCCESS_VAL
         }
         case "fen" | "loadfen" => { //----------------------- FenString
           if (in.size < 2) then
             print("Not enough arguments:")
-            //printHelp(in(0))
             ERR_VAL
           else
-            controller.putWithFen(in(1))
+            controller.executeAndNotify(controller.putWithFen, List(in(1)))
             SUCCESS_VAL
         }
         case "exit" => EXIT_VAL //----------------------- Exit

@@ -2,9 +2,10 @@ package de.htwg.se.chess
 package model
 
 import ChessBoard.board
-import scala.annotation.tailrec
 
 case class ChessField(field: Matrix[Option[Piece]]):
+
+
   def this() = this(new Matrix(8, None))
   def cell(file: Char, rank: Int): Option[Piece] = {
     val row = file.toLower.toInt - 'a'.toInt
@@ -116,4 +117,8 @@ case class ChessField(field: Matrix[Option[Piece]]):
       else ""
     }
     res.mkString
+  }
+
+  def checkMove(tile1: String, tile2: String): String = {
+    ""
   }
