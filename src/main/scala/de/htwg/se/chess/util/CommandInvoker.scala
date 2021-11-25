@@ -7,7 +7,7 @@ class CommandInvoker() {
     private var undoStack: List[ChessCommand]= Nil
     private var redoStack: List[ChessCommand]= Nil
 
-    var gameState: ChessState = new ChessState(false, PieceColor.White, (true, true), (true, true), 0, 0)
+    var gameState: ChessState = new ChessState
 
     def handle(command: ChessCommand): ChessCommand = {
         val res: (ChessCommand, ChessState) = gameState.handle(command)
@@ -18,29 +18,29 @@ class CommandInvoker() {
     def doStep(command: ChessCommand): ChessField = {
         command match {
             case cmd: ErrorCommand =>
-            case _ => undoStack = command::undoStack
+            case _ => { undoStack = command::undoStack }
         }
         command.execute
     }
 
-    def undoStep  = {
+    def undoStep: ChessField  = {
         undoStack match {
-          case  Nil =>
+          case  Nil => new ChessField
           case head::stack => {
-            head.undo
             undoStack = stack
             redoStack = head::redoStack
+            head.undo
           }
         }
     }
 
-    def redoStep = {
+    def redoStep: ChessField = {
         redoStack match {
-            case Nil =>
+            case Nil => new ChessField
             case head::stack => {
-                head.redo
                 redoStack = stack
                 undoStack = head::undoStack
+                head.redo
             }
         }
     }

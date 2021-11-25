@@ -96,6 +96,9 @@ class ChessFieldSpec extends AnyWordSpec {
                 cf.checkTile("A9") should be ("Tile rank is invalid")
                 cf.checkTile("K1") should be ("Tile file is invalid")
                 cf.checkTile("K9") should be ("Tile file is invalid")
+                cf.checkTile("") should be("Invalid format")
+                cf.checkTile("A") should be("Invalid format")
+                cf.checkTile("1") should be("Invalid format")
 
                 cf.checkFen("/") should be ("")
                 cf.checkFen("2/2") should be ("")
@@ -108,6 +111,9 @@ class ChessFieldSpec extends AnyWordSpec {
                 cf.checkFen("qq/bbb") should be ("Invalid string: \"bbb\" at index 1\n")
                 cf.checkFen("3/3") should be ("Invalid string: \"3\" at index 0\nInvalid string: \"3\" at index 1\n")
                 cf.checkFen("bbb/k2") should be ("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
+
+                /* Not Implemented yet */
+                cf.checkMove("", "") should be("")
             }
             "have a string representation like specified in ChessBoard" in {
                 import model.ChessBoard.board
