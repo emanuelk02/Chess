@@ -7,6 +7,10 @@ import model.Piece
 import model.Matrix
 import model.ChessField
 import model.Piece._
+import de.htwg.se.chess.model.ClearCommand
+import de.htwg.se.chess.model.PutCommand
+import de.htwg.se.chess.model.MoveCommand
+import de.htwg.se.chess.model.FenCommand
 
 class ControllerSpec extends AnyWordSpec {
   "A Controller" when {
@@ -36,15 +40,16 @@ class ControllerSpec extends AnyWordSpec {
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
         ctrl.field.field.size should be(2)
-        ctrl.put("A1", "B_KING")
+        ctrl.put(List("A1", "B_KING"))
         ctrl.field.field.size should be(matr.size)
-        ctrl.put("B2", "b")
+        ctrl.put(List("B2", "b"))
         ctrl.field.field.size should be(matr.size)
         ctrl.field.field.size should be(matr.size)
       }
       "allow to replace single cells at any location by String and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put("A1", "B_KING")
+        ctrl.put(List("A1", "B_KING")) should be (PutCommand(List("A1", "B_KING"), ctrl))
+        ctrl.executeAndNotify(ctrl.put, List("A1", "B_KING"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -55,7 +60,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.put("B2", "B_KING")
+        ctrl.put(List("B2", "B_KING")) should be (PutCommand(List("B2", "B_KING"), ctrl))
+        ctrl.executeAndNotify(ctrl.put, List("B2", "B_KING"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -67,7 +73,8 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put("A1", "k")
+        ctrl.put(List("A1", "k")) should be (PutCommand(List("A1", "k"), ctrl))
+        ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -78,7 +85,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.put("B2", "k")
+        ctrl.put(List("B2", "k")) should be (PutCommand(List("B2", "k"),ctrl))
+        ctrl.executeAndNotify(ctrl.put, List("B2", "k"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -92,7 +100,8 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to be fully cleared" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.clear()
+        ctrl.clear() should be (ClearCommand(ctrl))
+        ctrl.executeAndNotify(ctrl.clear)
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -103,7 +112,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.put("A1", "W_KING")
+        ctrl.put(List("A1", "W_KING")) should be (PutCommand(List("A1", "W_KING"), ctrl))
+        ctrl.executeAndNotify(ctrl.put, List("A1", "W_KING"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -117,8 +127,9 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to move contents of one tile into another and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put("A1", "B_KING")
-        ctrl.move("A1", "A2")
+        ctrl.field = ctrl.field.replace("A1", Some(B_KING))
+        ctrl.move(List("A1", "A2")) should be (MoveCommand(List("A1", "A2"), ctrl))
+        ctrl.executeAndNotify(ctrl.move, List("A1","A2"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -129,7 +140,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.move("A2", "B2")
+        ctrl.move(List("A2", "B2")) should be (MoveCommand(List("A2", "B2"),ctrl))
+        ctrl.executeAndNotify(ctrl.move, List("A2","B2"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -138,8 +150,10 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put("A1", "B_KING")
-        ctrl.move("A1", "B1")
+        ctrl.put(List("A1", "B_KING")) should be (PutCommand(List("A1", "B_KING"),ctrl))
+        ctrl.executeAndNotify(ctrl.put,List("A1", "B_KING"))
+        ctrl.move(List("A1", "B1")) should be (MoveCommand(List("A1", "B1"), ctrl))
+        ctrl.executeAndNotify(ctrl.move, List("A1", "B1"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -150,7 +164,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.move("B1", "A2")
+        ctrl.move(List("B1", "A2")) should be (MoveCommand(List("B1", "A2"), ctrl))
+        ctrl.executeAndNotify(ctrl.move, List("B1", "A2"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -161,15 +176,18 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.putWithFen("/")
+        ctrl.putWithFen(List("/")) should be (FenCommand(List("/"), ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("/"))
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
         )
-        ctrl.putWithFen("2/2")
+        ctrl.putWithFen(List("2/2")) should be (FenCommand(List("2/2"),ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("2/2"))
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
         )
-        ctrl.putWithFen("k/1B")
+        ctrl.putWithFen(List("k/1B")) should be(FenCommand(List("k/1B"),ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("k/1B"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -177,7 +195,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("k1/1B")
+        ctrl.putWithFen(List("k1/1B")) should be (FenCommand(List("k1/1B"), ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("k1/1B"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -185,7 +204,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("1k/B")
+        ctrl.putWithFen(List("1k/B")) should be (FenCommand(List("1k/B"), ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("1k/B"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -193,7 +213,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("1k/B1")
+        ctrl.putWithFen(List("1k/B1")) should be (FenCommand(List("1k/B1"), ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("1k/B1"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -202,7 +223,8 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
 
-        ctrl.putWithFen("Qk/Br")
+        ctrl.putWithFen(List("Qk/Br")) should be(FenCommand(List("Qk/Br"), ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("Qk/Br"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -213,7 +235,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("kQ/rB")
+        ctrl.putWithFen(List("kQ/rB")) should be(FenCommand(List("kQ/rB"), ctrl))
+        ctrl.executeAndNotify(ctrl.putWithFen, List("kQ/rB"))
         ctrl.field should be(
           ChessField(
             Matrix(
