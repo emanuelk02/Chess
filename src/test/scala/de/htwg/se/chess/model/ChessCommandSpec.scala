@@ -58,9 +58,9 @@ class ChessCommandSpec extends AnyWordSpec {
             put2.undo should be(cf)
             put2.redo should be(cf.replace('B', 1, Some(W_KING)))
         }
-        "Throw the same error as ChessField on wrong input" in {
-            an [IndexOutOfBoundsException] should be thrownBy PutCommand(List("C1", "W_QUEEN"), ctrl)
-            an [IndexOutOfBoundsException] should be thrownBy PutCommand(List("A3", "W_QUEEN"), ctrl)
+        "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
+            PutCommand(List("C1", "W_QUEEN"), ctrl)
+            PutCommand(List("A3", "W_QUEEN"), ctrl)
         }
     }
     "A MoveCommand" should {
@@ -72,9 +72,9 @@ class ChessCommandSpec extends AnyWordSpec {
             move.undo should be(cf)
             ctrl.field = cf
         }
-        "Throw the same errors as ChessField on wrong input" in {
-            an [IndexOutOfBoundsException] should be thrownBy PutCommand(List("C1", "W_QUEEN"), ctrl)
-            an [IndexOutOfBoundsException] should be thrownBy PutCommand(List("A3", "W_QUEEN"), ctrl)
+        "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
+            MoveCommand(List("A1", "H3"), ctrl)
+            MoveCommand(List("H3", "A1"), ctrl)
         }
     }
     "A ClearCommand" should {
