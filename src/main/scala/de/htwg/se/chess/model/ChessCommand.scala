@@ -21,7 +21,7 @@ case class MoveCommand(args: List[String], controller: Controller) extends Chess
     override def execute: ChessField = controller.field.move(args(0), args(1))
     override def undo: ChessField    = {
         controller.field = controller.field.move(args(1), args(0))
-        controller.field.replace(args(0), prevPiece)
+        controller.field.replace(args(1), prevPiece)
     }
     override def redo: ChessField    = execute
 }
