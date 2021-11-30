@@ -4,8 +4,6 @@ package controller
 import util.ChessCommand
 import model.ChessState
 import model.ChessField
-import controller.ChessCommand
-import controller.ErrorCommand
 
 class CommandInvoker() {
     private var undoStack: List[ChessCommand]= Nil

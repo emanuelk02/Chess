@@ -1,8 +1,7 @@
 package de.htwg.se.chess
-package model
+package controller
 
 import util.ChessCommand
-import controller._
 
 case class ChessState(playing: Boolean, color: PieceColor, whiteCastle: (Boolean, Boolean), blackCastle: (Boolean, Boolean), halfMoves: Int, fullMoves: Int):
     def this() = this(false, PieceColor.White, (true, true), (true, true), 0, 0)
