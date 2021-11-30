@@ -4,8 +4,7 @@ package model
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import controller.Controller
-import util.ChessCommand
+import controller._
 import model.Piece._
 
 class ChessCommandSpec extends AnyWordSpec {
@@ -27,6 +26,36 @@ class ChessCommandSpec extends AnyWordSpec {
         "Implement a functionality for redoing this command the same way it was first executed" in {
             cm.redo should be(cm.execute)
             cm.redo should be(cf.fill(None))
+        }
+        "be created using the factory methods" in {
+            val ctrl = new Controller(cf)
+            ChessCommand("A1", "W_QUEEN", ctrl) should be(PutCommand(List("A1", "W_QUEEN"), ctrl))
+            ChessCommand("Z1", "k", ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+            ChessCommand("A3", "k", ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand("A1", "W", ctrl) should be(ErrorCommand("Invalid format", ctrl))
+
+            ChessCommand("A1", "A2", ctrl) should be(MoveCommand(List("A1", "A2"), ctrl))
+            ChessCommand("A3", "A2", ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand("A1", "C2", ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+
+            ChessCommand("KQ/kq", ctrl) should be(FenCommand(List("KQ/kq"), ctrl))
+            ChessCommand("3/kq", ctrl) should be(ErrorCommand("Invalid string: \"3\" at index 0\n", ctrl))
+
+            ChessCommand(ctrl) should be(ClearCommand(ctrl))
+
+            ChessCommand(List("A1", "W_QUEEN"), ctrl) should be(PutCommand(List("A1", "W_QUEEN"), ctrl))
+            ChessCommand(List("Z1", "k"), ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+            ChessCommand(List("A3", "k"), ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand(List("A1", "W"), ctrl) should be(ErrorCommand("Invalid format", ctrl))
+
+            ChessCommand(List("A1", "A2"), ctrl) should be(MoveCommand(List("A1", "A2"), ctrl))
+            ChessCommand(List("A3", "A2"), ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand(List("A1", "C2"), ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+
+            ChessCommand(List("KQ/kq"), ctrl) should be(FenCommand(List("KQ/kq"), ctrl))
+            ChessCommand(List("3/kq"), ctrl) should be(ErrorCommand("Invalid string: \"3\" at index 0\n", ctrl))
+
+            ChessCommand(List("A", "B", "C"), ctrl) should be(ErrorCommand("Invalid number of inputs", ctrl))
         }
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))

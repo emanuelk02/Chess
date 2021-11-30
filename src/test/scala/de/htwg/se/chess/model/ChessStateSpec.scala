@@ -4,7 +4,7 @@ package model
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import controller.Controller
+import controller._
 
 class ChessStateSpec extends AnyWordSpec {
     "A ChessState" when {

@@ -1,7 +1,11 @@
 package de.htwg.se.chess
-package util
+package controller
 
-import model._
+import util.ChessCommand
+import model.ChessState
+import model.ChessField
+import controller.ChessCommand
+import controller.ErrorCommand
 
 class CommandInvoker() {
     private var undoStack: List[ChessCommand]= Nil
@@ -23,24 +27,24 @@ class CommandInvoker() {
         command.execute
     }
 
-    def undoStep: ChessField  = {
+    def undoStep: Option[ChessField]  = {
         undoStack match {
-          case  Nil => new ChessField
+          case  Nil => None
           case head::stack => {
             undoStack = stack
             redoStack = head::redoStack
-            head.undo
+            Some(head.undo)
           }
         }
     }
 
-    def redoStep: ChessField = {
+    def redoStep: Option[ChessField] = {
         redoStack match {
-            case Nil => new ChessField
+            case Nil => None
             case head::stack => {
                 redoStack = stack
                 undoStack = head::undoStack
-                head.redo
+                Some(head.redo)
             }
         }
     }

@@ -81,6 +81,14 @@ class TUI(controller: Controller) extends Observer {
             controller.executeAndNotify(controller.putWithFen, List(in(1)))
             SUCCESS_VAL
         }
+        case "undo" => {
+          controller.undo
+          SUCCESS_VAL
+        }
+        case "redo" => {
+          controller.redo
+          SUCCESS_VAL
+        }
         case "exit" => EXIT_VAL //----------------------- Exit
         case _ => { //----------------------- Invalid
           print("Unknown Command: " + in(0) + "\n")

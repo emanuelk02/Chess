@@ -1,8 +1,10 @@
 package de.htwg.se.chess
 package controller
 
-import util._
-import model._
+import util.Observable
+import util.CommandInvoker
+import util.ChessCommand
+import model.ChessField
 import scala.io.StdIn.readLine
 
 case class Controller(var field: ChessField) extends Observable {
@@ -19,15 +21,23 @@ case class Controller(var field: ChessField) extends Observable {
     notifyObservers
   }
 
-  def move(args: List[String]): ChessCommand = commandHandler.handle(MoveCommand(args, this))
+  def move(args: List[String]): ChessCommand = newCommand(args)
+  def put(args: List[String]): ChessCommand = newCommand(args)
+  def clear(): ChessCommand = newCommand(Nil)
+  def putWithFen(args: List[String]): ChessCommand = newCommand(args)
 
-  def put(args: List[String]): ChessCommand = commandHandler.handle(PutCommand(args, this))
+  def undo: Unit = {
+    field = commandHandler.undoStep.getOrElse(field)
+    notifyObservers
+  }
 
-  def clear(): ChessCommand = commandHandler.handle(ClearCommand(this))
-
-  def putWithFen(args: List[String]): ChessCommand = commandHandler.handle(FenCommand(args, this))
+  def redo: Unit = {
+    field = commandHandler.redoStep.getOrElse(field)
+    notifyObservers
+  }
 
   def fieldToString: String = {
     field.toString
   }
+  private def newCommand(args: List[String]): ChessCommand = commandHandler.handle(ChessCommand(args, this))
 }

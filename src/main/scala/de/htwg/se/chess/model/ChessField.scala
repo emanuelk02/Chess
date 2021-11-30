@@ -2,9 +2,9 @@ package de.htwg.se.chess
 package model
 
 import ChessBoard.board
+import util.ChessCommand
 
 case class ChessField(field: Matrix[Option[Piece]]):
-
 
   def this() = this(new Matrix(8, None))
   def cell(file: Char, rank: Int): Option[Piece] = {

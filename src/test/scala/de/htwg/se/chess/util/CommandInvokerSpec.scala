@@ -5,6 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import controller.Controller
+import controller._
 import model._
 import model.Piece._
 
