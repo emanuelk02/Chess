@@ -1,8 +1,12 @@
+import de.htwg.se.chess._
+import model.Piece
+import model.Piece._
+import model.ChessField
+import util.Matrix
+
 val fen = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
 
 val arr = fen.split("/").map(s => s.toCharArray.toList)
-
-import util.Matrix
 
 arr(0) match {
     case s::rest => if s.isDigit then List.fill(s.toInt - '0'.toInt)(None):::rest else Piece.fromChar(s)
@@ -66,8 +70,6 @@ import controller.MoveCommand
 val matr2 = new Matrix[Option[Piece]](2, Some(W_BISHOP))
 val cf = ChessField(matr2).replace("A1", "B_KING").replace("B2", "B_KING")
 val ctrl = Controller(cf)
-val move = MoveCommand("A1", "A2", ctrl)
-
-move.prevPiece
+val move = MoveCommand(List("A1", "A2"), ctrl)
 
 
