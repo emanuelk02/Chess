@@ -8,7 +8,7 @@ import model._
 import model.Piece._
 import util.Matrix
 
-class CommandInvokerSpec extends AnyWordSpec {
+class ChessCommandInvokerSpec extends AnyWordSpec {
     "A ChessCommandInvoker" when {
         "you're not playing" should {
             val inv = new ChessCommandInvoker
@@ -28,24 +28,24 @@ class CommandInvokerSpec extends AnyWordSpec {
             }
             "allow to execute and remember all these commands over the controller but not change on error" in {
                 inv.doStep(put) should be(put.execute)
-                inv.undoStep should be(put.undo)
-                inv.redoStep should be(put.redo)
+                inv.undoStep.get should be(put.undo)
+                inv.redoStep.get should be(put.redo)
 
                 inv.doStep(move) should be(move.execute)
-                inv.undoStep should be(move.undo)
-                inv.redoStep should be(move.redo)
+                inv.undoStep.get should be(move.undo)
+                inv.redoStep.get should be(move.redo)
 
                 inv.doStep(clear) should be(clear.execute)
-                inv.undoStep should be(clear.undo)
-                inv.redoStep should be(clear.redo)
+                inv.undoStep.get should be(clear.undo)
+                inv.redoStep.get should be(clear.redo)
 
                 inv.doStep(fen) should be(fen.execute)
-                inv.undoStep should be(fen.undo)
-                inv.redoStep should be(fen.redo)
+                inv.undoStep.get should be(fen.undo)
+                inv.redoStep.get should be(fen.redo)
 
                 inv.doStep(err) should be(ctrl.field)
-                inv.undoStep should be(fen.undo)
-                inv.redoStep should be(fen.redo)
+                inv.undoStep.get should be(fen.undo)
+                inv.redoStep.get should be(fen.redo)
             }
         }
         "the game is active" should {   // Not implemented yet; needs adding in the ChessState first
