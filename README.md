@@ -14,13 +14,18 @@
 | [Textual User Interface](src/main/scala/de/htwg/se/chess/aview) | [Input](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
 | | [Output](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala) |
 | | | |
-| [Control Structure](src/main/scala/de/htwg/se/chess/controller) | [Commands](#using-the-tui) | [Controller.scala](src/main/scala/de/htwg/se/chess/controller/Controller.scala) | [ControllerSpec.scala](src/test/scala/de/htwg/se/chess/ControllerSpec.scala) |
-| | | [ChessCommand.scala](src/main/scala/de/htwg/se/chess/controller/ChessCommand.scala) | [ChessCommandSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessCommandSpec.scala) |
+| [Control Structure](src/main/scala/de/htwg/se/chess/controller) | [Controller](#using-the-tui) | [Controller.scala](src/main/scala/de/htwg/se/chess/controller/Controller.scala) | [ControllerSpec.scala](src/test/scala/de/htwg/se/chess/ControllerSpec.scala) |
+| | [Commands](#using-the-tui) | [ChessCommand.scala](src/main/scala/de/htwg/se/chess/controller/ChessCommand.scala) | [ChessCommandSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessCommandSpec.scala) |
 | | Undo-Redo | [ChessCommandInvoker.scala](src/main/scala/de/htwg/se/chess/controller/ChessCommandInvoker.scala) | [ChessCommandInvokerSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessCommandInvokerSpec.scala) |
 | | [Game-State](#board-representation) | [ChessState.scala](src/main/scala/de/htwg/se/chess/controller/ChessState.scala) | [ChessStateSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessStateSpec.scala) |
 | | | |
 | [Model Structure](src/main/scala/de/htwg/se/chess/model) | [Chess Pieces](#inputs-for-pieces) | [Pieces.scala](src/main/scala/de/htwg/se/chess/model/Pieces.scala) | [PiecesSpec.scala](src/test/scala/de/htwg/se/chess/model/PiecesSpec.scala) |
 | | [Chess Field](#board-representation) | [ChessField.scala](src/main/scala/de/htwg/se/chess/model/ChessField.scala) | [ChessFieldSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessFieldSpec.scala) |
+| | | |
+| [Util Interfaces](src/main/scala/de/htwg/se/chess/util) | [Matrices](#board-representation) | [Matrix.scala](src/main/scala/de/htwg/se/chess/util/Matrix.scala) |[MatrixSpec.scala](src/test/scala/de/htwg/se/chess/util/MatrixSpec.scala) |
+| | Oberserver Pattern | [Observer.scala](src/main/scala/de/htwg/se/chess/util/Observer.scala) | [ObserverSpec.scala](src/test/scala/de/htwg/se/chess/util/ObersverSpec.scala) |
+| | Command Pattern | [Command.scala](src/main/scala/de/htwg/se/chess/util/Command.scala) | [CommandSpec.scala](src/test/scala/de/htwg/se/chess/util/CommandSpec.scala) |
+| | Invoker for Command | [CommandInvoker.scala](src/main/scala/de/htwg/se/chess/util/CommandInvoker.scala) | [CommandInvokerSpec.scala](src/main/scala/de/htwg/se/chess/util/CommandInvokerSpec.scala)
 
 ---
 
