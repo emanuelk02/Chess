@@ -23,7 +23,7 @@
 | | [Chess Field](#board-representation) | [ChessField.scala](src/main/scala/de/htwg/se/chess/model/ChessField.scala) | [ChessFieldSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessFieldSpec.scala) |
 | | | |
 | [Util Interfaces](src/main/scala/de/htwg/se/chess/util) | [Matrices](#board-representation) | [Matrix.scala](src/main/scala/de/htwg/se/chess/util/Matrix.scala) |[MatrixSpec.scala](src/test/scala/de/htwg/se/chess/util/MatrixSpec.scala) |
-| | Oberserver Pattern | [Observer.scala](src/main/scala/de/htwg/se/chess/util/Observer.scala) | [ObserverSpec.scala](src/test/scala/de/htwg/se/chess/util/ObersverSpec.scala) |
+| | Oberserver Pattern | [Observer.scala](src/main/scala/de/htwg/se/chess/util/Observer.scala) | [ObserverSpec.scala](src/test/scala/de/htwg/se/chess/util/ObserverSpec.scala) |
 | | Command Pattern | [Command.scala](src/main/scala/de/htwg/se/chess/util/Command.scala) | [CommandSpec.scala](src/test/scala/de/htwg/se/chess/util/CommandSpec.scala) |
 | | Invoker for Command | [CommandInvoker.scala](src/main/scala/de/htwg/se/chess/util/CommandInvoker.scala) | [CommandInvokerSpec.scala](src/test/scala/de/htwg/se/chess/util/CommandInvokerSpec.scala)
 
