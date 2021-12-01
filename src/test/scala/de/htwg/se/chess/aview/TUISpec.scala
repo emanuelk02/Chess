@@ -5,9 +5,9 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import model.Piece
 import model.Piece._
-import model.Matrix
 import model.ChessField
 import controller.Controller
+import util.Matrix
 
 class TUISpec extends AnyWordSpec {
   "A TUI" when {

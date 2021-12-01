@@ -3,6 +3,7 @@ package model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+import util.Matrix
 import model.Piece._
 
 class ChessFieldSpec extends AnyWordSpec {

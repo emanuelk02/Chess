@@ -1,10 +1,11 @@
 package de.htwg.se.chess
-package model
+package util
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
-import Matrix._
-import Piece._
+import util.Matrix
+import model.Piece
+import model.Piece._
 
 class MatrixSpec extends AnyWordSpec {
     "A Matrix" when {

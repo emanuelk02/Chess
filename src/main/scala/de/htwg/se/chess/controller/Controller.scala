@@ -2,15 +2,13 @@ package de.htwg.se.chess
 package controller
 
 import util.Observable
-import util.CommandInvoker
-import util.ChessCommand
 import model.ChessField
 import scala.io.StdIn.readLine
 
 case class Controller(var field: ChessField) extends Observable {
   def this() = this(new ChessField())
 
-  val commandHandler = new CommandInvoker
+  val commandHandler = new ChessCommandInvoker
 
   def executeAndNotify(command: List[String] => ChessCommand, args: List[String]): Unit = {
     field = commandHandler.doStep(command(args))

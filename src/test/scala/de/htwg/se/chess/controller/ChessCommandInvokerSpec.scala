@@ -6,11 +6,12 @@ import org.scalatest.matchers.should.Matchers._
 
 import model._
 import model.Piece._
+import util.Matrix
 
 class CommandInvokerSpec extends AnyWordSpec {
-    "A CommandInvoker" when {
+    "A ChessCommandInvoker" when {
         "you're not playing" should {
-            val inv = new CommandInvoker
+            val inv = new ChessCommandInvoker
             val ctrl = new Controller(new ChessField)
 
             val put = PutCommand(List("A1", "k"), ctrl)

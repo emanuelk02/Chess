@@ -2,10 +2,7 @@ val fen = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
 
 val arr = fen.split("/").map(s => s.toCharArray.toList)
 
-import de.htwg.se.chess._
-import model.Piece
-import Piece._
-import model.Matrix
+import util.Matrix
 
 arr(0) match {
     case s::rest => if s.isDigit then List.fill(s.toInt - '0'.toInt)(None):::rest else Piece.fromChar(s)
@@ -13,8 +10,6 @@ arr(0) match {
 }
 
 val field: Matrix[Option[Piece]] = new Matrix(8, None)
-
-import model.ChessField
 
 def loadFromFen(fen: String): ChessField = {
         val fenList = fenToList(fen.toCharArray.toList, 8).toVector
@@ -66,7 +61,7 @@ val res = for ( s <- splitted) yield {
 }
 
 import controller.Controller
-import model.MoveCommand
+import controller.MoveCommand
 
 val matr2 = new Matrix[Option[Piece]](2, Some(W_BISHOP))
 val cf = ChessField(matr2).replace("A1", "B_KING").replace("B2", "B_KING")

@@ -5,6 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import controller._
+import model.PieceColor
 
 class ChessStateSpec extends AnyWordSpec {
     "A ChessState" when {

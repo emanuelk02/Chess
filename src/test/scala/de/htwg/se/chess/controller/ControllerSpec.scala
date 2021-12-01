@@ -3,14 +3,11 @@ package controller
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+import util.Matrix
 import model.Piece
-import model.Matrix
 import model.ChessField
 import model.Piece._
-import de.htwg.se.chess.model.ClearCommand
-import de.htwg.se.chess.model.PutCommand
-import de.htwg.se.chess.model.MoveCommand
-import de.htwg.se.chess.model.FenCommand
+import util.Matrix
 
 class ControllerSpec extends AnyWordSpec {
   "A Controller" when {

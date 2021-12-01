@@ -1,8 +1,8 @@
 package de.htwg.se.chess
 package model
 
+import util.Matrix
 import ChessBoard.board
-import util.ChessCommand
 
 case class ChessField(field: Matrix[Option[Piece]]):
 

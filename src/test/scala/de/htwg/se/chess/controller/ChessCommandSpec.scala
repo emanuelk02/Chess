@@ -4,11 +4,14 @@ package controller
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
+import util.Matrix
+import model.Piece
 import model.Piece._
+import model.ChessField
 
 class ChessCommandSpec extends AnyWordSpec {
     "A concrete ChessCommand" should {
-        case class TestCommand(field: ChessField, controller : Controller) extends ChessCommand(controller) {
+        case class TestCommand(field: ChessField, controller : Controller) extends ChessCommand {
             override def execute: ChessField = field.fill(None)
             override def undo: ChessField = field
             override def redo: ChessField = execute

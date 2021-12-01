@@ -1,7 +1,8 @@
 package de.htwg.se.chess
 package model
 
-import Matrix._
+import util.Matrix
+import util.Matrix._
 
 object ChessBoard {
     val eol = sys.props("line.separator")

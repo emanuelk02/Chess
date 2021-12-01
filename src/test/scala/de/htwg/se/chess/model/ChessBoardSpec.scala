@@ -5,6 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import ChessBoard._
 import Piece._
+import util.Matrix
 
 class ChessBoardSpec extends AnyWordSpec {
     "line(color: String, width: Int)" should {
