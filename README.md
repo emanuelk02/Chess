@@ -7,44 +7,76 @@
 
 ---
 
-## Table of Contents
+# Table of Contents
 
-| **Feature** | **Content** | **Code** | **Tests** |
+| **Content** | **Feature** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
-| [Textual User Interface](#using-the-tui) | [Usage](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
-| | [Format](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala) |
+| [Textual User Interface](src/main/scala/de/htwg/se/chess/aview) | [Input](#see-also-command-help-for-more-information) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
+| | [Output](#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessBoardSpec.scala) |
+| | | |
+| [Control Structure](src/main/scala/de/htwg/se/chess/controller) | [Commands](#using-the-tui) | [Controller.scala](src/main/scala/de/htwg/se/chess/controller/Controller.scala) | [ControllerSpec.scala](src/test/scala/de/htwg/se/chess/ControllerSpec.scala) |
+| | | [ChessCommand.scala](src/main/scala/de/htwg/se/chess/controller/ChessCommand.scala) | [ChessCommandSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessCommandSpec.scala) |
+| | Undo-Redo | [ChessCommandInvoker.scala](src/main/scala/de/htwg/se/chess/controller/ChessCommandInvoker.scala) | [ChessCommandInvokerSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessCommandInvokerSpec.scala) |
+| | [Game-State](#board-representation) | [ChessState.scala](src/main/scala/de/htwg/se/chess/controller/ChessState.scala) | [ChessStateSpec.scala](src/test/scala/de/htwg/se/chess/controller/ChessStateSpec.scala) |
+| | | |
+| [Model Structure](src/main/scala/de/htwg/se/chess/model) | [Chess Pieces](#inputs-for-pieces) | [Pieces.scala](src/main/scala/de/htwg/se/chess/model/Pieces.scala) | [PiecesSpec.scala](src/test/scala/de/htwg/se/chess/model/PiecesSpec.scala) |
+| | [Chess Field](#board-representation) | [ChessField.scala](src/main/scala/de/htwg/se/chess/model/ChessField.scala) | [ChessFieldSpec.scala](src/test/scala/de/htwg/se/chess/model/ChessFieldSpec.scala) |
 
 ---
 
-## Using the **TUI**
+# Using the **TUI**
 
 The text interface allows for following commands and inputs:
 
-| Syntax | Description |
-| :---------- | :---------: |
-| **insert** | Inserts a piece into the matrix |
-| **move** | Moves an already inserted piece to another location |
-| **clear** | Clears all pieces from board |
-| **fen** | Loads a Chess position from a given FEN-String |    
+| Syntax | Description | Alias |
+| :---------- | :---------: | -----: |
+| **insert** | Inserts a piece into the matrix | `put` / `i` |
+| **move** | Moves an already inserted piece to another location | `m` |
+| **clear** | Clears all pieces from board | `cl` |
+| **fen** | Loads a Chess position from a given FEN-String | `loadFen` |
+| **start** | Starts the game, so that you can play | |
+| **undo** | Reverts the last changes you've done | `z` |
+| **redo** | Redoes the last changes you've undone | `y` |
+| **exit** | Quits the program | |
+
+- All inputs are _case insensitive_
 
 ---
 
-### Valid input
+## Valid input
 
 #### Inserting Pieces
 
- 1. destination tile:
- consists of its file described by a char ('A' to 'H')
- and its rank described by an integer (1 to 8)
+ 1. destination [tile](#inputs-for-tiles): 
+    consists of its file described by a char ('A' to 'H')
+    and its rank described by an integer (1 to 8)
  2. desired piece:
- string describing a valid [piece](#inputs-for-pieces)
+    string describing a valid [piece](#inputs-for-pieces)
 
 #### Moving Pieces
 
- 1. source
+ 1. source [tile](#inputs-for-tiles)
+ 2. destination [tile](#inputs-for-tiles)
+
+ - Grabs the piece at the _source_ and moves it to the _destination_
+ - If the game has been started, the move will be validated and only executed if valid
+
+#### Clearing the Board
+
+ - If you wish to reset the entire board to an empty state you can do so by using the `clear` command
+ - **Note** that, in order to get a correctly initialized starting position you need to use `start` **!!!(Not implemented yet)!!!**
+
+#### Loading a Board with a FEN String
+
+ - The **Forsyth-Edwards-Notation** allows to code every needed information of a chess position into a single-line string
+ - The Program follows the official FEN notation as described in the **[Chess Programming Wiki](https://www.chessprogramming.org/Forsyth-Edwards_Notation)**
+ - Additionally: _trailing empty tiles_ in a rank may be omitted:
+ - Valid FEN String for the starting position:  `rnbqkbnr/pppppppp/////PPPPPPPP/RNBQKBNR`
+ - See also: our **[Board Representation](#board-representation)**
+
 ---
 
-### Inputs for Pieces
+## Inputs for Pieces
 
 | **Piece** | **String** | **Alt.** |
 | :-------  | :--------  | :------  |
@@ -61,9 +93,21 @@ The text interface allows for following commands and inputs:
 | White Knight | W_KNIGHT | N |
 | White Pawn | W_PAWN | P |
 
+## Inputs for tiles
+
+- Tiles consist of:
+ 1. a _character_ describing their **file**.
+ These range from 'A' to 'H'; Input is _case insensitive_
+ 2. an _integer_ describing their **rank**.
+ These range from '1' to '8'
+
+- Tiles are numbered from the view of the **white** player.
+- Starting with **'A1'** on the bottem left corner and 
+ending with **'H8'** in the top right corner
+
 ---
 
-### See also command *help* for more information:
+## See also command *help* for more information:
 
 ```
     Usage: <command> [options]
@@ -90,13 +134,19 @@ The text interface allows for following commands and inputs:
 
     fen / FEN / Fen / loadFEN <fen-string>
                         initializes a chess position from given FEN-String
+                        
+    start               starts the game, prohibiting anything but the move command
+                        
+    z / undo            reverts the last changes you've done
+    
+    y / redo            redoes the last changes you've undone
 
     exit                quits the program
 ```
 
 ---
 
-### Board Representation
+## Board Representation
 
 Game runs on console by printing an 8x8 matrix of boxes with letters - representing Chess pieces - inside them:
 
