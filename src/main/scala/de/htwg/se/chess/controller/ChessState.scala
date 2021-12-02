@@ -11,28 +11,17 @@ case class ChessState(playing: Boolean, color: PieceColor, whiteCastle: (Boolean
     def handlePlaying(command: ChessCommand): (ChessCommand, ChessState) = {
         command match {
             case put: PutCommand => (ErrorCommand("This command is unavailable during the game", put.controller), this)
-            case move: MoveCommand => {
-                move.controller.field.checkMove(move.args(0), move.args(1)) match {
-                    case "" => (move, evaluateMove)
-                    case s: String => (ErrorCommand(s, move.controller), this)
-                }
-            }
+            case move: MoveCommand => evaluateMove(move)
             case clear: ClearCommand => (ErrorCommand("You cannot clear the board while the game is active", clear.controller), this)
-            case fen: FenCommand => (ErrorCommand("You cannot load a new board while the game is active", fen.controller), evaluateFen)
+            case fen: FenCommand => (ErrorCommand("You cannot load a new board while the game is active", fen.controller), this)
             case err: ErrorCommand => (err, this)
         }
     }
 
-    def handleIdle(command: ChessCommand): (ChessCommand, ChessState) = {
-        (command match {
-            case put: PutCommand => put
-            case move: MoveCommand => move
-            case clear: ClearCommand => clear
-            case fen: FenCommand => fen
-            case err: ErrorCommand => err
-        }, this)
-    }
+    def handleIdle(command: ChessCommand): (ChessCommand, ChessState) = (command, this)
     
-    def evaluateMove: ChessState = {this}  // not implemented yet
+    def evaluateMove(move: MoveCommand): (ChessCommand, ChessState) = {
+        (CheckedMoveCommand(move), this)
+    } // not implemented yet
     
     def evaluateFen: ChessState = {this}   // not implemented yet
