@@ -264,6 +264,15 @@ class ControllerSpec extends AnyWordSpec {
       "use its CommandInvoker to undo and redo commands" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
+        import util.TestObserver
+        val to = new TestObserver(ctrl)
+        ctrl.add(to)
+        ctrl.undo
+        ctrl.field should be(ctrl.field.fill(Some(W_BISHOP)))
+        to.num should be(1)
+        ctrl.redo
+        ctrl.field should be(ctrl.field.replace("A1", "k"))
+        to.num should be(2)
       }
       "have a string representation like specified in ChessBoard" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))

@@ -4,15 +4,15 @@ package util
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-class ObserverSpec extends AnyWordSpec {
-  class TestObservable extends Observable {}
-  class TestObserver(observable: TestObservable) extends Observer {
+class TestObservable extends Observable {}
+class TestObserver(observable: Observable) extends Observer {
     val observed = observable
     var num = 0
     override def update: Unit = { num = num + 1 }
     override def updateOnError(message: String): Unit = { num = num - 1 }
-  }
+}
 
+class ObserverSpec extends AnyWordSpec {
   "An Observer" should {
     "be able to observe Observables and be notified of changes withing his observed object" in {
       val observable = new TestObservable()
