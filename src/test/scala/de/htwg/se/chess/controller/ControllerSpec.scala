@@ -124,7 +124,7 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to move contents of one tile into another and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.field = ctrl.field.replace("A1", Some(B_KING))
+        ctrl.field = ctrl.field.replace("A1", "B_KING")
         ctrl.move(List("A1", "A2")) should be (MoveCommand(List("A1", "A2"), ctrl))
         ctrl.executeAndNotify(ctrl.move, List("A1","A2"))
         ctrl.field should be(
@@ -244,6 +244,10 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
+      }
+      "use its CommandInvoker to undo and redo commands" in {
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
       }
       "have a string representation like specified in ChessBoard" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))

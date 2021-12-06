@@ -11,7 +11,7 @@ trait ChessCommand(controller: Controller) extends Command[ChessField] {
 }
 
 case class PutCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
-    override def execute: ChessField = controller.field.replace(args(0)(0), args(0)(1).toInt - '0'.toInt, Piece.fromString(args(1)))
+    override def execute: ChessField = controller.field.replace(args(0), args(1))
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute 
 }
