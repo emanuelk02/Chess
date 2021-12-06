@@ -5,9 +5,9 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import model.Piece
 import model.Piece._
-import model.Matrix
 import model.ChessField
 import controller.Controller
+import util.Matrix
 
 class TUISpec extends AnyWordSpec {
   "A TUI" when {
@@ -23,8 +23,8 @@ class TUISpec extends AnyWordSpec {
         ctrl.field.field.size should be(1)
         ctrl.field.field.cell(0, 0).get should be(W_PAWN)
         ctrl.field.field.cell(0, 1).get should be(B_KING)
-        ctrl.field.cell('A', 1).get should be(W_PAWN)
-        ctrl.field.cell('B', 1).get should be(B_KING)
+        ctrl.field.cell("A1").get should be(W_PAWN)
+        ctrl.field.cell("B1").get should be(B_KING)
       }
     }
     /*"ran" should {
@@ -78,8 +78,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -89,8 +89,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(B_KING))
+                Vector(Some(W_BISHOP), Some(B_KING)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -101,8 +101,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -112,8 +112,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(B_KING))
+                Vector(Some(W_BISHOP), Some(B_KING)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -139,8 +139,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(W_KING), None),
-                Vector(None, None)
+                Vector(None, None),
+                Vector(Some(W_KING), None)
               )
             )
           )
@@ -166,8 +166,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(None, Some(W_BISHOP)),
-                Vector(Some(B_KING), Some(W_BISHOP))
+                Vector(Some(B_KING), Some(W_BISHOP)),
+                Vector(None, Some(W_BISHOP))
               )
             )
           )
@@ -176,7 +176,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(W_BISHOP)), Vector(None, Some(B_KING)))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -187,8 +190,8 @@ class TUISpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(None, Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(None, Some(B_KING))
               )
             )
           )
@@ -197,7 +200,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, None), Vector(Some(B_KING), Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), Some(W_BISHOP)),
+                Vector(None, None)
+              )
             )
           )
         )

@@ -1,46 +1,33 @@
 package de.htwg.se.chess
 package util
 
-import model._
+trait CommandInvoker[T] {
+    protected var undoStack: List[Command[T]]= Nil
+    protected var redoStack: List[Command[T]]= Nil
 
-class CommandInvoker() {
-    private var undoStack: List[ChessCommand]= Nil
-    private var redoStack: List[ChessCommand]= Nil
-
-    var gameState: ChessState = new ChessState
-
-    def handle(command: ChessCommand): ChessCommand = {
-        val res: (ChessCommand, ChessState) = gameState.handle(command)
-        gameState = res._2
-        res._1
-    }
-
-    def doStep(command: ChessCommand): ChessField = {
-        command match {
-            case cmd: ErrorCommand =>
-            case _ => { undoStack = command::undoStack }
-        }
+    def doStep(command: Command[T]): T = {
+        undoStack = command::undoStack
         command.execute
     }
 
-    def undoStep: ChessField  = {
+    def undoStep: Option[T]  = {
         undoStack match {
-          case  Nil => new ChessField
+          case  Nil => None
           case head::stack => {
             undoStack = stack
             redoStack = head::redoStack
-            head.undo
+            Some(head.undo)
           }
         }
     }
 
-    def redoStep: ChessField = {
+    def redoStep: Option[T] = {
         redoStack match {
-            case Nil => new ChessField
+            case Nil => None
             case head::stack => {
                 redoStack = stack
                 undoStack = head::undoStack
-                head.redo
+                Some(head.redo)
             }
         }
     }

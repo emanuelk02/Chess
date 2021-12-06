@@ -4,53 +4,25 @@ package util
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import controller.Controller
-import model._
-import model.Piece._
+class TestCommandInvoker extends CommandInvoker[Int]
 
 class CommandInvokerSpec extends AnyWordSpec {
     "A CommandInvoker" when {
-        "you're not playing" should {
-            val inv = new CommandInvoker
-            val ctrl = new Controller(new ChessField)
-
-            val put = PutCommand(List("A1", "k"), ctrl)
-            val move = MoveCommand(List("A1", "A2"), ctrl)
-            val clear = ClearCommand(ctrl)
-            val fen = FenCommand(List("pppppppp/8/8/8/8/8/QQQQ4/8"), ctrl)
-            val err = ErrorCommand("Error", ctrl)
-            "handle any command from Controller" in {
-                inv.handle(put) should be(put)
-                inv.handle(move) should be(move)
-                inv.handle(clear) should be(clear)
-                inv.handle(fen) should be(fen)
-                inv.handle(err) should be(err)
+        val ci = new TestCommandInvoker
+        "parsed Commands" should {
+            "execute these Commands" in {
+                ci.doStep(new TestCommand(5)) should be(15)
+                ci.doStep(new TestCommand(10)) should be(20)
             }
-            "allow to execute and remember all these commands over the controller but not change on error" in {
-                inv.doStep(put) should be(put.execute)
-                inv.undoStep should be(put.undo)
-                inv.redoStep should be(put.redo)
-
-                inv.doStep(move) should be(move.execute)
-                inv.undoStep should be(move.undo)
-                inv.redoStep should be(move.redo)
-
-                inv.doStep(clear) should be(clear.execute)
-                inv.undoStep should be(clear.undo)
-                inv.redoStep should be(clear.redo)
-
-                inv.doStep(fen) should be(fen.execute)
-                inv.undoStep should be(fen.undo)
-                inv.redoStep should be(fen.redo)
-
-                inv.doStep(err) should be(ctrl.field)
-                inv.undoStep should be(fen.undo)
-                inv.redoStep should be(fen.redo)
+            "remember the commands and undo them in correct order returning their given state before execution\n    or return None if nothing can be undone anymore" in {
+                ci.undoStep should be(Some(10))
+                ci.undoStep should be(Some(5))
+                ci.undoStep should be(None)
             }
-        }
-        "the game is active" should {   // Not implemented yet; needs adding in the ChessState first
-            "only accept move commands and a stop command" in {
-                
+            "also allow to redo steps, you've undone" in {
+                ci.redoStep should be(Some(15))
+                ci.redoStep should be(Some(20))
+                ci.redoStep should be(None)
             }
         }
     }

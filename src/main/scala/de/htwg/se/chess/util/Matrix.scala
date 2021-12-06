@@ -1,5 +1,5 @@
 package de.htwg.se.chess
-package model
+package util
 
 case class Matrix[T](rows: Vector[Vector[T]]):
   def this(size: Int, filling: T) = this(Vector.tabulate(size, size) { (rows, col) => filling})

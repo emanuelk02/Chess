@@ -14,7 +14,7 @@ class TUI(controller: Controller) extends Observer {
   print(
     "||== Welcome to Chess ==||\nType 'help' for more information on available commands\n\n"
   )
-  print(controller.fieldToString)
+  update
   print("\n\n")
 
   def this() = this(new Controller())
@@ -81,6 +81,14 @@ class TUI(controller: Controller) extends Observer {
             controller.executeAndNotify(controller.putWithFen, List(in(1)))
             SUCCESS_VAL
         }
+        case "z" | "undo" => {
+          controller.undo
+          SUCCESS_VAL
+        }
+        case "y" | "redo" => {
+          controller.redo
+          SUCCESS_VAL
+        }
         case "exit" => EXIT_VAL //----------------------- Exit
         case _ => { //----------------------- Invalid
           print("Unknown Command: " + in(0) + "\n")
@@ -116,6 +124,12 @@ class TUI(controller: Controller) extends Observer {
 
     fen / FEN / Fen / loadFEN <fen-string>
                         initializes a chess position from given FEN-String
+                            
+    start               starts the game, prohibiting anything but the move command
+                        
+    z / undo            reverts the last changes you've done
+    
+    y / redo            redoes the last changes you've undone
 
     exit                quits the program
     """.stripMargin)

@@ -5,6 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import ChessBoard._
 import Piece._
+import util.Matrix
 
 class ChessBoardSpec extends AnyWordSpec {
     "line(color: String, width: Int)" should {
@@ -165,7 +166,6 @@ class ChessBoardSpec extends AnyWordSpec {
         }
         "receiving an empty matrix" should {
             "produce an empty chess board consisting of as many numbers of ranks as the dimension of given matrix" in {
-                ChessBoard.eol should be(sys.props("line.separator"))
                 board(1, 1, matr) should be(
                     "+-+" + eol +
                     "| |" + eol +

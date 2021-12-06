@@ -1,23 +1,25 @@
 package de.htwg.se.chess
-package model
+package controller
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import controller.Controller
-import util.ChessCommand
+import util.Matrix
+import model.Piece
 import model.Piece._
+import model.ChessField
+
+case class TestChessCommand(field: ChessField, controller : Controller) extends ChessCommand(controller) {
+    override def execute: ChessField = field.fill(None)
+    override def undo: ChessField = field
+    override def redo: ChessField = execute
+}
 
 class ChessCommandSpec extends AnyWordSpec {
     "A concrete ChessCommand" should {
-        case class TestCommand(field: ChessField, controller : Controller) extends ChessCommand(controller) {
-            override def execute: ChessField = field.fill(None)
-            override def undo: ChessField = field
-            override def redo: ChessField = execute
-        }
         val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
         val cf = ChessField(matr)
-        val cm = TestCommand(cf, null)
+        val cm = TestChessCommand(cf, new Controller)
         "Implement a functionality for executing this command over a ChessField" in {
             cm.execute should be(cf.fill(None))
         }
@@ -27,6 +29,36 @@ class ChessCommandSpec extends AnyWordSpec {
         "Implement a functionality for redoing this command the same way it was first executed" in {
             cm.redo should be(cm.execute)
             cm.redo should be(cf.fill(None))
+        }
+        "be created using the factory methods" in {
+            val ctrl = new Controller(cf)
+            ChessCommand("A1", "W_QUEEN", ctrl) should be(PutCommand(List("A1", "W_QUEEN"), ctrl))
+            ChessCommand("Z1", "k", ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+            ChessCommand("A3", "k", ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand("A1", "W", ctrl) should be(ErrorCommand("Invalid format", ctrl))
+
+            ChessCommand("A1", "A2", ctrl) should be(MoveCommand(List("A1", "A2"), ctrl))
+            ChessCommand("A3", "A2", ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand("A1", "C2", ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+
+            ChessCommand("KQ/kq", ctrl) should be(FenCommand(List("KQ/kq"), ctrl))
+            ChessCommand("3/kq", ctrl) should be(ErrorCommand("Invalid string: \"3\" at index 0\n", ctrl))
+
+            ChessCommand(ctrl) should be(ClearCommand(ctrl))
+
+            ChessCommand(List("A1", "W_QUEEN"), ctrl) should be(PutCommand(List("A1", "W_QUEEN"), ctrl))
+            ChessCommand(List("Z1", "k"), ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+            ChessCommand(List("A3", "k"), ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand(List("A1", "W"), ctrl) should be(ErrorCommand("Invalid format", ctrl))
+
+            ChessCommand(List("A1", "A2"), ctrl) should be(MoveCommand(List("A1", "A2"), ctrl))
+            ChessCommand(List("A3", "A2"), ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
+            ChessCommand(List("A1", "C2"), ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
+
+            ChessCommand(List("KQ/kq"), ctrl) should be(FenCommand(List("KQ/kq"), ctrl))
+            ChessCommand(List("3/kq"), ctrl) should be(ErrorCommand("Invalid string: \"3\" at index 0\n", ctrl))
+
+            ChessCommand(List("A", "B", "C"), ctrl) should be(ErrorCommand("Invalid number of inputs", ctrl))
         }
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
@@ -50,13 +82,13 @@ class ChessCommandSpec extends AnyWordSpec {
 
     "A PutCommand" should {
         "Run the put command on its controller's ChessField and return that" in {
-            put.execute should be(cf.replace('A', 1, Some(W_KING)))
+            put.execute should be(cf.replace("A1", "W_KING"))
             put.undo should be(cf)
-            put.redo should be(cf.replace('A', 1, Some(W_KING)))
+            put.redo should be(cf.replace("a1", "W_KING"))
 
-            put2.execute should be(cf.replace('B', 1, Some(W_KING)))
+            put2.execute should be(cf.replace("b1", "W_KING"))
             put2.undo should be(cf)
-            put2.redo should be(cf.replace('B', 1, Some(W_KING)))
+            put2.redo should be(cf.replace("B1", "W_KING"))
         }
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
             PutCommand(List("C1", "W_QUEEN"), ctrl)
@@ -75,6 +107,15 @@ class ChessCommandSpec extends AnyWordSpec {
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
             MoveCommand(List("A1", "H3"), ctrl)
             MoveCommand(List("H3", "A1"), ctrl)
+        }
+        "be encapsulated in a CheckedMoveCommand if the move needs validation" in {
+            val cmc = CheckedMoveCommand(move)
+            cmc.state should be("")
+            cmc.errorCmd should be(ErrorCommand("", move.controller))
+
+            cmc.execute should be(move.execute)
+            cmc.undo should be(move.undo)
+            cmc.redo should be(move.redo)
         }
     }
     "A ClearCommand" should {
