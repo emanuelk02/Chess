@@ -82,13 +82,13 @@ class ChessCommandSpec extends AnyWordSpec {
 
     "A PutCommand" should {
         "Run the put command on its controller's ChessField and return that" in {
-            put.execute should be(cf.replace('A', 1, Some(W_KING)))
+            put.execute should be(cf.replace("A1", "W_KING"))
             put.undo should be(cf)
-            put.redo should be(cf.replace('A', 1, Some(W_KING)))
+            put.redo should be(cf.replace("a1", "W_KING"))
 
-            put2.execute should be(cf.replace('B', 1, Some(W_KING)))
+            put2.execute should be(cf.replace("b1", "W_KING"))
             put2.undo should be(cf)
-            put2.redo should be(cf.replace('B', 1, Some(W_KING)))
+            put2.redo should be(cf.replace("B1", "W_KING"))
         }
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
             PutCommand(List("C1", "W_QUEEN"), ctrl)
