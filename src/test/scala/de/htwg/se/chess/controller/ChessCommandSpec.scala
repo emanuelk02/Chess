@@ -9,16 +9,17 @@ import model.Piece
 import model.Piece._
 import model.ChessField
 
+case class TestChessCommand(field: ChessField, controller : Controller) extends ChessCommand(controller) {
+    override def execute: ChessField = field.fill(None)
+    override def undo: ChessField = field
+    override def redo: ChessField = execute
+}
+
 class ChessCommandSpec extends AnyWordSpec {
     "A concrete ChessCommand" should {
-        case class TestCommand(field: ChessField, controller : Controller) extends ChessCommand {
-            override def execute: ChessField = field.fill(None)
-            override def undo: ChessField = field
-            override def redo: ChessField = execute
-        }
         val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
         val cf = ChessField(matr)
-        val cm = TestCommand(cf, null)
+        val cm = TestChessCommand(cf, new Controller)
         "Implement a functionality for executing this command over a ChessField" in {
             cm.execute should be(cf.fill(None))
         }
@@ -106,6 +107,15 @@ class ChessCommandSpec extends AnyWordSpec {
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
             MoveCommand(List("A1", "H3"), ctrl)
             MoveCommand(List("H3", "A1"), ctrl)
+        }
+        "be encapsulated in a CheckedMoveCommand if the move needs validation" in {
+            val cmc = CheckedMoveCommand(move)
+            cmc.state should be("")
+            cmc.errorCmd should be(ErrorCommand("", move.controller))
+
+            cmc.execute should be(move.execute)
+            cmc.undo should be(move.undo)
+            cmc.redo should be(move.redo)
         }
     }
     "A ClearCommand" should {
