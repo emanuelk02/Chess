@@ -176,8 +176,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), 
-              Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -198,8 +200,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Some(B_KING), Some(W_BISHOP))),
-              Vector(Vector(None, None)
+              Vector(
+                Vector(Some(B_KING), Some(W_BISHOP)),
+                Vector(None, None)
+              )
             )
           )
         )
