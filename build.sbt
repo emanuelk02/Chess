@@ -4,14 +4,14 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "Chess",
-    version := "0.1.0-SNAPSHOT",
+    version := "0.9.0",
 
     scalaVersion := scala3Version,
 
     libraryDependencies ++= Seq("com.novocode" % "junit-interface" % "0.11" % "test",
       "org.scalactic" %% "scalactic" % "3.2.10",
       "org.scalatest" %% "scalatest" % "3.2.10" % "test",
-      "org.scala-lang.modules" % "scala-swing_2.12" % "2.0.3"),
+      "org.scala-lang.modules" %% "scala-swing" % "3.0.0"),
     
     jacocoCoverallsServiceName := "github-actions",
     jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),

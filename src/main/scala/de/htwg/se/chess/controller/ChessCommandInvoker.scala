@@ -4,9 +4,10 @@ package controller
 import util.CommandInvoker
 import util.Command
 import model.ChessField
+import scala.swing.event.Event
 
 class ChessCommandInvoker extends CommandInvoker[ChessField] {
-    private var gameState: ChessState = new ChessState
+    var gameState: ChessState = new ChessState
 
     def handle(command: ChessCommand): ChessCommand = {
         val res: (ChessCommand, ChessState) = gameState.handle(command)
@@ -21,4 +22,6 @@ class ChessCommandInvoker extends CommandInvoker[ChessField] {
         }
         command.execute
     }
+
+    def selected: String = ('A' + gameState.selected.getOrElse(0,0)._2).toChar.toString + (gameState.selected.getOrElse(0,0)._1 + 1).toString
 }

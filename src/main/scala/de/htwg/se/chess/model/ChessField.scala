@@ -5,6 +5,7 @@ import util.Matrix
 import ChessBoard.board
 
 case class ChessField(field: Matrix[Option[Piece]]):
+  val size = field.size
 
   def this() = this(new Matrix(8, None))
   def cell(file: Int, rank: Int): Option[Piece] = field.cell(rank, file)
@@ -68,7 +69,7 @@ case class ChessField(field: Matrix[Option[Piece]]):
 
   def rankCharToInt(c: Char): Int = field.size - (c.toInt - '0'.toInt)
   def fileCharToInt(c: Char): Int = c.toLower.toInt - 'a'.toInt
-
+  
   def checkFile(check: Char): String = {
     if (
       check.toLower.toInt - 'a'.toInt < 0 || check.toLower.toInt - 'a'.toInt > field.size - 1

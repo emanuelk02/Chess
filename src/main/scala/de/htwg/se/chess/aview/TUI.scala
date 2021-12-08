@@ -1,16 +1,24 @@
 package de.htwg.se.chess
 package aview
 
-import controller.Controller
+import controller._
 import scala.io.StdIn.readLine
 import util.Observer
 import scala.annotation.tailrec
+import scala.swing.Reactor
 
-class TUI(controller: Controller) extends Observer {
+class TUI(controller: Controller) extends Reactor {
   val EXIT_VAL = 0
   val ERR_VAL = -1
   val SUCCESS_VAL = 1
-  controller.add(this)
+  listenTo(controller)
+
+  reactions += {
+    case e: CommandExecuted => update
+    case e: ErrorEvent => updateOnError(e.msg)
+    case e: Select => print((('A' + e.file).toChar.toString + (e.rank + 1).toString) + (if (controller.isSelected(e.rank, e.file)) then " selected\n" else " unselected\n"));
+  }
+
   print(
     "||== Welcome to Chess ==||\nType 'help' for more information on available commands\n\n"
   )
@@ -156,6 +164,6 @@ class TUI(controller: Controller) extends Observer {
     }
   }
 
-  override def update: Unit = print("\n" + controller.fieldToString)
-  override def updateOnError(message: String): Unit = print("\n" + message + "\n")
+  def update: Unit = print("\n" + controller.fieldToString + "\n")
+  def updateOnError(message: String): Unit = print("\n" + message + "\n")
 }

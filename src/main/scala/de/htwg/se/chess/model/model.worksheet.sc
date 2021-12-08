@@ -1,5 +1,11 @@
-import scala.compiletime.ops.boolean
-import de.htwg.se.chess._
+import de.htwg.se.chess.util.Matrix
+import de.htwg.se.chess.model.ChessBoard
+import de.htwg.se.chess.model.Piece._
+import de.htwg.se.chess.model.Piece
+import de.htwg.se.chess.model.PieceColor
+import de.htwg.se.chess.model.PieceType
+import de.htwg.se.chess.model.ChessField
+
 1 + 2
 case class Cell(value: Int) {
   def isSet: Boolean = value != 0
@@ -22,8 +28,6 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-import model.Piece
-import model.Piece._
 
 Piece.B_KING
 
@@ -49,8 +53,6 @@ B_KING
   def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
   def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))*/
 
-import model.Matrix
-import model.Matrix._
 
 val boardData = new Matrix[Option[Piece]](8, None)
 boardData.replace(4, 3, Some(B_ROOK))
@@ -83,7 +85,7 @@ val matri = new Matrix[Option[Piece]](8, None)
 val newMatr = matri.replace(1, 1, Some(B_KING))
 matri.cell(1, 1)
 
-import model.ChessBoard._
+import ChessBoard._
 
 val tmp = new Matrix[Option[Piece]](8, None)
 var pieceMatr = tmp.replace(0, 3, Some(W_KNIGHT))
@@ -166,28 +168,6 @@ carr1(1)
 carr2(0)
 carr2(1)
 
-import controller.Controller
-
-val ctrl = new Controller()
-
-ctrl.put("A1", "k")
-ctrl.field
-
-val tile1 = "A1".toCharArray
-val tile2 = "B3".toCharArray
-
-ctrl.move("A1", "B3")
-print(ctrl.fieldToString)
-
-val strw = "m B3 H7"
-
-val next = strw.split(" ")
-
-next(2)(0)
-next(2)(1)
-
-ctrl.move(next(1), next(2))
-print(ctrl.fieldToString)
 
 val file = 'B'
 
@@ -208,8 +188,6 @@ var pieceCount = 0
 arr.toSeq
 pieceCount
 
-import model.ChessField
-import model.ChessField._
 
 def fenSegToVector(fen: String): Vector[Option[Piece]] = {
   val chars = fen.toCharArray
@@ -293,14 +271,6 @@ val vecc = fenSegToVector("p3rK1Q")
 
 97.toChar
 
-val matrx = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-val cfx = ChessField(matrx)
-val ctrlx = Controller(cfx)
-
-ctrlx.fill("B_KING")
-print(ctrlx.fieldToString)
-ctrlx.put("A1", "W_KING")
-print(ctrlx.fieldToString)
 
 val testmtr = new Matrix[Option[Piece]](2, Some(W_KING))
 
@@ -347,3 +317,12 @@ def oobcheckCF(tile1: Array[Char], tile2: Array[Char]): Boolean = {
 'h'.toInt
 '1'.toInt
 '8'.toInt
+
+
+val g = for {
+  ii <- 10 to 0 by -1
+  jj <- 0 until 10
+}  yield (ii.toString,jj.toString);
+
+
+g.toList

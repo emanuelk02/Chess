@@ -45,7 +45,7 @@ case class FenCommand(args: List[String], controller: Controller) extends ChessC
 
 case class ErrorCommand(errorMessage: String, controller: Controller) extends ChessCommand(controller) {
     override def execute: ChessField = {
-        controller.notifyOnError(errorMessage)
+        controller.publish(ErrorEvent(errorMessage))
         controller.field
     }
     override def undo: ChessField    = controller.field

@@ -1,10 +1,11 @@
 import de.htwg.se.chess._
 import scala.io.StdIn.readLine
 import aview.TUI
-import de.htwg.se.chess.aview.guiDemo
+import aview.gui.GuiDemo
+import de.htwg.se.chess.controller.Controller
 @main def main: Unit = {
-    val gui = new guiDemo
-    gui.start()
-    //val tui = new TUI()
-    //tui.run
+    val ctrl = new Controller()
+    val gui = GuiDemo(ctrl)
+    val tui = TUI(ctrl)
+    tui.run
 }

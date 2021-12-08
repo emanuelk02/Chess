@@ -3,20 +3,25 @@ package controller
 
 import util.Observable
 import model.ChessField
-import scala.io.StdIn.readLine
+import scala.swing.Publisher
+import de.htwg.se.chess.util.Command
 
-case class Controller(var field: ChessField) extends Observable {
-  def this() = this(new ChessField())
+case class Controller(var field: ChessField) extends Publisher {
+  val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+  def this() = {
+    this(new ChessField())
+    this.field = field.loadFromFen(startingFen)
+  }
 
   val commandHandler = new ChessCommandInvoker
 
   def executeAndNotify(command: List[String] => ChessCommand, args: List[String]): Unit = {
     field = commandHandler.doStep(command(args))
-    notifyObservers
+    publish(new CommandExecuted)
   }
   def executeAndNotify(command: () => ChessCommand): Unit = {
     field = commandHandler.doStep(command())
-    notifyObservers
+    publish(new CommandExecuted)
   }
 
   def move(args: List[String]): ChessCommand = newCommand(args)
@@ -26,16 +31,28 @@ case class Controller(var field: ChessField) extends Observable {
 
   def undo: Unit = {
     field = commandHandler.undoStep.getOrElse(field)
-    notifyObservers
+    publish(new CommandExecuted)
   }
 
   def redo: Unit = {
     field = commandHandler.redoStep.getOrElse(field)
-    notifyObservers
+    publish(new CommandExecuted)
   }
 
   def fieldToString: String = {
     field.toString
   }
   private def newCommand(args: List[String]): ChessCommand = commandHandler.handle(ChessCommand(args, this))
+
+  def select(rank: Int, file: Int): Unit = {
+    commandHandler.gameState.selected = Some(rank, file)
+    publish(Select(rank, file))
+  }
+  def unselect(rank: Int, file: Int): Unit = {
+    commandHandler.gameState.selected = None
+    publish(Select(rank, file))
+  }
+  def selected: String = commandHandler.selected
+  def isSelected(rank: Int, file: Int): Boolean = commandHandler.gameState.selected equals Some(rank, file)
+  def hasSelected: Boolean = commandHandler.gameState.selected.isDefined
 }
