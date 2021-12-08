@@ -15,9 +15,7 @@ class ControllerSpec extends AnyWordSpec {
       "be created calling the explicit Constructor" in {
         val ctrl = new Controller()
         ctrl.field.field.size should be(8)
-        ctrl.field.field.rows.forall(r => r.forall(p => p == None)) should be(
-          true
-        )
+        ctrl.field.field.rows.forall(r => r.forall(p => p == None)) should be(true)
       }
       "be instantiated with a full ChessField containing a Matrix given as a Vector of Vectors" in {
         val matr =
@@ -27,8 +25,8 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field.field.size should be(1)
         ctrl.field.field.cell(0, 0).get should be(W_PAWN)
         ctrl.field.field.cell(0, 1).get should be(B_KING)
-        ctrl.field.cell('A', 1).get should be(W_PAWN)
-        ctrl.field.cell('B', 1).get should be(B_KING)
+        ctrl.field.cell("A1").get should be(W_PAWN)
+        ctrl.field.cell("B1").get should be(B_KING)
       }
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
@@ -51,8 +49,8 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -63,8 +61,8 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(B_KING))
+                Vector(Some(W_BISHOP), Some(B_KING)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -76,8 +74,8 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -88,8 +86,8 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(Some(W_BISHOP), Some(B_KING))
+                Vector(Some(W_BISHOP), Some(B_KING)),
+                Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
           )
@@ -115,8 +113,8 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(Some(W_KING), None),
-                Vector(None, None)
+                Vector(None, None),
+                Vector(Some(W_KING), None)
               )
             )
           )
@@ -124,15 +122,15 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to move contents of one tile into another and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.field = ctrl.field.replace("A1", Some(B_KING))
+        ctrl.field = ctrl.field.replace("A1", "B_KING")
         ctrl.move(List("A1", "A2")) should be (MoveCommand(List("A1", "A2"), ctrl))
         ctrl.executeAndNotify(ctrl.move, List("A1","A2"))
         ctrl.field should be(
           ChessField(
             Matrix(
               Vector(
-                Vector(None, Some(W_BISHOP)),
-                Vector(Some(B_KING), Some(W_BISHOP))
+                Vector(Some(B_KING), Some(W_BISHOP)),
+                Vector(None, Some(W_BISHOP))
               )
             )
           )
@@ -142,7 +140,10 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(W_BISHOP)), Vector(None, Some(B_KING)))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -155,8 +156,8 @@ class ControllerSpec extends AnyWordSpec {
           ChessField(
             Matrix(
               Vector(
-                Vector(None, Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(W_BISHOP))
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(None, Some(B_KING))
               )
             )
           )
@@ -166,7 +167,10 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, None), Vector(Some(B_KING), Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), Some(W_BISHOP)),
+                Vector(None, None)
+              )
             )
           )
         )
@@ -188,7 +192,10 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None),
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -197,7 +204,10 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None),
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -206,7 +216,10 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
             )
           )
         )
@@ -215,7 +228,10 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
             )
           )
         )
@@ -244,6 +260,19 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
+      }
+      "use its CommandInvoker to undo and redo commands" in {
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
+        import util.TestObserver
+        val to = new TestObserver(ctrl)
+        ctrl.add(to)
+        ctrl.undo
+        ctrl.field should be(ctrl.field.fill(Some(W_BISHOP)))
+        to.num should be(1)
+        ctrl.redo
+        ctrl.field should be(ctrl.field.replace("A1", "k"))
+        to.num should be(2)
       }
       "have a string representation like specified in ChessBoard" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))

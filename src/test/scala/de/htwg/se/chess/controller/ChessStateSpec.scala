@@ -40,7 +40,7 @@ class ChessStateSpec extends AnyWordSpec {
                 csOff.handle(err) should be(err, csOff)
 
                 csOn.handle(put) should be((ErrorCommand("This command is unavailable during the game", ctrl), csOn))
-                csOn.handle(move) should be(move, csOn)
+                csOn.handle(move) should be(CheckedMoveCommand(move), csOn)
                 csOn.handle(clear) should be(ErrorCommand("You cannot clear the board while the game is active", ctrl), csOn)
                 csOn.handle(fen) should be(ErrorCommand("You cannot load a new board while the game is active", ctrl), csOn)
                 csOn.handle(err) should be(err, csOn)
