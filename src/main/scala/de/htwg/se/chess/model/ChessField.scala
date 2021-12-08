@@ -35,18 +35,18 @@ case class ChessField(field: Matrix[Option[Piece]]):
     assert(tile1.size == 2)
     assert(tile2.size == 2)
     val piece = field.cell(
-      tile1(1).toInt - '0'.toInt - 1,
+      8 - (tile1(1).toInt - '1'.toInt) - 1,
       tile1(0).toLower.toInt - 'a'.toInt
     )
     copy(
       field
         .replace(
-          tile2(1).toInt - '0'.toInt - 1,
+          7 - (tile2(1).toInt - '1'.toInt) ,
           tile2(0).toLower.toInt - 'a'.toInt,
           piece
         )
         .replace(
-          tile1(1).toInt - '0'.toInt - 1,
+          7 - (tile1(1).toInt - '1'.toInt) ,
           tile1(0).toLower.toInt - 'a'.toInt,
           None
         )

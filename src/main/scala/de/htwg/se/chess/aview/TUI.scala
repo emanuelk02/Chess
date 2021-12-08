@@ -95,6 +95,8 @@ class TUI(controller: Controller) extends Observer {
           print("For more information type 'h'")
           ERR_VAL
         }
+
+        // controller.executeAndNotify(controller.newCommand(in.drop(1)))
       }
   }
 
