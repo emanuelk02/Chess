@@ -44,7 +44,8 @@ case class Controller(var field: ChessField) extends Publisher {
   def fieldToString: String = {
     field.toString
   }
-  private def newCommand(args: List[String]): ChessCommand = commandHandler.handle(ChessCommand(args, this))
+  
+  def newCommand(args: List[String]): ChessCommand = commandHandler.handle(ChessCommand(args, this))
 
   def select(rank: Int, file: Int): Unit = {
     commandHandler.gameState.selected = Some(rank, file)

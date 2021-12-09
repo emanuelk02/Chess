@@ -20,7 +20,7 @@ case class PutCommand(args: List[String], controller: Controller) extends ChessC
 }
 
 case class MoveCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
-    override def execute: ChessField = controller.field.move(args(0), args(1))
+    override def execute: ChessField = if (controller.field.cell(args(0)).isDefined) then controller.field.move(args(0), args(1)) else prevField
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
     override def event = MoveEvent(args(0), args(1))

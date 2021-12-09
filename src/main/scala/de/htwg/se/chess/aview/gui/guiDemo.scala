@@ -11,8 +11,7 @@ import scala.swing._
 import scala.swing.Swing.LineBorder
 import scala.swing.event._
 import javax.swing.Icon
-import javax.swing.JOptionPane
-import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 
 class GuiDemo(controller: Controller) extends SimpleSwingApplication:
@@ -20,9 +19,9 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
         title = "HTWG CHESS"
 
         listenTo(controller)
-        peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+        peer.setDefaultCloseOperation(EXIT_ON_CLOSE)
 
-        override def closeOperation() = {
+        /*override def closeOperation() = {
             Dialog.showConfirmation(parent = this,
                 title = "Exit",
                 message = "Are you sure you want to quit?"
@@ -30,7 +29,7 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
                 case Dialog.Result.Ok => quit()
                 case _ => ()
             }
-        }
+        }*/
 
         val fieldsize = controller.field.size
         var tiles = Array.tabulate[TileLabel](fieldsize, fieldsize) { (row, col) => new TileLabel(row, col, controller) }
@@ -45,9 +44,9 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
                 col <- -1 until fieldsize
             } {
                 contents += (col match {
-                    case -1 => Label((row + 1).toString)
+                    case -1 => new Label((row + 1).toString) { preferredSize = new Dimension(30,100) }
                     case _ => {
-                        tiles(row)(col) = new TileLabel(row, col , controller)
+                        tiles(row)(col) = new TileLabel(row, col, controller)
                         tiles(row)(col)
                     }
                 })
@@ -57,8 +56,8 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
                 col <- 0 to fieldsize
             } {
                 contents += (col match {
-                    case 0 => Label("")
-                    case _ => Label(('A'.toInt + col - 1).toChar.toString)
+                    case 0 => new Label("") { preferredSize = new Dimension(30,30) }
+                    case _ => new Label(('A'.toInt + col - 1).toChar.toString) { preferredSize = new Dimension(100,30) }
                     }
                 )
             }
@@ -71,9 +70,10 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
         visible = true
 
         reactions += {
-            case e: MoveEvent => tiles(controller.field.rankCharToInt(e.tile2(1)))(controller.field.fileCharToInt(e.tile2(0))).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
-            case e: Select => tiles(e.rank)(e.file).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
-            case e: ErrorEvent => Dialog.showMessage(this, Label(e.msg))
+            case e: CommandExecuted => redraw
+            case e: MoveEvent => redraw //tiles(controller.field.rankCharToInt(e.tile2(1)))(controller.field.fileCharToInt(e.tile2(0))).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
+            case e: Select => redraw //tiles(e.rank)(e.file).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
+            case e: ErrorEvent => Dialog.showMessage(this, e.msg)
         }
 
         def redraw = {
@@ -86,5 +86,6 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
                 case _ => tiles(row)(col).redraw
             }
         }
+        contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
     }
   }

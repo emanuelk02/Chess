@@ -16,7 +16,7 @@ import scala.util.Success
 import scala.util.Failure
 import javax.swing.ImageIcon
 
-class TileLabel(row: Int, col: Int, controller: Controller) extends BoxPanel(Orientation.Horizontal) {
+class TileLabel(row: Int, col: Int, controller: Controller) extends BoxPanel(Orientation.NoOrientation) {
     def selectReaction = controller.select(row, col)
     def unselectReaction = controller.unselect(row, col)
     def moveReaction = { controller.executeAndNotify(controller.move, List(controller.selected, (('A' + col).toChar.toString + (row + 1).toString))) ; controller.unselect(controller.commandHandler.gameState.selected.get._1, controller.commandHandler.gameState.selected.get._2)}
@@ -30,7 +30,6 @@ class TileLabel(row: Int, col: Int, controller: Controller) extends BoxPanel(Ori
             then new Color(184, 184, 212)
             else new Color(230, 230, 255)
     
-    val piece = controller.field.cell(col, 7 - row)
     val imgIcon = newPicture
 
     preferredSize = new Dimension(100, 100)
@@ -50,6 +49,7 @@ class TileLabel(row: Int, col: Int, controller: Controller) extends BoxPanel(Ori
     }
 
     def newPicture: ImageIcon = {
+        val piece = controller.field.cell(col, 7 - row)
         val imagePath = "src/main/resources/pieces/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png")
         val image: BufferedImage = 
         Try(ImageIO.read(new File(imagePath))) match {
@@ -62,7 +62,7 @@ class TileLabel(row: Int, col: Int, controller: Controller) extends BoxPanel(Ori
     def redraw = {
         contents.clear
         contents += new Label("", newPicture, Alignment.Center)
-        repaint()
         background = if controller.isSelected(row, col) then selectedColor else tileColor
+        repaint()
     }
 }

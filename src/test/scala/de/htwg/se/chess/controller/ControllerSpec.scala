@@ -265,8 +265,8 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
         import util.TestObserver
-        val to = new TestObserver(ctrl)
-        ctrl.add(to)
+        //val to = new TestObserver(ctrl)
+        //ctrl.add(to)
         ctrl.undo
         ctrl.field should be(ctrl.field.fill(Some(W_BISHOP)))
         to.num should be(1)
