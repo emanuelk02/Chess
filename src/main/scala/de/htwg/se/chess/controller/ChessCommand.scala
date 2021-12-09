@@ -5,21 +5,25 @@ import model.Piece
 import model.ChessField
 import util.Command
 import util.Observable
+import scala.swing.event.Event
 
 trait ChessCommand(controller: Controller) extends Command[ChessField] {
     protected val prevField = controller.field
+    def event: Event
 }
 
 case class PutCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
     override def execute: ChessField = controller.field.replace(args(0), args(1))
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
+    override def event = new CommandExecuted
 }
 
 case class MoveCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
     override def execute: ChessField = controller.field.move(args(0), args(1))
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
+    override def event = MoveEvent(args(0), args(1))
 }
 
 case class CheckedMoveCommand(command: MoveCommand) extends ChessCommand(command.controller) {
@@ -29,18 +33,21 @@ case class CheckedMoveCommand(command: MoveCommand) extends ChessCommand(command
     override def execute: ChessField = cmd.execute
     override def undo: ChessField    = cmd.undo
     override def redo: ChessField    = cmd.redo
+    override def event = MoveEvent(command.args(0), command.args(1))
 }
 
 case class ClearCommand(controller: Controller) extends ChessCommand(controller) {
     override def execute: ChessField = controller.field.fill(None)
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
+    override def event = new CommandExecuted
 }
 
 case class FenCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
     override def execute: ChessField = controller.field.loadFromFen(args(0))
     override def undo: ChessField    = prevField
     override def redo: ChessField    = execute
+    override def event = new CommandExecuted
 }
 
 case class ErrorCommand(errorMessage: String, controller: Controller) extends ChessCommand(controller) {
@@ -50,6 +57,7 @@ case class ErrorCommand(errorMessage: String, controller: Controller) extends Ch
     }
     override def undo: ChessField    = controller.field
     override def redo: ChessField    = execute
+    override def event = ErrorEvent(errorMessage)
 }
 
 object ChessCommand {

@@ -6,6 +6,6 @@ import de.htwg.se.chess.controller.Controller
 @main def main: Unit = {
     val ctrl = new Controller()
     val gui = GuiDemo(ctrl)
+    gui.startup(Array())
     val tui = TUI(ctrl)
-    tui.run
 }

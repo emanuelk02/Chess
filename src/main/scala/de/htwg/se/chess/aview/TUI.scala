@@ -15,6 +15,7 @@ class TUI(controller: Controller) extends Reactor {
 
   reactions += {
     case e: CommandExecuted => update
+    case e: MoveEvent => update; print("Move\n")
     case e: ErrorEvent => updateOnError(e.msg)
     case e: Select => print((('A' + e.file).toChar.toString + (e.rank + 1).toString) + (if (controller.isSelected(e.rank, e.file)) then " selected\n" else " unselected\n"));
   }

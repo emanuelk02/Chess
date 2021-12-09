@@ -16,12 +16,14 @@ case class Controller(var field: ChessField) extends Publisher {
   val commandHandler = new ChessCommandInvoker
 
   def executeAndNotify(command: List[String] => ChessCommand, args: List[String]): Unit = {
-    field = commandHandler.doStep(command(args))
-    publish(new CommandExecuted)
+    val cmd = command(args)
+    field = commandHandler.doStep(cmd)
+    publish(cmd.event)
   }
   def executeAndNotify(command: () => ChessCommand): Unit = {
-    field = commandHandler.doStep(command())
-    publish(new CommandExecuted)
+    val cmd = command()
+    field = commandHandler.doStep(cmd)
+    publish(cmd.event)
   }
 
   def move(args: List[String]): ChessCommand = newCommand(args)

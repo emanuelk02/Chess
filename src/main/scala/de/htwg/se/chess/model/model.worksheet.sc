@@ -326,3 +326,31 @@ val g = for {
 
 
 g.toList
+
+import scala.swing._
+import javax.swing.table._
+import scala.swing.event._
+
+import de.htwg.se.chess.controller._
+
+import java.awt.Color
+import de.htwg.se.chess.model.PieceColor
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
+import java.io.File
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+import javax.swing.ImageIcon
+
+val piece = Some(W_KING)
+
+val controller = new Controller()
+
+val imagePath = "src/main/resources/pieces/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png")
+val image =
+Try(ImageIO.read(new File(imagePath))) match {
+    case s: Success[BufferedImage] => s.value
+    case f: Failure[BufferedImage] => null
+}
+val icon = new ImageIcon(image)
