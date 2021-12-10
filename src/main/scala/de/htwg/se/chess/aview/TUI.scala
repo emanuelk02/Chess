@@ -18,7 +18,7 @@ class TUI(controller: Controller) extends Reactor {
 
   reactions += {
     case e: CommandExecuted => update
-    case e: MoveEvent => update; print("Move\n")
+    case e: MoveEvent => update; print("Move" + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
     case e: Select => print((('A' + e.file).toChar.toString + (e.rank + 1).toString) + (if (controller.isSelected(e.rank, e.file)) then " selected\n" else " unselected\n"));
   }
@@ -56,7 +56,7 @@ class TUI(controller: Controller) extends Reactor {
       else run
   }
 
-  def eval(inputString: String): String = {
+  def eval(inputString: String): Unit = {
     if (inputString.size == 0)
       print("No input found.\n")
       printHelp()
@@ -71,13 +71,15 @@ class TUI(controller: Controller) extends Reactor {
         }
         case "i" | "insert" | "put" => { //----------------------- Insert / Put
           if (in.size < 3) then
-            "Not enough arguments:"
+            print("Not enough arguments:")
+            printHelp("i")
           else
             controller.executeAndNotify(controller.put, List(in(1), in(2)))
         }
         case "m" | "move" => { //----------------------- Move
           if (in.size < 3) then
             print("Not enough arguments:")
+            printHelp("m")
           else
             controller.executeAndNotify(controller.move, List(in(1), in(2)))
         }
@@ -87,6 +89,7 @@ class TUI(controller: Controller) extends Reactor {
         case "fen" | "loadfen" => { //----------------------- FenString
           if (in.size < 2) then
             print("Not enough arguments:")
+            printHelp("fen")
           else
             controller.executeAndNotify(controller.putWithFen, List(in(1)))
         }
@@ -96,18 +99,16 @@ class TUI(controller: Controller) extends Reactor {
         case "y" | "redo" => {
           controller.redo
         }
-        case "exit" => "exit" //----------------------- Exit
+        case "exit" =>  //----------------------- Exit
         case _ => { //----------------------- Invalid
           print("Unknown Command: " + in(0) + "\n")
           print("For more information type 'h'")
         }
-
-        // controller.executeAndNotify(controller.newCommand(in.drop(1)))
       }
-      ""
   }
 
-  def printHelp(): String = {
+  def printHelp(): Unit = {
+    print(
     """
     Usage: <command> [options]
     Commands:
@@ -141,11 +142,11 @@ class TUI(controller: Controller) extends Reactor {
     y / redo            redoes the last changes you've undone
 
     exit                quits the program
-    """.stripMargin
+    """.stripMargin)
   }
 
-  def printHelp(cmd: String): String = {
-    cmd.toLowerCase match {
+  def printHelp(cmd: String): Unit = {
+    print(cmd.toLowerCase match {
       case "i" | "insert" | "put" =>
           "\nUsage: i / insert / put <tile: \"A1\"> <piece>\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"\n"
       case "m" | "move" =>
@@ -154,7 +155,7 @@ class TUI(controller: Controller) extends Reactor {
       case "fen" | "loadfen" =>
           "\nfen / FEN / Fen / loadFEN <fen-string>\nSee 'https://www.chessprogramming.org/Forsyth-Edwards_Notation' for detailed information\non what FEN strings do\n"
       case _ => "\nUnknown command. See 'help' for more information\n"
-    }
+    })
   }
 
   def update: Unit = print("\n" + controller.fieldToString + "\n")

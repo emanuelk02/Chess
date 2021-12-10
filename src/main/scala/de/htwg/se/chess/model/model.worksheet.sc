@@ -354,3 +354,14 @@ Try(ImageIO.read(new File(imagePath))) match {
     case f: Failure[BufferedImage] => null
 }
 val icon = new ImageIcon(image)
+
+
+import de.htwg.se.chess.util.ChainHandler
+
+def one(in: Int) = if in > 2 then Some(in + 1) else None
+def two(in: Int) = if in > 1 then Some(in + 2) else None
+def three(in: Int) = if in > 0 then Some(in + 3) else None
+
+val chain = ChainHandler[Int](List(one, two, three))
+
+chain.handleRequest(0)
