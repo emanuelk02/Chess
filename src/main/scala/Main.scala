@@ -8,5 +8,5 @@ import de.htwg.se.chess.controller.Controller
     val gui = GuiDemo(ctrl)
     val tui = TUI(ctrl)
     gui.startup(Array())
-    //tui.run
+    tui.run
 }

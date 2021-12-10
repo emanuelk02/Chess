@@ -5,11 +5,10 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Option[R]) {
+case class ChainHandler[+R](successor: Option[ChainHandler[R]])(function: R => Option[R]) {
+  def handle(in: R): Try[Option[R]] = Try(function(in))
 
-  def handle[T <: R](in: T): Try[Option[R]] = Try(function(in))
-
-  def handleRequest[T <: R](in: T): Option[R] = {
+  def handleRequest(in: R): Option[R] = {
     handle(in) match {
       case s: Success[Option[R]] => 
         if s.get.isDefined

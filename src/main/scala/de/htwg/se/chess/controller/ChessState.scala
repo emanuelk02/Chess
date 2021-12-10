@@ -21,9 +21,12 @@ case class ChessState(playing: Boolean, color: PieceColor, whiteCastle: (Boolean
     }
 
     def handleIdle(command: ChessCommand): (ChessCommand, ChessState) = (command, this)
-    
+
     def evaluateMove(move: MoveCommand): (ChessCommand, ChessState) = {
         (CheckedMoveCommand(move), this)
     } // not implemented yet
     
     def evaluateFen: ChessState = {this}   // not implemented yet
+
+    def start: ChessState = copy(true, color, whiteCastle, blackCastle, halfMoves, fullMoves)
+    def stop: ChessState = copy(false, color, whiteCastle, blackCastle, halfMoves, fullMoves)

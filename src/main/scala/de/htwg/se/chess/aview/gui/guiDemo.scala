@@ -11,7 +11,7 @@ import scala.swing._
 import scala.swing.Swing.LineBorder
 import scala.swing.event._
 import javax.swing.Icon
-import javax.swing.WindowConstants.EXIT_ON_CLOSE
+import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 
 
 class GuiDemo(controller: Controller) extends SimpleSwingApplication:
@@ -19,9 +19,9 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
         title = "HTWG CHESS"
 
         listenTo(controller)
-        peer.setDefaultCloseOperation(EXIT_ON_CLOSE)
+        peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
 
-        /*override def closeOperation() = {
+        override def closeOperation() = {
             Dialog.showConfirmation(parent = this,
                 title = "Exit",
                 message = "Are you sure you want to quit?"
@@ -29,7 +29,7 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
                 case Dialog.Result.Ok => quit()
                 case _ => ()
             }
-        }*/
+        }
 
         val fieldsize = controller.field.size
         var tiles = Array.tabulate[TileLabel](fieldsize, fieldsize) { (row, col) => new TileLabel(row, col, controller) }

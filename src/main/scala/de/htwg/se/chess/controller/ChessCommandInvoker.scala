@@ -24,4 +24,6 @@ class ChessCommandInvoker extends CommandInvoker[ChessField] {
     }
 
     def selected: String = ('A' + gameState.selected.getOrElse(0,0)._2).toChar.toString + (gameState.selected.getOrElse(0,0)._1 + 1).toString
+    def start: Unit = gameState = gameState.start
+    def stop: Unit = gameState = gameState.stop
 }

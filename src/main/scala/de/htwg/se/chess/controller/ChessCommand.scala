@@ -50,6 +50,13 @@ case class FenCommand(args: List[String], controller: Controller) extends ChessC
     override def event = new CommandExecuted
 }
 
+case class SelectCommand(args: List[String], controller: Controller) extends ChessCommand(controller) {
+    override def execute: ChessField = controller.field
+    override def undo: ChessField    = controller.field
+    override def redo: ChessField    = controller.field
+    override def event = new Select(1, 1)
+}
+
 case class ErrorCommand(errorMessage: String, controller: Controller) extends ChessCommand(controller) {
     override def execute: ChessField = {
         controller.publish(ErrorEvent(errorMessage))

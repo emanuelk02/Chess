@@ -31,6 +31,9 @@ case class Controller(var field: ChessField) extends Publisher {
   def clear(): ChessCommand = newCommand(Nil)
   def putWithFen(args: List[String]): ChessCommand = newCommand(args)
 
+  def start: Unit = commandHandler.start
+  def stop: Unit = commandHandler.stop
+
   def undo: Unit = {
     field = commandHandler.undoStep.getOrElse(field)
     publish(new CommandExecuted)
