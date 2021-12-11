@@ -9,11 +9,10 @@ import scala.swing.Reactor
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import scala.reflect.ManifestFactory.NothingManifest
 
 class TUI(controller: Controller) extends Reactor {
-  val EXIT_VAL = 0
-  val ERR_VAL = -1
-  val SUCCESS_VAL = 1
+  var exitFlag = false
   listenTo(controller)
 
   reactions += {
@@ -21,6 +20,7 @@ class TUI(controller: Controller) extends Reactor {
     case e: MoveEvent => update; print("Move" + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
     case e: Select => print((('A' + e.file).toChar.toString + (e.rank + 1).toString) + (if (controller.isSelected(e.rank, e.file)) then " selected\n" else " unselected\n"));
+    case e: ExitEvent => exitFlag = true
   }
 
   print(
@@ -35,32 +35,16 @@ class TUI(controller: Controller) extends Reactor {
   final def run: Unit = {
     val input = readLine(">> ")
 
-    //eval(input) match {
-      /*case EXIT_VAL => print("Shutting down...\nGoodbye\n")
-      case ERR_VAL => {
-        printHelp(input.split(" ")(0))
-        run
-      }
-      case SUCCESS_VAL => {
-        print("\n\n")
-        run
-      }
-      case _ => print("Unexpected Problem occured\n")*/
-    //}
-    Try(eval(input)) match {
+    eval(input) match {
       case s: Success[_] =>
       case f: Failure[_] => updateOnError(f.exception.getMessage)
     }
-    if (input equals "exit")
-      then 
-      else run
+    if (!exitFlag) run
   }
 
-  def eval(inputString: String): Unit = {
-    if (inputString.size == 0)
-      print("No input found.\n")
-      printHelp()
-    else
+  def eval(inputString: String): Try[Unit] = {
+    Try(
+    {
       val in = inputString.split(" ")
       in(0).toLowerCase match {
         case "h" | "help" => { //----------------------- Help
@@ -69,42 +53,25 @@ class TUI(controller: Controller) extends Reactor {
           else
             printHelp()
         }
-        case "i" | "insert" | "put" => { //----------------------- Insert / Put
-          if (in.size < 3) then
-            print("Not enough arguments:")
-            printHelp("i")
-          else
+        case "i" | "insert" | "put" =>  //----------------------- Insert / Put
             controller.executeAndNotify(controller.put, List(in(1), in(2)))
-        }
-        case "m" | "move" => { //----------------------- Move
-          if (in.size < 3) then
-            print("Not enough arguments:")
-            printHelp("m")
-          else
+        case "m" | "move" =>  //----------------------- Move
             controller.executeAndNotify(controller.move, List(in(1), in(2)))
-        }
-        case "cl" | "clear" => { //----------------------- Fill
+        case "cl" | "clear" =>  //----------------------- Fill
           controller.executeAndNotify(controller.clear)
-        }
-        case "fen" | "loadfen" => { //----------------------- FenString
-          if (in.size < 2) then
-            print("Not enough arguments:")
-            printHelp("fen")
-          else
+        case "fen" | "loadfen" =>  //----------------------- FenString
             controller.executeAndNotify(controller.putWithFen, List(in(1)))
-        }
-        case "z" | "undo" => {
+        case "z" | "undo" =>
           controller.undo
-        }
-        case "y" | "redo" => {
+        case "y" | "redo" =>
           controller.redo
-        }
-        case "exit" =>  //----------------------- Exit
-        case _ => { //----------------------- Invalid
+        case "exit" => controller.exit //----------------------- Exit
+        case _ =>       //----------------------- Invalid
           print("Unknown Command: " + in(0) + "\n")
           print("For more information type 'h'")
-        }
       }
+    }
+    )
   }
 
   def printHelp(): Unit = {

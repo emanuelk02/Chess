@@ -5,8 +5,8 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-case class ChainHandler[+R](successor: Option[ChainHandler[R]])(function: R => Option[R]) {
-  def handle(in: R): Try[Option[R]] = Try(function(in))
+case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Option[R]) {
+  private def handle(in: R): Try[Option[R]] = Try(function(in))
 
   def handleRequest(in: R): Option[R] = {
     handle(in) match {

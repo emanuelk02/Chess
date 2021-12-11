@@ -8,6 +8,14 @@ import model.Piece
 import model.ChessField
 import model.Piece._
 import util.Matrix
+import scala.swing.Reactor
+
+class TestObserver extends Reactor {
+  var field = ChessField(Matrix(Vector()))
+  reactions += {
+    case e: TestEvent => field = e.field
+  }
+}
 
 class ControllerSpec extends AnyWordSpec {
   "A Controller" when {
@@ -21,7 +29,7 @@ class ControllerSpec extends AnyWordSpec {
         val matr =
           Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
         val cf = ChessField(matr)
-        val ctrl = Controller(cf)
+        val ctrl = Controller(cf, new ChessCommandInvoker)
         ctrl.field.field.size should be(1)
         ctrl.field.field.cell(0, 0).get should be(W_PAWN)
         ctrl.field.field.cell(0, 1).get should be(B_KING)
@@ -31,7 +39,7 @@ class ControllerSpec extends AnyWordSpec {
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
     val cf = ChessField(matr)
-    val ctrl = Controller(cf)
+    val ctrl = Controller(cf, new ChessCommandInvoker)
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
         ctrl.field.field.size should be(2)
@@ -264,7 +272,6 @@ class ControllerSpec extends AnyWordSpec {
       "use its CommandInvoker to undo and redo commands" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
-        import util.TestObserver
         ctrl.undo
         ctrl.field should be(ctrl.field.fill(Some(W_BISHOP)))
         ctrl.redo

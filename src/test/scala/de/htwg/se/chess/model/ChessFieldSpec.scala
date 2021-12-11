@@ -30,7 +30,7 @@ class ChessFieldSpec extends AnyWordSpec {
     "filled" should {
       val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
       val cf = ChessField(matr)
-      "return contents from single cells using rank: Int and file: Char parameters" in {
+      "return contents from single cells using file: Int, rank: Int or String parameters" in {
         val cf_temp = cf.replace("A1", "B_KING").replace("B2", "B_QUEEN")
         cf_temp.cell(0, 1) should be(Some(B_KING)) // A1
         cf_temp.cell(1, 1) should be(Some(W_BISHOP)) // B1
@@ -275,12 +275,8 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.checkFen("/3") should be("Invalid string: \"3\" at index 1\n")
         cf.checkFen("2b/qq") should be("Invalid string: \"2b\" at index 0\n")
         cf.checkFen("qq/bbb") should be("Invalid string: \"bbb\" at index 1\n")
-        cf.checkFen("3/3") should be(
-          "Invalid string: \"3\" at index 0\nInvalid string: \"3\" at index 1\n"
-        )
-        cf.checkFen("bbb/k2") should be(
-          "Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n"
-        )
+        cf.checkFen("3/3") should be("Invalid string: \"3\" at index 0\nInvalid string: \"3\" at index 1\n")
+        cf.checkFen("bbb/k2") should be("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
 
         /* Not Implemented yet */
         cf.checkMove("", "") should be("")

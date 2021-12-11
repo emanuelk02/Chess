@@ -2,18 +2,22 @@ package de.htwg.se.chess
 package controller
 
 import util.Observable
+import util.Matrix
 import model.ChessField
 import scala.swing.Publisher
+import scala.swing.event.Event
 import de.htwg.se.chess.util.Command
 
-case class Controller(var field: ChessField) extends Publisher {
+case class Controller(var field: ChessField, val commandHandler: ChessCommandInvoker) extends Publisher {
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
   def this() = {
-    this(new ChessField())
+    this(new ChessField(), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
-
-  val commandHandler = new ChessCommandInvoker
+  def this(ch: ChessCommandInvoker) = {
+    this(new ChessField, ch)
+    this.field = field.loadFromFen(startingFen)
+  }
 
   def executeAndNotify(command: List[String] => ChessCommand, args: List[String]): Unit = {
     val cmd = command(args)
@@ -26,10 +30,10 @@ case class Controller(var field: ChessField) extends Publisher {
     publish(cmd.event)
   }
 
-  def move(args: List[String]): ChessCommand = newCommand(args)
-  def put(args: List[String]): ChessCommand = newCommand(args)
-  def clear(): ChessCommand = newCommand(Nil)
-  def putWithFen(args: List[String]): ChessCommand = newCommand(args)
+  def move(args: List[String]): ChessCommand = new MoveCommand(args, this)
+  def put(args: List[String]): ChessCommand = new PutCommand(args, this)
+  def clear(): ChessCommand = new ClearCommand(this)
+  def putWithFen(args: List[String]): ChessCommand = new FenCommand(args, this)
 
   def start: Unit = commandHandler.start
   def stop: Unit = commandHandler.stop
@@ -44,11 +48,13 @@ case class Controller(var field: ChessField) extends Publisher {
     publish(new CommandExecuted)
   }
 
+  def exit: Unit = {
+    publish(new ExitEvent)
+  }
+
   def fieldToString: String = {
     field.toString
   }
-  
-  def newCommand(args: List[String]): ChessCommand = commandHandler.handle(ChessCommand(args, this))
 
   def select(rank: Int, file: Int): Unit = {
     commandHandler.gameState.selected = Some(rank, file)

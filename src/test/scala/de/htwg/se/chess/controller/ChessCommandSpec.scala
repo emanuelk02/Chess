@@ -13,6 +13,7 @@ case class TestChessCommand(field: ChessField, controller : Controller) extends 
     override def execute: ChessField = field.fill(None)
     override def undo: ChessField = field
     override def redo: ChessField = execute
+    override def event = new TestEvent(field)
 }
 
 class ChessCommandSpec extends AnyWordSpec {
@@ -30,8 +31,12 @@ class ChessCommandSpec extends AnyWordSpec {
             cm.redo should be(cm.execute)
             cm.redo should be(cf.fill(None))
         }
+        "contain an event which can be published by its controller" in {
+            cm.event should be(new TestEvent(cm.field))
+            cm.controller.publish(cm.event)
+        }
         "be created using the factory methods" in {
-            val ctrl = new Controller(cf)
+            val ctrl = Controller(cf, new ChessCommandInvoker)
             ChessCommand("A1", "W_QUEEN", ctrl) should be(PutCommand(List("A1", "W_QUEEN"), ctrl))
             ChessCommand("Z1", "k", ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))
             ChessCommand("A3", "k", ctrl) should be(ErrorCommand("Tile rank is invalid", ctrl))
@@ -63,7 +68,7 @@ class ChessCommandSpec extends AnyWordSpec {
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
     val cf = ChessField(matr).replace("A1", "B_KING").replace("B2", "B_KING")
-    val ctrl = Controller(cf)
+    val ctrl = Controller(cf, new ChessCommandInvoker)
 
     val put = PutCommand(List("A1", "W_KING"), ctrl)
     val put2 = PutCommand(List("B1", "W_KING"), ctrl)

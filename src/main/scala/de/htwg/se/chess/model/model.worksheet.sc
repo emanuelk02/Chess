@@ -361,6 +361,27 @@ import de.htwg.se.chess.util.ChainHandler
 def one(in: Int) = if in > 3 then Some(in + 1) else None
 def two(in: Int) = if in > 1 then Some(in + 2) else None
 def three(in: Int) = if in > 0 then Some(in + 3) else None
-val chain = ChainHandler[Number](List(one, two, three))
+val chain = ChainHandler[Int](List(one, two, three))
 
 chain.handleRequest(2)
+
+val inv = new ChessCommandInvoker
+
+
+val chainInstanceChecker = ChainHandler[ChessCommand](
+    List(
+        checkClass(ErrorCommand("", new Controller(inv)).getClass) _, 
+        checkClass(SelectCommand(Nil, new Controller(inv)).getClass) _
+    )
+)
+
+def checkClass(typ: Class[_])(in: ChessCommand): Option[ChessCommand] = if in.getClass eq typ then Some(in) else None
+
+chainInstanceChecker.handleRequest(new MoveCommand(Nil, new Controller()))
+
+
+def classCheck(in: ChessCommand): Class[_] = in.getClass
+
+classCheck(new MoveCommand(Nil, new Controller()))
+
+MoveCommand(Nil, new Controller()).getClass == classCheck(new MoveCommand(Nil, new Controller()))

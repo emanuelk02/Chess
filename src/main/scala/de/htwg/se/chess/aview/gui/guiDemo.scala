@@ -26,7 +26,7 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
                 title = "Exit",
                 message = "Are you sure you want to quit?"
             ) match {
-                case Dialog.Result.Ok => quit()
+                case Dialog.Result.Ok => controller.exit
                 case _ => ()
             }
         }
@@ -74,6 +74,7 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
             case e: MoveEvent => redraw //tiles(controller.field.rankCharToInt(e.tile2(1)))(controller.field.fileCharToInt(e.tile2(0))).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
             case e: Select => redraw //tiles(e.rank)(e.file).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
             case e: ErrorEvent => Dialog.showMessage(this, e.msg)
+            case e: ExitEvent => quit()
         }
 
         def redraw = {
