@@ -14,6 +14,10 @@ class TestObserver extends Reactor {
   var field = ChessField(Matrix(Vector()))
   reactions += {
     case e: TestEvent => field = e.field
+    case e: CommandExecuted => field = (new ChessField).fill("W_BISHOP")
+    case e: ErrorEvent => field = (new ChessField).fill(e.msg)
+    case e: MoveEvent => field = (new ChessField).replace(e.tile2, "Q")
+    case e: ExitEvent => throw new Error("Non-Exitable")
   }
 }
 

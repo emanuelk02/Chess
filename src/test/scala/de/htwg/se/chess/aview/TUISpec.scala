@@ -283,6 +283,35 @@ class TUISpec extends AnyWordSpec {
         tui.exitFlag shouldBe true
         tui.eval("ExIt awdaf") shouldBe Success(())
       }
+      "allow to undo and redo recent changes" in {
+        tui.eval("fen QQ/QQ") shouldBe Success(())
+        tui.eval("i A1 k") shouldBe Success(())
+
+        tui.eval("undo") shouldBe Success(())
+        ctrl.field should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_QUEEN), Some(W_QUEEN)),
+                Vector(Some(W_QUEEN), Some(W_QUEEN))
+              )
+            )
+          )
+        )
+      }
+      "allow to redo undone changes" in {
+        tui.eval("redo") shouldBe Success(())
+        ctrl.field should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_QUEEN), Some(W_QUEEN)),
+                Vector(Some(B_KING), Some(W_QUEEN))
+              )
+            )
+          )
+        )
+      }
     }
   }
 }
