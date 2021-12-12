@@ -23,7 +23,6 @@ class ControllerSpec extends AnyWordSpec {
       "be created calling the explicit Constructor" in {
         val ctrl = new Controller()
         ctrl.field.field.size should be(8)
-        ctrl.field.field.rows.forall(r => r.forall(p => p == None)) should be(true)
       }
       "be instantiated with a full ChessField containing a Matrix given as a Vector of Vectors" in {
         val matr =

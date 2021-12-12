@@ -67,8 +67,7 @@ class TUI(controller: Controller) extends Reactor {
           controller.redo
         case "exit" => controller.exit //----------------------- Exit
         case _ =>       //----------------------- Invalid
-          print("Unknown Command: " + in(0) + "\n")
-          print("For more information type 'h'")
+          throw new IllegalArgumentException("Unknown Command")
       }
     }
     )

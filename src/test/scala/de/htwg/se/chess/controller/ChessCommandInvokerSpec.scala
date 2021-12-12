@@ -11,8 +11,8 @@ import util.Matrix
 class ChessCommandInvokerSpec extends AnyWordSpec {
     "A ChessCommandInvoker" when {
         "you're not playing" should {
-            val inv = new ChessCommandInvoker
-            val ctrl = Controller(new ChessField, inv)
+            val ctrl = new Controller
+            val inv = ctrl.commandHandler
 
             val put = PutCommand(List("A1", "k"), ctrl)
             val move = MoveCommand(List("A1", "A2"), ctrl)
@@ -20,7 +20,7 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
             val fen = FenCommand(List("pppppppp/8/8/8/8/8/QQQQ4/8"), ctrl)
             val sel = SelectCommand(List("A1"), ctrl)
             val err = ErrorCommand("Error", ctrl)
-            "handle any command from Controller" in {
+            "handle any command from Controller" in { // deprecating
                 inv.handle(put) should be(put)
                 inv.handle(move) should be(move)
                 inv.handle(clear) should be(clear)
@@ -45,12 +45,12 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
                 inv.redoStep.get should be(fen.redo)
 
                 inv.doStep(err) should be(ctrl.field)
-                inv.undoStep.get should be(fen.undo)
-                inv.redoStep.get should be(fen.redo)
+                inv.undoStep.get should be(ctrl.field)
+                inv.redoStep.get should be(ctrl.field)
 
                 inv.doStep(sel) should be(ctrl.field)
-                inv.undoStep.get should be(fen.undo)
-                inv.redoStep.get should be(fen.redo)
+                inv.undoStep.get should be(ctrl.field)
+                inv.redoStep.get should be(ctrl.field)
             }
         }
     }

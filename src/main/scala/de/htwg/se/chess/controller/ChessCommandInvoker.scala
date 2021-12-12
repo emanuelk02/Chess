@@ -31,7 +31,7 @@ class ChessCommandInvoker extends CommandInvoker[ChessField] {
         )
     )
 
-    def checkClass(typ: Class[_])(in: Command[ChessField]): Option[Command[ChessField]] = if in.getClass eq typ then Some(in) else None
+    def checkClass(typ: Class[_])(in: Command[ChessField]): Option[Command[ChessField]] = if in.getClass eq typ then None else Some(in)
 
 
     def selected: String = ('A' + gameState.selected.getOrElse(0,0)._2).toChar.toString + (gameState.selected.getOrElse(0,0)._1 + 1).toString

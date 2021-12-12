@@ -25,6 +25,7 @@ object ChainHandler {
   def apply[R](list: List[(R) => (Option[R])]): ChainHandler[R] = {
     list match {
         case Nil => ChainHandler[R](None)(_ => None)
+        case func :: Nil => ChainHandler[R](None)(func)
         case func :: tail => ChainHandler[R](Some(ChainHandler(tail)))(func)
     }
   }

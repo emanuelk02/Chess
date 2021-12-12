@@ -365,17 +365,17 @@ val chain = ChainHandler[Int](List(one, two, three))
 
 chain.handleRequest(2)
 
-val inv = new ChessCommandInvoker
+val invo = new ChessCommandInvoker
+import de.htwg.se.chess.util.Command
 
-
-val chainInstanceChecker = ChainHandler[ChessCommand](
+val chainInstanceChecker = ChainHandler[Command[ChessField]](
     List(
-        checkClass(ErrorCommand("", new Controller(inv)).getClass) _, 
-        checkClass(SelectCommand(Nil, new Controller(inv)).getClass) _
+        checkClass(ErrorCommand("", new Controller(invo)).getClass) _, 
+        checkClass(SelectCommand(Nil, new Controller(invo)).getClass) _
     )
 )
 
-def checkClass(typ: Class[_])(in: ChessCommand): Option[ChessCommand] = if in.getClass eq typ then Some(in) else None
+def checkClass(typ: Class[_])(in: Command[ChessField]): Option[Command[ChessField]] = if in.getClass eq typ then Some(in) else None
 
 chainInstanceChecker.handleRequest(new MoveCommand(Nil, new Controller()))
 
@@ -385,3 +385,36 @@ def classCheck(in: ChessCommand): Class[_] = in.getClass
 classCheck(new MoveCommand(Nil, new Controller()))
 
 MoveCommand(Nil, new Controller()).getClass == classCheck(new MoveCommand(Nil, new Controller()))
+
+val testCheck = checkClass(ErrorCommand("", new Controller(invo)).getClass) _
+
+
+
+val ctrl = new Controller
+val inv = ctrl.commandHandler
+val put = PutCommand(List("A1", "k"), ctrl)
+val move = MoveCommand(List("A1", "A2"), ctrl)
+val clear = ClearCommand(ctrl)
+val fens = FenCommand(List("pppppppp/8/8/8/8/8/QQQQ4/8"), ctrl)
+val sel = SelectCommand(List("A1"), ctrl)
+val err = ErrorCommand("Error", ctrl)
+
+
+inv.doStep(put)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(move)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(clear)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(fens)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(err)
+inv.undoStep.get
+inv.redoStep.get 
+inv.doStep(sel)
+inv.undoStep.get
+inv.redoStep.get

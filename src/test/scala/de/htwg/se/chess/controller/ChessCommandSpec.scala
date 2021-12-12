@@ -35,7 +35,7 @@ class ChessCommandSpec extends AnyWordSpec {
             cm.event should be(new TestEvent(cm.field))
             cm.controller.publish(cm.event)
         }
-        "be created using the factory methods" in {
+        "be created using the factory methods" in { // deprecating; factory creation is unsafe
             val ctrl = Controller(cf, new ChessCommandInvoker)
             ChessCommand("A1", "W_QUEEN", ctrl) should be(PutCommand(List("A1", "W_QUEEN"), ctrl))
             ChessCommand("Z1", "k", ctrl) should be(ErrorCommand("Tile file is invalid", ctrl))

@@ -11,6 +11,7 @@ import util.Matrix
 import de.htwg.se.chess.controller.ChessCommandInvoker
 import scala.util.Success
 import scala.util.Failure
+import scala.util.Try
 
 class TUISpec extends AnyWordSpec {
   "A TUI" when {
@@ -44,39 +45,38 @@ class TUISpec extends AnyWordSpec {
       val tui = TUI(ctrl)
       "not have a diferent sized ChessField based on contents" in {
         ctrl.field.field.size should be(2)
-        tui.eval("i A1 B_KING") shouldBe Success
+        tui.eval("i A1 B_KING") shouldBe Success(())
         ctrl.field.field.size should be(matr.size)
-        tui.eval("i B2 b") shouldBe Success
+        tui.eval("i B2 b") shouldBe Success(())
         ctrl.field.field.size should be(matr.size)
-        tui.eval("fen 1B/kQ") shouldBe Success
+        tui.eval("fen 1B/kQ") shouldBe Success(())
         ctrl.field.field.size should be(matr.size)
       }
 
       "detect missing arguments" in {
-        tui.eval("") shouldBe Failure
-        tui.eval("i") shouldBe Failure
-        tui.eval("i A1") shouldBe Failure
-        tui.eval("m") shouldBe Failure
-        tui.eval("m A1") shouldBe Failure
-        tui.eval("fen") shouldBe Failure
+        tui.eval("i").isFailure shouldBe true    // Failure(ArrayIndexOutOfBoundsException)
+        tui.eval("fen").isFailure shouldBe true
+        tui.eval("m").isFailure shouldBe true
+        tui.eval("m A1").isFailure shouldBe true
+        tui.eval("i A1").isFailure shouldBe true
       }
       "detect invalid commands" in {
-        tui.eval("moveTo A1 B1") shouldBe Failure
-        tui.eval("show") shouldBe Failure
+        tui.eval("moveTo A1 B1").isFailure shouldBe true
+        tui.eval("show").isFailure shouldEqual true
       }
       "print information on available commands either singularily or in its entirety" in {
-        tui.eval("h") shouldBe Success
-        tui.eval("help i") shouldBe Success
-        tui.eval("H m") shouldBe Success
-        tui.eval("HELP rank") shouldBe Success
-        tui.eval("helP file") shouldBe Success
-        tui.eval("Help fill") shouldBe Success
-        tui.eval("h fen") shouldBe Success
-        tui.eval("h show") shouldBe Success
+        tui.eval("h") shouldBe Success(())
+        tui.eval("help i") shouldBe Success(())
+        tui.eval("H m") shouldBe Success(())
+        tui.eval("HELP rank") shouldBe Success(())
+        tui.eval("helP file") shouldBe Success(())
+        tui.eval("Help fill") shouldBe Success(())
+        tui.eval("h fen") shouldBe Success(())
+        tui.eval("h show") shouldBe Success(())
       }
       "allow to replace single cells at any location by String and keep the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("i A1 B_KING") shouldBe Success
+        tui.eval("i A1 B_KING") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -87,7 +87,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("insert B2 B_KING") shouldBe Success
+        tui.eval("insert B2 B_KING") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -99,7 +99,7 @@ class TUISpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("put A1 k") shouldBe Success
+        tui.eval("put A1 k") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -110,7 +110,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("INSERT B2 k") shouldBe Success
+        tui.eval("INSERT B2 k") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -124,9 +124,9 @@ class TUISpec extends AnyWordSpec {
       }
       "allow to be fully cleared" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("cl") shouldBe Success
+        tui.eval("cl") shouldBe Success(())
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("clear") shouldBe Success
+        tui.eval("clear") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -137,7 +137,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("i A1 W_KING") shouldBe Success
+        tui.eval("i A1 W_KING") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -149,7 +149,7 @@ class TUISpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("clear") shouldBe Success
+        tui.eval("clear") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -163,8 +163,8 @@ class TUISpec extends AnyWordSpec {
       }
       "allow to move contents of one tile into another and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("i A1 k") shouldBe Success
-        tui.eval("m A1 A2") shouldBe Success
+        tui.eval("i A1 k") shouldBe Success(())
+        tui.eval("m A1 A2") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -175,7 +175,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("move a2 B2") shouldBe Success
+        tui.eval("move a2 B2") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -187,8 +187,8 @@ class TUISpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("I A1 k") shouldBe Success
-        tui.eval("M A1 b1") shouldBe Success
+        tui.eval("I A1 k") shouldBe Success(())
+        tui.eval("M A1 b1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -199,7 +199,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("MOVE b1 a2") shouldBe Success
+        tui.eval("MOVE b1 a2") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -213,15 +213,15 @@ class TUISpec extends AnyWordSpec {
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("fen /") shouldBe Success
+        tui.eval("fen /") shouldBe Success(())
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
         )
-        tui.eval("FEN 2/2") shouldBe Success
+        tui.eval("FEN 2/2") shouldBe Success(())
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
         )
-        tui.eval("Fen k/1B") shouldBe Success
+        tui.eval("Fen k/1B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -229,7 +229,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("loadfen k1/1B") shouldBe Success
+        tui.eval("loadfen k1/1B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -237,7 +237,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("loadFEN 1k/B") shouldBe Success
+        tui.eval("loadFEN 1k/B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -245,7 +245,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("loadFen 1k/B1") shouldBe Success
+        tui.eval("loadFen 1k/B1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -254,7 +254,7 @@ class TUISpec extends AnyWordSpec {
           )
         )
 
-        tui.eval("fen Qk/Br") shouldBe Success
+        tui.eval("fen Qk/Br") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -265,7 +265,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("FEN kQ/rB") shouldBe Success
+        tui.eval("FEN kQ/rB") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -279,9 +279,9 @@ class TUISpec extends AnyWordSpec {
       }
       "allow to exit the programm by typing \"exit\"" in {
         tui.exitFlag shouldBe false
-        tui.eval("exit") shouldBe Success
+        tui.eval("exit") shouldBe Success(())
         tui.exitFlag shouldBe true
-        tui.eval("ExIt awdaf") shouldBe Success
+        tui.eval("ExIt awdaf") shouldBe Success(())
       }
     }
   }
