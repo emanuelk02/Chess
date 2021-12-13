@@ -418,3 +418,15 @@ inv.redoStep.get
 inv.doStep(sel)
 inv.undoStep.get
 inv.redoStep.get
+
+import de.htwg.se.chess.model.Tile
+
+val tile1 = new Tile(1, 2)
+val tile2 = Tile(1, 2, 3)
+
+tile1 == tile2
+tile1 + tile2
+tile1 + (2, 2)
+tile1 - (0, 1)
+
+tile2 - (1, 0)

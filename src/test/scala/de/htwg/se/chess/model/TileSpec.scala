@@ -20,6 +20,19 @@ class TileSpec extends AnyWordSpec {
             an [AssertionError] should be thrownBy Tile("A3", 2)
             an [AssertionError] should be thrownBy Tile("C2", 2)
         }
+        "be manipulatable with + and - operators and comparable with ==" in {
+            val tile1 = new Tile(2, 2)
+            val tile2 = Tile(2, 2, 3)
+
+            tile1 == tile2 shouldBe true
+            tile1 + tile2 shouldBe Tile(4, 4, 8)
+            tile1 + (2, 2) shouldBe Tile("D4")
+            tile1 - (0, 1) shouldBe Tile(2, 1, 8)
+            tile1 - (1, 1) shouldBe Tile(1, 1, 8)
+
+            an [AssertionError] should be thrownBy tile2 - (2, 0)
+            an [AssertionError] should be thrownBy tile2 - Tile(0, 2, 8)
+        }
         "allow conversion to matrix collumns and rows" in {
             val tile1 = Tile("A1")
             tile1.col shouldBe 0
