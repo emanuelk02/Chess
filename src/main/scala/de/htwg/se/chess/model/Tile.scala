@@ -1,6 +1,8 @@
 package de.htwg.se.chess
 package model
 
+import scala.annotation.targetName
+
 case class Tile(file: Int, rank: Int, fieldsize: Int) {
     assert(file > 0 && file <= fieldsize, "Invalid file")
     assert(rank > 0 && rank <= fieldsize, "Invalid rank")
@@ -29,4 +31,7 @@ object Tile {
 
     def apply(args: List[Char]): Tile = apply(args, 8)
     def apply(args: String): Tile = apply(args, 8)
+
+    def apply(args: List[String], fieldsize: Int): List[Tile] = args.map(s => Tile(s, fieldsize))
+    def apply(args: List[String]): List[Tile] = args.map(s => Tile(s))
 }

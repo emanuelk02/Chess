@@ -16,6 +16,8 @@ class TileSpec extends AnyWordSpec {
             Tile("B1", 2) should be(new Tile(2, 1, 2))
             Tile(List('A','2')) should be(new Tile(1, 2, 8))
             Tile("B2") should be(new Tile(2, 2, 8))
+            Tile(List("A1", "B2")) should be(List(new Tile(1, 1, 8), new Tile(2, 2, 8)))
+            Tile(List("A2", "B1"), 3) should be(List(new Tile(1, 2, 3), new Tile(2, 1, 3))) 
 
             an [AssertionError] should be thrownBy Tile("A3", 2)
             an [AssertionError] should be thrownBy Tile("C2", 2)

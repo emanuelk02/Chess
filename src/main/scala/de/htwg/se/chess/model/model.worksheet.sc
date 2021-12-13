@@ -429,4 +429,4 @@ tile1 + tile2
 tile1 + (2, 2)
 tile1 - (0, 1)
 
-tile2 - (1, 0)
+Try(tile2 - (1, 0))
