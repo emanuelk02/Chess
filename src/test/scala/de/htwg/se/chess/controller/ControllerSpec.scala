@@ -8,6 +8,18 @@ import model.Piece
 import model.ChessField
 import model.Piece._
 import util.Matrix
+import scala.swing.Reactor
+
+class TestObserver extends Reactor {
+  var field = ChessField(Matrix(Vector()))
+  reactions += {
+    case e: TestEvent => field = e.field
+    case e: CommandExecuted => field = (new ChessField).fill("W_BISHOP")
+    case e: ErrorEvent => field = (new ChessField).fill(e.msg)
+    case e: MoveEvent => field = (new ChessField).replace(e.tile2, "Q")
+    case e: ExitEvent => throw new Error("Non-Exitable")
+  }
+}
 
 class ControllerSpec extends AnyWordSpec {
   "A Controller" when {
@@ -15,13 +27,12 @@ class ControllerSpec extends AnyWordSpec {
       "be created calling the explicit Constructor" in {
         val ctrl = new Controller()
         ctrl.field.field.size should be(8)
-        ctrl.field.field.rows.forall(r => r.forall(p => p == None)) should be(true)
       }
       "be instantiated with a full ChessField containing a Matrix given as a Vector of Vectors" in {
         val matr =
           Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
         val cf = ChessField(matr)
-        val ctrl = Controller(cf)
+        val ctrl = Controller(cf, new ChessCommandInvoker)
         ctrl.field.field.size should be(1)
         ctrl.field.field.cell(0, 0).get should be(W_PAWN)
         ctrl.field.field.cell(0, 1).get should be(B_KING)
@@ -31,7 +42,7 @@ class ControllerSpec extends AnyWordSpec {
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
     val cf = ChessField(matr)
-    val ctrl = Controller(cf)
+    val ctrl = Controller(cf, new ChessCommandInvoker)
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
         ctrl.field.field.size should be(2)
@@ -264,6 +275,10 @@ class ControllerSpec extends AnyWordSpec {
       "use its CommandInvoker to undo and redo commands" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.executeAndNotify(ctrl.put, List("A1", "k"))
+        ctrl.undo
+        ctrl.field should be(ctrl.field.fill(Some(W_BISHOP)))
+        ctrl.redo
+        ctrl.field should be(ctrl.field.replace("A1", "k"))
       }
       "have a string representation like specified in ChessBoard" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))

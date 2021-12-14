@@ -44,6 +44,9 @@ class ChessStateSpec extends AnyWordSpec {
                 csOn.handle(clear) should be(ErrorCommand("You cannot clear the board while the game is active", ctrl), csOn)
                 csOn.handle(fen) should be(ErrorCommand("You cannot load a new board while the game is active", ctrl), csOn)
                 csOn.handle(err) should be(err, csOn)
+
+                csOff.start shouldBe csOn
+                csOn.stop shouldBe csOff
             }
         }
     }

@@ -1,5 +1,11 @@
-import scala.compiletime.ops.boolean
-import de.htwg.se.chess._
+import de.htwg.se.chess.util.Matrix
+import de.htwg.se.chess.model.ChessBoard
+import de.htwg.se.chess.model.Piece._
+import de.htwg.se.chess.model.Piece
+import de.htwg.se.chess.model.PieceColor
+import de.htwg.se.chess.model.PieceType
+import de.htwg.se.chess.model.ChessField
+
 1 + 2
 case class Cell(value: Int) {
   def isSet: Boolean = value != 0
@@ -22,8 +28,6 @@ val house = House(Vector(cell1, cell2))
 house.cells(0).value
 house.cells(0).isSet
 
-import model.Piece
-import model.Piece._
 
 Piece.B_KING
 
@@ -49,8 +53,6 @@ B_KING
   def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
   def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))*/
 
-import model.Matrix
-import model.Matrix._
 
 val boardData = new Matrix[Option[Piece]](8, None)
 boardData.replace(4, 3, Some(B_ROOK))
@@ -83,7 +85,7 @@ val matri = new Matrix[Option[Piece]](8, None)
 val newMatr = matri.replace(1, 1, Some(B_KING))
 matri.cell(1, 1)
 
-import model.ChessBoard._
+import ChessBoard._
 
 val tmp = new Matrix[Option[Piece]](8, None)
 var pieceMatr = tmp.replace(0, 3, Some(W_KNIGHT))
@@ -166,28 +168,6 @@ carr1(1)
 carr2(0)
 carr2(1)
 
-import controller.Controller
-
-val ctrl = new Controller()
-
-ctrl.put("A1", "k")
-ctrl.field
-
-val tile1 = "A1".toCharArray
-val tile2 = "B3".toCharArray
-
-ctrl.move("A1", "B3")
-print(ctrl.fieldToString)
-
-val strw = "m B3 H7"
-
-val next = strw.split(" ")
-
-next(2)(0)
-next(2)(1)
-
-ctrl.move(next(1), next(2))
-print(ctrl.fieldToString)
 
 val file = 'B'
 
@@ -208,8 +188,6 @@ var pieceCount = 0
 arr.toSeq
 pieceCount
 
-import model.ChessField
-import model.ChessField._
 
 def fenSegToVector(fen: String): Vector[Option[Piece]] = {
   val chars = fen.toCharArray
@@ -293,14 +271,6 @@ val vecc = fenSegToVector("p3rK1Q")
 
 97.toChar
 
-val matrx = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-val cfx = ChessField(matrx)
-val ctrlx = Controller(cfx)
-
-ctrlx.fill("B_KING")
-print(ctrlx.fieldToString)
-ctrlx.put("A1", "W_KING")
-print(ctrlx.fieldToString)
 
 val testmtr = new Matrix[Option[Piece]](2, Some(W_KING))
 
@@ -347,3 +317,116 @@ def oobcheckCF(tile1: Array[Char], tile2: Array[Char]): Boolean = {
 'h'.toInt
 '1'.toInt
 '8'.toInt
+
+
+val g = for {
+  ii <- 10 to 0 by -1
+  jj <- 0 until 10
+}  yield (ii.toString,jj.toString);
+
+
+g.toList
+
+import scala.swing._
+import javax.swing.table._
+import scala.swing.event._
+
+import de.htwg.se.chess.controller._
+
+import java.awt.Color
+import de.htwg.se.chess.model.PieceColor
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
+import java.io.File
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+import javax.swing.ImageIcon
+
+val piece = Some(W_KING)
+
+val controller = new Controller()
+
+val imagePath = "src/main/resources/pieces/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png")
+val image =
+Try(ImageIO.read(new File(imagePath))) match {
+    case s: Success[BufferedImage] => s.value
+    case f: Failure[BufferedImage] => null
+}
+val icon = new ImageIcon(image)
+
+
+import de.htwg.se.chess.util.ChainHandler
+
+def one(in: Int) = if in > 3 then Some(in + 1) else None
+def two(in: Int) = if in > 1 then Some(in + 2) else None
+def three(in: Int) = if in > 0 then Some(in + 3) else None
+val chain = ChainHandler[Int](List(one, two, three))
+
+chain.handleRequest(2)
+
+val invo = new ChessCommandInvoker
+import de.htwg.se.chess.util.Command
+
+val chainInstanceChecker = ChainHandler[Command[ChessField]](
+    List(
+        checkClass(ErrorCommand("", new Controller(invo)).getClass) _, 
+        checkClass(SelectCommand(Nil, new Controller(invo)).getClass) _
+    )
+)
+
+def checkClass(typ: Class[_])(in: Command[ChessField]): Option[Command[ChessField]] = if in.getClass eq typ then Some(in) else None
+
+chainInstanceChecker.handleRequest(new MoveCommand(Nil, new Controller()))
+
+
+def classCheck(in: ChessCommand): Class[_] = in.getClass
+
+classCheck(new MoveCommand(Nil, new Controller()))
+
+MoveCommand(Nil, new Controller()).getClass == classCheck(new MoveCommand(Nil, new Controller()))
+
+val testCheck = checkClass(ErrorCommand("", new Controller(invo)).getClass) _
+
+
+
+val ctrl = new Controller
+val inv = ctrl.commandHandler
+val put = PutCommand(List("A1", "k"), ctrl)
+val move = MoveCommand(List("A1", "A2"), ctrl)
+val clear = ClearCommand(ctrl)
+val fens = FenCommand(List("pppppppp/8/8/8/8/8/QQQQ4/8"), ctrl)
+val sel = SelectCommand(List("A1"), ctrl)
+val err = ErrorCommand("Error", ctrl)
+
+
+inv.doStep(put)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(move)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(clear)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(fens)
+inv.undoStep.get
+inv.redoStep.get
+inv.doStep(err)
+inv.undoStep.get
+inv.redoStep.get 
+inv.doStep(sel)
+inv.undoStep.get
+inv.redoStep.get
+
+import de.htwg.se.chess.model.Tile
+
+val tile1 = new Tile(1, 2)
+val tile2 = Tile(1, 2, 3)
+
+tile1 == tile2
+tile1 + tile2
+tile1 + (2, 2)
+tile1 - (0, 1)
+
+tile2 - (1, 0)
