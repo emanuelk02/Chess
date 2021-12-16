@@ -1,21 +1,25 @@
 package de.htwg.se.chess
-package model
-package gameDataComponent
-package gameDataBaseImpl
+package util
 
-import model.GameTile
-
-case class Tile(file: Int, rank: Int, size: Int) extends GameTile(file, rank, size) {
+case class Tile(file: Int, rank: Int, size: Int) {
     assert(file > 0 && file <= size, "Invalid file")
     assert(rank > 0 && rank <= size, "Invalid rank")
 
-    override def ==(x: Tile) = this.file == x.file && this.rank == x.rank
+    def col: Int = file - 1
+    def row: Int = size - rank
 
-    override def +(x: Tuple2[Int, Int]): Tile = copy(file + x._1, rank + x._2)
-    override def +(x: Tile): Tile = copy(file + x.file, rank + x.rank)
+    def fileChar: Char = ('A' - 1 + file).toChar
+    def rankChar: Char = rank.toString.apply(0)
 
-    override def -(x: Tuple2[Int, Int]): Tile = copy(file - x._1, rank - x._2)
-    override def -(x: Tile): Tile = copy(file - x.file, rank - x.rank)
+    def apply(args: String, size: Int): Tile = Tile(args, size)
+
+    def ==(x: Tile) = this.file == x.file && this.rank == x.rank
+
+    def +(x: Tuple2[Int, Int]): Tile = copy(file + x._1, rank + x._2)
+    def +(x: Tile): Tile = copy(file + x.file, rank + x.rank)
+
+    def -(x: Tuple2[Int, Int]): Tile = copy(file - x._1, rank - x._2)
+    def -(x: Tile): Tile = copy(file - x.file, rank - x.rank)
 
     override def toString: String = ('A' - 1 + file).toChar.toString + rank.toString
 }

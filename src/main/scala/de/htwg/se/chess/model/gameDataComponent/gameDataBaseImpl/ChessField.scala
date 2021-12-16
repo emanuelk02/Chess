@@ -5,7 +5,7 @@ package gameDataBaseImpl
 
 import util.Matrix
 import ChessBoard.board
-import model.ChessField
+import util.Tile
 
 case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
 
@@ -52,7 +52,11 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
 
   override def toString: String = board(3, 1, field)
   
+  override def start = copy(field, state.start)
+  override def stop = copy(field, state.stop)
 
+  override def select(tile: Option[Tile]) = copy(field, state.select(tile))
+  def selected: Option[Tile] = state.selected
   
   def checkFile(check: Char): String = {
     if (

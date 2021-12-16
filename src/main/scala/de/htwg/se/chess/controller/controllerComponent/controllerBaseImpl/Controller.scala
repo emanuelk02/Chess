@@ -1,25 +1,25 @@
 package de.htwg.se.chess
-package controller
+package controller.controllerComponent
 
-import util.Observable
-import util.Matrix
-import model.ChessField
+import model.gameDataComponent.GameField
 import scala.swing.Publisher
 import scala.swing.event.Event
 import de.htwg.se.chess.util.Command
+import util.Tile
+import model.gameDataComponent.gameDataBaseImpl.ChessField
 
-case class Controller(var field: ChessField, val commandHandler: ChessCommandInvoker) extends Publisher {
+case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
   def this() = {
     this(new ChessField(), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
   def this(ch: ChessCommandInvoker) = {
-    this(new ChessField, ch)
+    this(new ChessField(), ch)
     this.field = field.loadFromFen(startingFen)
   }
 
-  def executeAndNotify(command: List[String] => ChessCommand, args: List[String]): Unit = {
+  def executeAndNotify(command: List[AnyRef] => ChessCommand, args: List[AnyRef]): Unit = {
     val cmd = command(args)
     field = commandHandler.doStep(cmd)
     publish(cmd.event)
@@ -34,9 +34,10 @@ case class Controller(var field: ChessField, val commandHandler: ChessCommandInv
   def put(args: List[String]): ChessCommand = new PutCommand(args, this)
   def clear(): ChessCommand = new ClearCommand(this)
   def putWithFen(args: List[String]): ChessCommand = new FenCommand(args, this)
+  def select(args: List[String]): ChessCommand = new SelectCommand(args, this)
 
-  def start: Unit = commandHandler.start
-  def stop: Unit = commandHandler.stop
+  def start: Unit = field = field.start
+  def stop: Unit = field = field.stop
 
   def undo: Unit = {
     field = commandHandler.undoStep.getOrElse(field)
@@ -56,15 +57,7 @@ case class Controller(var field: ChessField, val commandHandler: ChessCommandInv
     field.toString
   }
 
-  def select(rank: Int, file: Int): Unit = {
-    commandHandler.gameState.selected = Some(rank, file)
-    publish(Select(rank, file))
-  }
-  def unselect(rank: Int, file: Int): Unit = {
-    commandHandler.gameState.selected = None
-    publish(Select(rank, file))
-  }
-  def selected: String = commandHandler.selected
-  def isSelected(rank: Int, file: Int): Boolean = commandHandler.gameState.selected equals Some(rank, file)
-  def hasSelected: Boolean = commandHandler.gameState.selected.isDefined
+  def selected: Option[Tile] = field.selected
+  def isSelected(tile: Tile): Boolean = if hasSelected then field.selected.get == tile else false
+  def hasSelected: Boolean = field.selected.isDefined
 }

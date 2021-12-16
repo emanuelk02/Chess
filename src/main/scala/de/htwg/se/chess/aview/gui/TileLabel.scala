@@ -5,7 +5,7 @@ package gui
 import scala.swing._
 import javax.swing.table._
 import scala.swing.event._
-import controller._
+import controller.controllerComponent._
 import java.awt.Color
 import de.htwg.se.chess.model.PieceColor
 import javax.imageio.ImageIO
@@ -16,10 +16,10 @@ import scala.util.Success
 import scala.util.Failure
 import javax.swing.ImageIcon
 
-class TileLabel(row: Int, col: Int, controller: Controller) extends BoxPanel(Orientation.NoOrientation) {
-    def selectReaction = controller.select(row, col)
+class TileLabel(row: Int, col: Int, controller: ControllerInterface) extends BoxPanel(Orientation.NoOrientation) {
+    def selectReaction = controller.executeAndNotify(controller.select, List(Tile(row, col, size)))
     def unselectReaction = controller.unselect(row, col)
-    def moveReaction = { controller.executeAndNotify(controller.move, List(controller.selected, (('A' + col).toChar.toString + (row + 1).toString))) ; controller.unselect(controller.commandHandler.gameState.selected.get._1, controller.commandHandler.gameState.selected.get._2)}
+    def moveReaction = { controller.executeAndNotify(controller.move, List(controller.selected, Tile(row, col, size))); controller.unselect(controller.commandHandler.gameState.selected.get._1, controller.commandHandler.gameState.selected.get._2)}
 
     val tileColor =
         if ((row % 2 == 1 && col % 2 == 1) || (row % 2 == 0 && col % 2 == 0)) 
