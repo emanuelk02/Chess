@@ -57,6 +57,8 @@ case class Controller(var field: GameField, val commandHandler: ChessCommandInvo
     field.toString
   }
 
+  def cell(tile: Tile) = field.cell(tile)
+
   def selected: Option[Tile] = field.selected
   def isSelected(tile: Tile): Boolean = if hasSelected then field.selected.get == tile else false
   def hasSelected: Boolean = field.selected.isDefined

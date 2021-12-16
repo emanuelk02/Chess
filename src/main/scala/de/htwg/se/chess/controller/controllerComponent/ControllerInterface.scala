@@ -8,13 +8,13 @@ import util.Tile
 
 trait ControllerInterface(field: GameField) extends Publisher{
 
- def executeAndNotify(command: List[AnyRef] => ChessCommand, args: List[AnyRef]): Unit
+ def executeAndNotify[T](command: T => ChessCommand, args: T): Unit
  def executeAndNotify(command: () => ChessCommand): Unit
  def move(args: List[Tile]): ChessCommand
  def put(args: List[Tile]): ChessCommand
  def clear(): ChessCommand
  def putWithFen(args: List[String]): ChessCommand
- def select(args: List[Tile]): ChessCommand
+ def select(args: Option[Tile]): ChessCommand
 
  def start: Unit
  def stop: Unit
@@ -22,6 +22,7 @@ trait ControllerInterface(field: GameField) extends Publisher{
  def redo: Unit
  def exit: Unit
  def fieldToString: String
+ def cell(tile: Tile): Option[Piece]
  def selected: Option[Tile]
  def isSelected(tile: Tile): Boolean
  def hasSelected: Boolean

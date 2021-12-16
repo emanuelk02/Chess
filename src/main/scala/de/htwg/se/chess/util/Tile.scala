@@ -33,4 +33,7 @@ object Tile {
 
     def apply(args: List[String], size: Int): List[Tile] = args.map(s => Tile(s, size))
     def apply(args: List[String]): List[Tile] = args.map(s => Tile(s, 8))
+
+    def apply(row: Int, col: Int, size: Int) = new Tile(size - col, row + 1, size)
+    def apply(row: Int, col: Int) = new Tile(8 - col, row + 1, 8)
 }

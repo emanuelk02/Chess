@@ -11,15 +11,19 @@ import de.htwg.se.chess.model.PieceColor
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 import java.io.File
+import util.Tile
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 import javax.swing.ImageIcon
 
 class TileLabel(row: Int, col: Int, controller: ControllerInterface) extends BoxPanel(Orientation.NoOrientation) {
-    def selectReaction = controller.executeAndNotify(controller.select, List(Tile(row, col, size)))
-    def unselectReaction = controller.unselect(row, col)
-    def moveReaction = { controller.executeAndNotify(controller.move, List(controller.selected, Tile(row, col, size))); controller.unselect(controller.commandHandler.gameState.selected.get._1, controller.commandHandler.gameState.selected.get._2)}
+    def selectReaction   = controller.executeAndNotify(controller.select, Some(Tile(row, col)))
+    def unselectReaction = controller.executeAndNotify(controller.select, None)
+    def moveReaction     = {
+        controller.executeAndNotify(controller.move, List(controller.selected.get, Tile(row, col))); 
+        unselectReaction
+    }
 
     val tileColor =
         if ((row % 2 == 1 && col % 2 == 1) || (row % 2 == 0 && col % 2 == 0)) 
@@ -33,14 +37,14 @@ class TileLabel(row: Int, col: Int, controller: ControllerInterface) extends Box
     val imgIcon = newPicture
 
     preferredSize = new Dimension(100, 100)
-    background = if controller.isSelected(row, col) then selectedColor else tileColor
+    background = if controller.isSelected(Tile(row, col)) then selectedColor else tileColor
     contents += new Label("", imgIcon, Alignment.Center)
 
     listenTo(mouse.clicks)
 
     reactions += {
         case e: MouseClicked => {
-            if (controller.isSelected(row, col)) 
+            if (controller.isSelected(Tile(row, col)))
                 then unselectReaction
                 else if (controller.hasSelected) 
                     then { moveReaction }
@@ -49,7 +53,7 @@ class TileLabel(row: Int, col: Int, controller: ControllerInterface) extends Box
     }
 
     def newPicture: ImageIcon = {
-        val piece = controller.field.cell(col, 7 - row)
+        val piece = controller.cell(Tile(col, 7 - row))
         val imagePath = "src/main/resources/pieces/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png")
         val image: BufferedImage = 
         Try(ImageIO.read(new File(imagePath))) match {
@@ -62,7 +66,7 @@ class TileLabel(row: Int, col: Int, controller: ControllerInterface) extends Box
     def redraw = {
         contents.clear
         contents += new Label("", newPicture, Alignment.Center)
-        background = if controller.isSelected(row, col) then selectedColor else tileColor
+        background = if controller.isSelected(Tile(row, col)) then selectedColor else tileColor
         repaint()
     }
 }
