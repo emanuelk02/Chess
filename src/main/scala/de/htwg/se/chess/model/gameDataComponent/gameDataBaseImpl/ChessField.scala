@@ -1,55 +1,40 @@
 package de.htwg.se.chess
 package model
+package gameDataComponent
+package gameDataBaseImpl
 
 import util.Matrix
 import ChessBoard.board
+import model.ChessField
 
-case class ChessField(field: Matrix[Option[Piece]]):
-  val size = field.size
+case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
 
-  def this() = this(new Matrix(8, None))
-  def cell(file: Int, rank: Int): Option[Piece] = field.cell(rank, file)
-  def cell(tile: String): Option[Piece] = cell(fileCharToInt(tile(0)), rankCharToInt(tile(1)))
+  def this() = this(new Matrix(8, None), new ChessState())
 
-  def replace(file: Int, rank: Int, fill: Option[Piece]): ChessField = copy(field.replace(rank, file, fill))
-  def replace(tile: String, fill: String): ChessField = replace(
-    fileCharToInt(tile(0)),
-    rankCharToInt(tile(1)),
-    Piece.fromString(fill)
-  )
+  def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
+
+  def replace(tile: Tile, fill: Option[Piece]): ChessField = copy(field.replace(tile.row, tile.col, fill))
+  def replace(tile: Tile, fill: String):        ChessField = replace(tile, Piece.fromString(fill))
 
   def fill(filling: Option[Piece]): ChessField = copy(field.fill(filling))
-  def fill(filling: String): ChessField = fill(Piece.fromString(filling))
+  def fill(filling: String):        ChessField = fill(Piece.fromString(filling))
 
-  def move(tile1: Array[Char], tile2: Array[Char]): ChessField = {
-    assert(tile1.size == 2)
-    assert(tile2.size == 2)
-    val piece = field.cell(
-      rankCharToInt(tile1(1)),
-      fileCharToInt(tile1(0))
-    )
+  def move(tile1: Tile, tile2: Tile): ChessField = {
+    val piece = field.cell(tile1.row, tile1.col)
     copy(
       field
-        .replace(
-          rankCharToInt(tile2(1)),
-          fileCharToInt(tile2(0)),
-          piece
-        )
-        .replace(
-          rankCharToInt(tile1(1)),
-          fileCharToInt(tile1(0)),
-          None
-        )
+        .replace(tile2.row, tile2.col, piece)
+        .replace(tile1.row, tile1.col, None )
     )
   }
-  def move(tile1: String, tile2: String): ChessField =
-    move(tile1.toCharArray, tile2.toCharArray)
 
   def loadFromFen(fen: String): ChessField = {
     val fenList = fenToList(fen.toCharArray.toList, field.size).toVector
-    copy(Matrix(Vector.tabulate(field.size) { rank =>
-      fenList.drop((rank * field.size)).take(field.size)
-    }))
+    copy(
+      Matrix(
+        Vector.tabulate(field.size) { rank =>  fenList.drop(rank * field.size).take(field.size) }
+      )
+    )
   }
   def fenToList(fen: List[Char], size: Int): List[Option[Piece]] = {
     fen match {
@@ -66,9 +51,8 @@ case class ChessField(field: Matrix[Option[Piece]]):
   }
 
   override def toString: String = board(3, 1, field)
+  
 
-  def rankCharToInt(c: Char): Int = field.size - (c.toInt - '0'.toInt)
-  def fileCharToInt(c: Char): Int = c.toLower.toInt - 'a'.toInt
   
   def checkFile(check: Char): String = {
     if (
@@ -119,3 +103,4 @@ case class ChessField(field: Matrix[Option[Piece]]):
   def checkMove(tile1: String, tile2: String): String = {
     ""
   }
+}
