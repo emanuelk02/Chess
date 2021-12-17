@@ -28,7 +28,7 @@ import controller.controllerComponent._
 import util.Tile
 
 
-class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
+class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
     def top = new MainFrame {
         title = "HTWG CHESS"
 
@@ -44,14 +44,14 @@ class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
 
             // tiles
             for {
-                row <- fieldsize to 1 by -1
+                row <- 0 until fieldsize
                 col <- 0 to fieldsize
             } {
                 contents += (col match {
-                    case 0 => new Label((row).toString) { preferredSize = new Dimension(30,100) }
+                    case 0 => new Label((fieldsize - row).toString) { preferredSize = new Dimension(30,100) }
                     case _ => {
-                        tiles(row - 1)(col - 1) = new TileLabel(new Tile(col, row, fieldsize), controller)
-                        tiles(row - 1)(col - 1)
+                        tiles(row)(col - 1) = new TileLabel(Tile(row, col - 1, fieldsize), controller)
+                        tiles(row)(col - 1)
                     }
                 })
             }
@@ -72,20 +72,18 @@ class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
 
         reactions += {
             case e: CommandExecuted => redraw
-            case e: MoveEvent => {redraw
-                /*chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
+            case e: MoveEvent => {
+                chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
                 chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
                 contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
-                repaint()*/
             }
-            case e: Select => redraw
-                /*if e.tile.isDefined 
+            case e: Select =>
+                if e.tile.isDefined 
                     then {
                         chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).redraw)
                         contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
                     }
                     else redraw
-                repaint()*/
             case e: ErrorEvent => Dialog.showMessage(this, e.msg)
             case e: ExitEvent => closeOperation()
         }
@@ -100,6 +98,6 @@ class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
                 case _ => tiles(row)(col).redraw
             }
         }
-        contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) } 
+        contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
     }
   }
