@@ -2,8 +2,8 @@ package de.htwg.se.chess
 package util
 
 case class Tile(file: Int, rank: Int, size: Int) {
-    assert(file > 0 && file <= size, "Invalid file")
-    assert(rank > 0 && rank <= size, "Invalid rank")
+    assert(file > 0 && file <= size, "Invalid file " + file)
+    assert(rank > 0 && rank <= size, "Invalid rank " + rank)
 
     def col: Int = file - 1
     def row: Int = size - rank
@@ -21,7 +21,7 @@ case class Tile(file: Int, rank: Int, size: Int) {
     def -(x: Tuple2[Int, Int]): Tile = copy(file - x._1, rank - x._2)
     def -(x: Tile): Tile = copy(file - x.file, rank - x.rank)
 
-    override def toString: String = ('A' - 1 + file).toChar.toString + rank.toString
+    override def toString: String = fileChar.toString + rank.toString
 }
 
 object Tile {
@@ -34,6 +34,6 @@ object Tile {
     def apply(args: List[String], size: Int): List[Tile] = args.map(s => Tile(s, size))
     def apply(args: List[String]): List[Tile] = args.map(s => Tile(s, 8))
 
-    def apply(row: Int, col: Int, size: Int) = new Tile(size - col, row + 1, size)
-    def apply(row: Int, col: Int) = new Tile(8 - col, row + 1, 8)
+    def apply(row: Int, col: Int, size: Int) = new Tile(col + 1, size - row, size)
+    def apply(row: Int, col: Int): Tile = apply(col, row, 8)
 }

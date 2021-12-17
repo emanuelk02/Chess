@@ -4,7 +4,6 @@ package gameDataComponent
 
 import util.Matrix
 import util.Tile
-import ChessBoard.board
 
 trait GameField(field: Matrix[Option[Piece]]) {
     val size = field.size
@@ -26,6 +25,4 @@ trait GameField(field: Matrix[Option[Piece]]) {
 
     def start: GameField
     def stop:  GameField
-
-    override def toString: String = board(3, 1, field)
 }

@@ -4,17 +4,17 @@ package gui
 
 /* Useful reference: https://stackoverflow.com/questions/21077322/create-a-chess-board-with-jpanel */
 
-import controller._
-
+import util.Tile
 import scala.io.Source._
 import scala.swing._
 import scala.swing.Swing.LineBorder
 import scala.swing.event._
 import javax.swing.Icon
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+import controller.controllerComponent._
 
 
-class GuiDemo(controller: Controller) extends SimpleSwingApplication:
+class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
     def top = new MainFrame {
         title = "HTWG CHESS"
 
@@ -31,8 +31,8 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
             }
         }
 
-        val fieldsize = controller.field.size
-        var tiles = Array.tabulate[TileLabel](fieldsize, fieldsize) { (row, col) => new TileLabel(row, col, controller) }
+        val fieldsize = 8
+        var tiles = Array.tabulate[TileLabel](fieldsize, fieldsize) { (row, col) => new TileLabel(Tile(row, col, fieldsize), controller) }
 
         def chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
             border = LineBorder(java.awt.Color.BLACK)
@@ -40,14 +40,14 @@ class GuiDemo(controller: Controller) extends SimpleSwingApplication:
 
             // tiles
             for {
-                row <- fieldsize - 1 to 0 by -1
-                col <- -1 until fieldsize
+                row <- fieldsize to 1 by -1
+                col <- 0 to fieldsize
             } {
                 contents += (col match {
-                    case -1 => new Label((row + 1).toString) { preferredSize = new Dimension(30,100) }
+                    case 0 => new Label((row).toString) { preferredSize = new Dimension(30,100) }
                     case _ => {
-                        tiles(row)(col) = new TileLabel(row, col, controller)
-                        tiles(row)(col)
+                        tiles(row - 1)(col - 1) = new TileLabel(new Tile(col, row, fieldsize), controller)
+                        tiles(row - 1)(col - 1)
                     }
                 })
             }

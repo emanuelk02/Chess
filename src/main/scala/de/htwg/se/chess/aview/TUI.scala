@@ -10,8 +10,10 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 import scala.reflect.ManifestFactory.NothingManifest
+import controller.controllerComponent._
+import util.Tile
 
-class TUI(controller: Controller) extends Reactor {
+class TUI(controller: ControllerInterface) extends Reactor {
   var exitFlag = false
   listenTo(controller)
 
@@ -19,7 +21,6 @@ class TUI(controller: Controller) extends Reactor {
     case e: CommandExecuted => update
     case e: MoveEvent => update; print("Move" + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
-    case e: Select => print((('A' + e.file).toChar.toString + (e.rank + 1).toString) + (if (controller.isSelected(e.rank, e.file)) then " selected\n" else " unselected\n"));
     case e: ExitEvent => exitFlag = true
   }
 
@@ -28,8 +29,6 @@ class TUI(controller: Controller) extends Reactor {
   )
   update
   print("\n\n")
-
-  def this() = this(new Controller())
 
   @tailrec
   final def run: Unit = {
@@ -54,13 +53,13 @@ class TUI(controller: Controller) extends Reactor {
             printHelp()
         }
         case "i" | "insert" | "put" =>  //----------------------- Insert / Put
-            controller.executeAndNotify(controller.put, List(in(1), in(2)))
+            controller.executeAndNotify(controller.put, (Tile(in(1)), in(2)))
         case "m" | "move" =>  //----------------------- Move
-            controller.executeAndNotify(controller.move, List(in(1), in(2)))
+            controller.executeAndNotify(controller.move, List(Tile(in(1)), Tile(in(2))))
         case "cl" | "clear" =>  //----------------------- Fill
           controller.executeAndNotify(controller.clear)
         case "fen" | "loadfen" =>  //----------------------- FenString
-            controller.executeAndNotify(controller.putWithFen, List(in(1)))
+            controller.executeAndNotify(controller.putWithFen, in(1))
         case "z" | "undo" =>
           controller.undo
         case "y" | "redo" =>

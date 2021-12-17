@@ -1,17 +1,16 @@
 package de.htwg.se.chess
-package controller.controllerComponent
+package controller
+package controllerComponent
+package controllerBaseImpl
 
 import util.CommandInvoker
 import util.Command
-import util.Matrix
-import model.ChessField
-import scala.swing.event.Event
 import util.ChainHandler
 import model.gameDataComponent.GameField
 import controllerMockImpl.MockController
 
 class ChessCommandInvoker extends CommandInvoker[GameField] {
-    val mockCtrl = new Controller()
+    val mockCtrl = new MockController
     override def doStep(command: Command[GameField]) = {
         if chainInstanceChecker.handleRequest(command).isDefined 
             then undoStack = command::undoStack
@@ -20,8 +19,8 @@ class ChessCommandInvoker extends CommandInvoker[GameField] {
 
     val chainInstanceChecker = ChainHandler[Command[GameField]](
         List(
-            checkClass(ErrorCommand("", mockCtrl).getClass) _, 
-            checkClass(SelectCommand(Nil, mockCtrl).getClass) _
+            checkClass(ErrorCommand("", mockCtrl.field).getClass) _,
+            checkClass(SelectCommand(None, mockCtrl.field).getClass) _
         )
     )
 

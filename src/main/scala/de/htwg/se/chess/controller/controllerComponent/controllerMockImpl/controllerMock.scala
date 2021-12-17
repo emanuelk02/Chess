@@ -6,16 +6,20 @@ package controllerMockImpl
 import model.gameDataComponent.gameDataBaseImpl.{ChessField, ChessState}
 import util.Matrix
 import util.Tile
+import model.Piece
+import model.gameDataComponent.GameField
 
 class MockController extends ControllerInterface(ChessField(Matrix(Vector()), new ChessState())) {
+  val field: GameField = new ChessField
 
-  def executeAndNotify(command: List[AnyRef] => ChessCommand, args: List[AnyRef]): Unit = { }
-  def executeAndNotify(command: () => ChessCommand): Unit = { }
+  def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
+  def executeAndNotify(command: () => CommandInterface): Unit = { }
 
-  def move(args: List[String]): ChessCommand = throw new UnsupportedOperationException()
-  def put(args: List[String]): ChessCommand = throw new UnsupportedOperationException()
-  def clear(): ChessCommand = throw new UnsupportedOperationException()
-  def putWithFen(args: List[String]): ChessCommand = throw new UnsupportedOperationException()
+  def move(args: List[Tile]): CommandInterface = throw new UnsupportedOperationException()
+  def put(args: Tuple2[Tile, String]): CommandInterface = throw new UnsupportedOperationException()
+  def clear(): CommandInterface = throw new UnsupportedOperationException()
+  def putWithFen(args: String): CommandInterface = throw new UnsupportedOperationException()
+  def select(tile: Option[Tile]): CommandInterface = throw new UnsupportedOperationException()
 
   def start: Unit = { }
   def stop: Unit = { }
@@ -28,7 +32,7 @@ class MockController extends ControllerInterface(ChessField(Matrix(Vector()), ne
 
   def fieldToString: String = ""
 
-  def select(rank: Int, file: Int): Unit = { }
+  def cell(tile: Tile): Option[Piece] = None
   def unselect(rank: Int, file: Int): Unit = { }
   def selected: Option[Tile] = None
   def isSelected(tile: Tile): Boolean = false

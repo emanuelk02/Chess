@@ -1,6 +1,5 @@
 package de.htwg.se.chess
-package model
-package gameDataComponent
+package util
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
@@ -24,7 +23,7 @@ class TileSpec extends AnyWordSpec {
             an [AssertionError] should be thrownBy Tile("C2", 2)
         }
         "be manipulatable with + and - operators and comparable with ==" in {
-            val tile1 = new Tile(2, 2)
+            val tile1 = Tile(2, 2)
             val tile2 = Tile(2, 2, 3)
 
             tile1 == tile2 shouldBe true

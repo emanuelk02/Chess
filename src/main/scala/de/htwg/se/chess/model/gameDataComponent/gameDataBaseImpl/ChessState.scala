@@ -3,7 +3,6 @@ package model
 package gameDataComponent
 package gameDataBaseImpl
 
-import model.ChessField
 import model.PieceColor
 import util.Tile
 

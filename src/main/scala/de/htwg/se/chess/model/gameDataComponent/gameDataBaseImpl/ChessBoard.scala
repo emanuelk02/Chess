@@ -1,5 +1,7 @@
 package de.htwg.se.chess
 package model
+package gameDataComponent
+package gameDataBaseImpl
 
 import util.Matrix
 import util.Matrix._

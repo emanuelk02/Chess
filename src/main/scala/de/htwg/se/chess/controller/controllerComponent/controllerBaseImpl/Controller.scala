@@ -1,5 +1,7 @@
 package de.htwg.se.chess
-package controller.controllerComponent
+package controller
+package controllerComponent
+package controllerBaseImpl
 
 import model.gameDataComponent.GameField
 import scala.swing.Publisher
@@ -19,22 +21,22 @@ case class Controller(var field: GameField, val commandHandler: ChessCommandInvo
     this.field = field.loadFromFen(startingFen)
   }
 
-  def executeAndNotify(command: List[AnyRef] => ChessCommand, args: List[AnyRef]): Unit = {
+  def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = {
     val cmd = command(args)
     field = commandHandler.doStep(cmd)
     publish(cmd.event)
   }
-  def executeAndNotify(command: () => ChessCommand): Unit = {
+  def executeAndNotify(command: () => CommandInterface): Unit = {
     val cmd = command()
     field = commandHandler.doStep(cmd)
     publish(cmd.event)
   }
 
-  def move(args: List[String]): ChessCommand = new MoveCommand(args, this)
-  def put(args: List[String]): ChessCommand = new PutCommand(args, this)
-  def clear(): ChessCommand = new ClearCommand(this)
-  def putWithFen(args: List[String]): ChessCommand = new FenCommand(args, this)
-  def select(args: List[String]): ChessCommand = new SelectCommand(args, this)
+  def move(args: List[Tile]): ChessCommand = new MoveCommand(args, field)
+  def put(args: Tuple2[Tile, String]): ChessCommand = new PutCommand(args, field)
+  def clear(): ChessCommand = new ClearCommand(field)
+  def putWithFen(args: String): ChessCommand = new FenCommand(args, field)
+  def select(args: Option[Tile]): ChessCommand = new SelectCommand(args, field)
 
   def start: Unit = field = field.start
   def stop: Unit = field = field.stop
