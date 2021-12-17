@@ -13,11 +13,11 @@ import model.gameDataComponent.gameDataBaseImpl.ChessField
 case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
   def this() = {
-    this(new ChessField(), new ChessCommandInvoker)
+    this(GameField(), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
   def this(ch: ChessCommandInvoker) = {
-    this(new ChessField(), ch)
+    this(GameField(), ch)
     this.field = field.loadFromFen(startingFen)
   }
 

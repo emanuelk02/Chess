@@ -3,14 +3,12 @@ package controller
 package controllerComponent
 package controllerMockImpl
 
-import model.gameDataComponent.gameDataBaseImpl.{ChessField, ChessState}
 import util.Matrix
 import util.Tile
 import model.Piece
 import model.gameDataComponent.GameField
 
-class MockController extends ControllerInterface(ChessField(Matrix(Vector()), new ChessState())) {
-  val field: GameField = new ChessField
+class MockController extends ControllerInterface(GameField()) {
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
   def executeAndNotify(command: () => CommandInterface): Unit = { }

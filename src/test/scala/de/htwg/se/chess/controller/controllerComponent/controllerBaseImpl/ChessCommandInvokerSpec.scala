@@ -1,32 +1,29 @@
 package de.htwg.se.chess
 package controller
+package controllerComponent
+package controllerBaseImpl
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import model._
 import model.Piece._
+import model.gameDataComponent.GameField
 import util.Matrix
+import util.Tile
 
 class ChessCommandInvokerSpec extends AnyWordSpec {
     "A ChessCommandInvoker" when {
         "you're not playing" should {
-            val ctrl = new Controller
-            val inv = ctrl.commandHandler
+            val field = GameField()
+            val inv = new ChessCommandInvoker
 
-            val put = PutCommand(List("A1", "k"), ctrl)
-            val move = MoveCommand(List("A1", "A2"), ctrl)
-            val clear = ClearCommand(ctrl)
-            val fen = FenCommand(List("pppppppp/8/8/8/8/8/QQQQ4/8"), ctrl)
-            val sel = SelectCommand(List("A1"), ctrl)
-            val err = ErrorCommand("Error", ctrl)
-            "handle any command from Controller" in { // deprecating
-                inv.handle(put) should be(put)
-                inv.handle(move) should be(move)
-                inv.handle(clear) should be(clear)
-                inv.handle(fen) should be(fen)
-                inv.handle(err) should be(err)
-            }
+            val put = PutCommand((Tile("A1"), "k"), field)
+            val move = MoveCommand(List(Tile("A1"), Tile("A2")), field)
+            val clear = ClearCommand(field)
+            val fen = FenCommand("pppppppp/8/8/8/8/8/QQQQ4/8", field)
+            val sel = SelectCommand(Some(Tile("A1")), field)
+            val err = ErrorCommand("Error", field)
             "allow to execute and remember all these commands over the controller but not change on error" in {
                 inv.doStep(put) should be(put.execute)
                 inv.undoStep.get should be(put.undo)
@@ -44,13 +41,13 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
                 inv.undoStep.get should be(fen.undo)
                 inv.redoStep.get should be(fen.redo)
 
-                inv.doStep(err) should be(ctrl.field)
-                inv.undoStep.get should be(ctrl.field)
-                inv.redoStep.get should be(ctrl.field)
+                inv.doStep(err) should be(field)
+                inv.undoStep.get should be(field)
+                inv.redoStep.get should be(field)
 
-                inv.doStep(sel) should be(ctrl.field)
-                inv.undoStep.get should be(ctrl.field)
-                inv.redoStep.get should be(ctrl.field)
+                inv.doStep(sel) should be(field)
+                inv.undoStep.get should be(field)
+                inv.redoStep.get should be(field)
             }
         }
     }
