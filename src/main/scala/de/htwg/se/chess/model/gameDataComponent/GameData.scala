@@ -2,6 +2,7 @@ package de.htwg.se.chess
 package model
 package gameDataComponent
 
+import gameDataBaseImpl.ChessField
 import util.Matrix
 import util.Tile
 
@@ -25,4 +26,10 @@ trait GameField(field: Matrix[Option[Piece]]) {
 
     def start: GameField
     def stop:  GameField
+}
+
+object GameField {
+    def apply(): GameField = {
+        ChessField()
+    }
 }

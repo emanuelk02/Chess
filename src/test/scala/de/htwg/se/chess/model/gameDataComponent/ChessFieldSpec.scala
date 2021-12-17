@@ -1,60 +1,62 @@
 package de.htwg.se.chess
 package model
+package gameDataComponent
+package gameDataBaseImpl
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import util.Matrix
 import model.Piece._
+import util.Tile
 
 class ChessFieldSpec extends AnyWordSpec {
   "A ChessField" when {
     "empty" should {
       "be created calling the explicit Constructor" in {
-        val cf = new ChessField()
+        val cf = ChessField()
         cf.field.size should be(8)
         cf.field.rows.forall(r => r.forall(p => p == None)) should be(true)
       }
       "be instantiated with a full Matrix given as a Vector of Vectors" in {
-        val matr =
-          Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
+        val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
         val cf = ChessField(matr)
         cf.field.size should be(1)
         cf.field.cell(0, 0).get should be(W_PAWN)
         cf.field.cell(0, 1).get should be(B_KING)
-        cf.cell(0, 0).get should be(W_PAWN)
-        cf.cell(1, 0).get should be(B_KING)
-        cf.cell("A1").get should be(W_PAWN)
-        cf.cell("B1").get should be(B_KING)
+        cf.cell(Tile(0, 0)).get should be(W_PAWN)
+        cf.cell(Tile(1, 0)).get should be(B_KING)
+        cf.cell(Tile("A1")).get should be(W_PAWN)
+        cf.cell(Tile("B1")).get should be(B_KING)
       }
     }
     "filled" should {
       val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
       val cf = ChessField(matr)
       "return contents from single cells using file: Int, rank: Int or String parameters" in {
-        val cf_temp = cf.replace("A1", "B_KING").replace("B2", "B_QUEEN")
-        cf_temp.cell(0, 1) should be(Some(B_KING)) // A1
-        cf_temp.cell(1, 1) should be(Some(W_BISHOP)) // B1
-        cf_temp.cell(0, 0) should be(Some(W_BISHOP)) // A2
-        cf_temp.cell(1, 0) should be(Some(B_QUEEN)) // B2
-        cf_temp.cell("A1") should be(Some(B_KING)) // A1
-        cf_temp.cell("B1") should be(Some(W_BISHOP)) // B1
-        cf_temp.cell("a2") should be(Some(W_BISHOP)) // A2
-        cf_temp.cell("b2") should be(Some(B_QUEEN)) // B2
+        val cf_temp = cf.replace(Tile("A1"), "B_KING").replace(Tile("B2"), "B_QUEEN")
+        cf_temp.cell(Tile(0, 1)) should be(Some(B_KING)) // A1
+        cf_temp.cell(Tile(1, 1)) should be(Some(W_BISHOP)) // B1
+        cf_temp.cell(Tile(0, 0)) should be(Some(W_BISHOP)) // A2
+        cf_temp.cell(Tile(1, 0)) should be(Some(B_QUEEN)) // B2
+        cf_temp.cell(Tile("A1")) should be(Some(B_KING)) // A1
+        cf_temp.cell(Tile("B1")) should be(Some(W_BISHOP)) // B1
+        cf_temp.cell(Tile("a2")) should be(Some(W_BISHOP)) // A2
+        cf_temp.cell(Tile("b2")) should be(Some(B_QUEEN)) // B2
       }
       "not have a diferent sized matrix based on contents" in {
         cf.field.size should be(2)
-        cf.replace(0, 0, Some(B_KING)).field.size should be(matr.size)
-        cf.replace(0, 1, Some(B_KING)).field.size should be(matr.size)
+        cf.replace(Tile(0, 0), Some(B_KING)).field.size should be(matr.size)
+        cf.replace(Tile(0, 1), Some(B_KING)).field.size should be(matr.size)
         cf.fill(None).field.size should be(matr.size)
       }
       "throw an IndexOutOfBoundsException when trying to access fields outside of the matrix" in {
-        an[IndexOutOfBoundsException] should be thrownBy cf.cell('B', 0)
-        an[IndexOutOfBoundsException] should be thrownBy cf.cell('C', 2)
-        an[IndexOutOfBoundsException] should be thrownBy cf.cell('B', 3)
-        an[IndexOutOfBoundsException] should be thrownBy cf.cell('Z', 2)
+        an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile('B', 0))
+        an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile('C', 2))
+        an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile('B', 3))
+        an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile('Z', 2))
       }
       "allow to replace single cells at any location by either an Option or String and return the new ChessField" in {
-        cf.replace(0, 0, Some(B_KING)) should be(
+        cf.replace(Tile(0, 0), Some(B_KING)) should be(
           ChessField(
             Matrix(
               Vector(
@@ -64,7 +66,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.replace(1, 1, Some(B_KING)) should be(
+        cf.replace(Tile(1, 1), Some(B_KING)) should be(
           ChessField(
             Matrix(
               Vector(
@@ -75,7 +77,7 @@ class ChessFieldSpec extends AnyWordSpec {
           )
         )
 
-        cf.replace("A1", "B_KING") should be(
+        cf.replace(Tile("A1"), "B_KING") should be(
           ChessField(
             Matrix(
               Vector(
@@ -85,7 +87,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.replace("B2", "B_KING") should be(
+        cf.replace(Tile("B2"), "B_KING") should be(
           ChessField(
             Matrix(
               Vector(
@@ -95,7 +97,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.replace("A1", "k") should be(
+        cf.replace(Tile("A1"), "k") should be(
           ChessField(
             Matrix(
               Vector(
@@ -105,7 +107,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.replace("B2", "k") should be(
+        cf.replace(Tile("B2"), "k") should be(
           ChessField(
             Matrix(
               Vector(
@@ -150,7 +152,7 @@ class ChessFieldSpec extends AnyWordSpec {
       }
       "allow to move contents of one tile into another" in {
         val cf = ChessField(matr.replace(1, 0, Some(B_KING)))
-        cf.move("A1".toCharArray, "B1".toCharArray) should be(
+        cf.move(Tile("A1"), Tile("B1")) should be(
           ChessField(
             Matrix(
               Vector(
@@ -160,7 +162,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.move("A1", "B1") should be(
+        cf.move(Tile("A1"), Tile("B1")) should be(
           ChessField(
             Matrix(
               Vector(
@@ -170,7 +172,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.move("A1".toCharArray, "A2".toCharArray) should be(
+        cf.move(Tile("A1"), Tile("A2")) should be(
           ChessField(
             Matrix(
               Vector(
@@ -180,7 +182,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.move("A1", "A2") should be(
+        cf.move(Tile("A1"), Tile("A2")) should be(
           ChessField(
             Matrix(
               Vector(
@@ -282,7 +284,7 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.checkMove("", "") should be("")
       }
       "have a string representation like specified in ChessBoard" in {
-        import model.ChessBoard.board
+        import gameDataBaseImpl.ChessBoard.board
         cf.toString should be(board(3, 1, cf.field))
       }
     }

@@ -9,8 +9,6 @@ import util.Tile
 
 case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
 
-  def this() = this(new Matrix(8, None), new ChessState())
-
   def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
   def replace(tile: Tile, fill: Option[Piece]): ChessField = copy(field.replace(tile.row, tile.col, fill))
@@ -107,4 +105,9 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
   def checkMove(tile1: String, tile2: String): String = {
     ""
   }
+}
+
+object ChessField {
+  def apply(): ChessField = new ChessField(new Matrix(8, None), new ChessState())
+  def apply(field: Matrix[Option[Piece]]): ChessField = new ChessField(field, new ChessState())
 }
