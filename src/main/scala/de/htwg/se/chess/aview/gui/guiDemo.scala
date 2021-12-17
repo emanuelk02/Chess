@@ -21,7 +21,8 @@ import scala.swing.Swing.LineBorder
 import scala.swing.event._
 
 import javax.swing.Icon
-import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+import javax.swing.WindowConstants.EXIT_ON_CLOSE
+import javax.swing.SwingConstants
 
 import controller.controllerComponent._
 import util.Tile
@@ -32,22 +33,12 @@ class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
         title = "HTWG CHESS"
 
         listenTo(controller)
-        peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+        peer.setDefaultCloseOperation(EXIT_ON_CLOSE)
 
-        override def closeOperation() = {
-            Dialog.showConfirmation(parent = this,
-                title = "Exit",
-                message = "Are you sure you want to quit?"
-            ) match {
-                case Dialog.Result.Ok => controller.exit
-                case _ => ()
-            }
-        }
+        val fieldsize = controller.size
+        var tiles = Array.ofDim[TileLabel](fieldsize, fieldsize)
 
-        val fieldsize = 8
-        var tiles = Array.tabulate[TileLabel](fieldsize, fieldsize) { (row, col) => new TileLabel(Tile(row, col, fieldsize), controller) }
-
-        def chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
+        val chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
             border = LineBorder(java.awt.Color.BLACK)
             background = java.awt.Color.LIGHT_GRAY
 
@@ -76,18 +67,27 @@ class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
             }
         }
 
-        contents = new BorderPanel {
-            add(chessBoard, BorderPanel.Position.Center)
-        }
-
+        contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) } 
         visible = true
 
         reactions += {
             case e: CommandExecuted => redraw
-            case e: MoveEvent => redraw //tiles(controller.field.rankCharToInt(e.tile2(1)))(controller.field.fileCharToInt(e.tile2(0))).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
-            case e: Select => redraw //tiles(e.rank)(e.file).redraw; contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
+            case e: MoveEvent => {redraw
+                /*chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
+                chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
+                contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
+                repaint()*/
+            }
+            case e: Select => redraw
+                /*if e.tile.isDefined 
+                    then {
+                        chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).redraw)
+                        contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
+                    }
+                    else redraw
+                repaint()*/
             case e: ErrorEvent => Dialog.showMessage(this, e.msg)
-            case e: ExitEvent => quit()
+            case e: ExitEvent => closeOperation()
         }
 
         def redraw = {
@@ -100,6 +100,6 @@ class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:
                 case _ => tiles(row)(col).redraw
             }
         }
-        contents = new BorderPanel {add(chessBoard, BorderPanel.Position.Center)}
+        contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) } 
     }
   }

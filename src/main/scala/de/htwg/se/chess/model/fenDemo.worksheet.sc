@@ -1,7 +1,9 @@
+import scala.swing.Component
+import scala.collection.mutable.Buffer
 import de.htwg.se.chess._
 import model.Piece
 import model.Piece._
-import model.ChessField
+import model.gameDataComponent.gameDataBaseImpl._
 import util.Matrix
 
 val fen = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
@@ -9,7 +11,7 @@ val fen = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
 val arr = fen.split("/").map(s => s.toCharArray.toList)
 
 arr(0) match {
-    case s::rest => if s.isDigit then List.fill(s.toInt - '0'.toInt)(None):::rest else Piece.fromChar(s)
+    case s::rest => if s.isDigit then List.fill(s.toInt - '0'.toInt)(None):::rest else Piece(s)
     case _ => List.fill(8)(None)
 }
 
@@ -24,7 +26,7 @@ def loadFromFen(fen: String): ChessField = {
             case '/'::rest => List.fill(size)(None):::fenToList(rest, 8)
             case s::rest => if s.isDigit 
                 then List.fill(s.toInt - '0'.toInt)(None):::fenToList(rest, size - (s.toInt - '0'.toInt))
-                else Piece.fromChar(s)::fenToList(rest, size - 1)
+                else Piece(s)::fenToList(rest, size - 1)
             case _ => List.fill(size)(None)
         }
     }
@@ -64,12 +66,58 @@ val res = for ( s <- splitted) yield {
     else ""
 }
 
-import controller.Controller
-import controller.MoveCommand
-
-val matr2 = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-val cf = ChessField(matr2).replace("A1", "B_KING").replace("B2", "B_KING")
-val ctrl = Controller(cf)
-val move = MoveCommand(List("A1", "A2"), ctrl)
+val screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+val height = (screenSize.getHeight() / (8 + 2)).toInt
 
 
+val contents = Buffer[Component]()
+
+import aview.gui.TileLabel
+import scala.io.Source._
+import scala.swing._
+import scala.swing.Swing.LineBorder
+import scala.swing.event._
+
+import javax.swing.Icon
+import javax.swing.WindowConstants.EXIT_ON_CLOSE
+import javax.swing.SwingConstants
+
+import controller.controllerComponent.controllerBaseImpl.Controller
+import util.Tile
+
+val ctrlt = new Controller()
+
+var tiles = Array.ofDim[Tuple2[Int, Int]](fieldsize, fieldsize)
+val chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
+    border = LineBorder(java.awt.Color.BLACK)
+    background = java.awt.Color.LIGHT_GRAY
+    // tiles
+    for {
+        row <- fieldsize to 1 by -1
+        col <- 0 to fieldsize
+    } {
+        this.contents += (col match {
+            case 0 => new Label((row).toString) { preferredSize = new Dimension(30,100) }
+            case _ => {
+                tiles(row - 1)(col - 1) = (row, col)
+                new Label() { text = tiles(row - 1)(col - 1).toString }
+            }
+        })
+    }
+    // bottom row; file indicators
+    for {
+        col <- 0 to fieldsize
+    } {
+        this.contents += (col match {
+            case 0 => new Label("") { preferredSize = new Dimension(30,30) }
+            case _ => new Label(('A'.toInt + col - 1).toChar.toString) { preferredSize = new Dimension(100,30) }
+            }
+        )
+    }
+}
+
+chessBoard.contents.toList.foreach{ s => print(s.asInstanceOf[Label].text)}
+chessBoard.contents.update(2, new Label() {text = (-1,-1).toString} )
+chessBoard.contents.toList.foreach{ s => print(s.asInstanceOf[Label].text)}
+val tes = chessBoard.contents(2)
+tes.asInstanceOf[Label].text

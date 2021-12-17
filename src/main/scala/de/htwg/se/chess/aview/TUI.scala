@@ -29,8 +29,9 @@ class TUI(controller: ControllerInterface) extends Reactor {
 
   reactions += {
     case e: CommandExecuted => update
-    case e: MoveEvent => update; print("Move" + e.tile1 + " to " + e.tile2 + "\n")
+    case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
+    case e: Select => print("Select " + e.tile)
     case e: ExitEvent => exitFlag = true
   }
 

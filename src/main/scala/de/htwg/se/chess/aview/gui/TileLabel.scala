@@ -21,6 +21,8 @@ import scala.util.Failure
 
 import java.io.File
 import java.awt.Color
+import java.awt.Image._
+import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import javax.swing.ImageIcon
 import javax.swing.table._
@@ -31,13 +33,16 @@ import model.PieceColor
 import util.Tile
 
 
-class TileLabel(tile: Tile, controller: ControllerInterface) extends BoxPanel(Orientation.NoOrientation) {
+class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1, 1) {
     def selectReaction   = controller.executeAndNotify(controller.select, Some(tile))
     def unselectReaction = controller.executeAndNotify(controller.select, None)
     def moveReaction     = {
         controller.executeAndNotify(controller.move, (controller.selected.get, tile));
         unselectReaction
     }
+    val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize();
+    val height = (screenSize.getHeight() / (controller.size + 2)).toInt
+    val dim = new Dimension(height, height)
 
     val tileColor =
         if ((tile.rank % 2 == 1 && tile.file % 2 == 1) || (tile.rank % 2 == 0 && tile.file % 2 == 0)) 
@@ -50,9 +55,9 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends BoxPanel(Or
 
     val imgIcon = newPicture
 
-    preferredSize = new Dimension(100, 100)
+    preferredSize = dim
     background = if controller.isSelected(tile) then selectedColor else tileColor
-    contents += new Label("", imgIcon, Alignment.Center)
+    contents += new Label("", imgIcon, Alignment.Center) { preferredSize = dim }
 
     listenTo(mouse.clicks)
 
@@ -66,21 +71,24 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends BoxPanel(Or
         }
     }
 
+    val style = "vipping"
+
     def newPicture: ImageIcon = {
         val piece = controller.cell(tile)
-        val imagePath = "src/main/resources/pieces/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png")
+        val imagePath = "src/main/resources/pieces/vipping/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png") 
         val image: BufferedImage = 
         Try(ImageIO.read(new File(imagePath))) match {
             case s: Success[BufferedImage] => s.value
-            case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)}
+            case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
         }
-        new ImageIcon(image)
+        new ImageIcon(image.getScaledInstance((dim.width * 0.8).toInt, (dim.height * 0.8).toInt, SCALE_SMOOTH))
     }
 
-    def redraw = {
+    def redraw: TileLabel = {
         contents.clear
         contents += new Label("", newPicture, Alignment.Center)
         background = if controller.isSelected(tile) then selectedColor else tileColor
         repaint()
+        this
     }
 }
