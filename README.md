@@ -191,10 +191,3 @@ Mappings:
  - **'P'** = *Pawn*
 
 ---
-
-
-
-[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=bisell-mar&theme=highcontrast&hide_border=true&date_format=j%20M%5B%20Y%5D&stroke=DD2727E1&background=140E17&currStreakLabel=3FD9C9&dates=E1B404)](https://git.io/streak-stats)
-
-
-[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=emanuelk02&theme=highcontrast&hide_border=true&date_format=j%20M%5B%20Y%5D&stroke=DD2727E1&background=140E17&currStreakLabel=3FD9C9&dates=E1B404)](https://git.io/streak-stats)
