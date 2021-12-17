@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -15,7 +15,7 @@ package gameDataComponent
 package gameDataBaseImpl
 
 import util.Matrix
-import util.Matrix._
+
 
 object ChessBoard {
     val eol = sys.props("line.separator")
@@ -58,7 +58,6 @@ object ChessBoard {
     def board[T](width: Int, height: Int, pieces: Matrix[Option[T]]) : String = {
         assert(height > 0, "Illegal height")
         assert(width > 0, "Illegal width")
-        //ensure that matrix has quadratic/symmetric dimension across all vectors?
 
         val pieceWidth = pieces.rows.map(r => r.maxBy(f = t => t.toString.length).getOrElse(" ").toString.length).max
 

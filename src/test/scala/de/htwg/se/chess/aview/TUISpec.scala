@@ -1,40 +1,51 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
-import model.Piece
-import model.Piece._
-import util.Matrix
-import controller.controllerComponent.controllerBaseImpl._
-import model.gameDataComponent.gameDataBaseImpl._
+
 import scala.util.Success
 import scala.util.Failure
 import scala.util.Try
 
+import controller.controllerComponent.controllerBaseImpl._
+import model.gameDataComponent.gameDataBaseImpl._
+import model.Piece
+import model.Piece._
+import util.Matrix
+
+
 class TUISpec extends AnyWordSpec {
   "A TUI" when {
-    val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
-    val state = new ChessState()
-    val cf = ChessField(matr, state)
+    val matr = Matrix[Option[Piece]](
+      Vector(
+        Vector(Some(W_BISHOP), Some(B_KING)), 
+        Vector(Some(W_PAWN), Some(W_BISHOP))
+      )
+    )
+    val cf = ChessField(matr)
     val ctrl = Controller(cf, new ChessCommandInvoker)
     val tui = TUI(ctrl)
-    /*"ran" should {
-            "detect input from console and display modifications based on it" in {
-                tui.run
-                print("i A1 q")
-                ctrl.field.cell('A', 1).get should be(B_QUEEN)
-            }
-        }*/
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
-        ctrl.field.size should be(2)
+        ctrl.size should be(2)
         tui.eval("i A1 B_KING") shouldBe Success(())
-        ctrl.field.size should be(matr.size)
+        ctrl.size should be(matr.size)
         tui.eval("i B2 b") shouldBe Success(())
-        ctrl.field.size should be(matr.size)
+        ctrl.size should be(matr.size)
         tui.eval("fen 1B/kQ") shouldBe Success(())
-        ctrl.field.size should be(matr.size)
+        ctrl.size should be(matr.size)
       }
 
       "detect missing arguments" in {
@@ -69,7 +80,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
-            , state
           )
         )
         tui.eval("insert B2 B_KING") shouldBe Success(())
@@ -81,7 +91,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
-            , state
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
@@ -94,7 +103,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
-            , state
           )
         )
         tui.eval("INSERT B2 k") shouldBe Success(())
@@ -106,7 +114,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(B_KING), Some(W_BISHOP))
               )
             )
-            , state
           )
         )
       }
@@ -123,7 +130,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(None, None)
               )
             )
-            , state
           )
         )
         tui.eval("i A1 W_KING") shouldBe Success(())
@@ -135,7 +141,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(W_KING), None)
               )
             )
-            , state
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
@@ -148,7 +153,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(None, None)
               )
             )
-            , state
           )
         )
       }
@@ -164,7 +168,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(None, Some(W_BISHOP))
               )
             )
-            , state
           )
         )
         tui.eval("move a2 B2") shouldBe Success(())
@@ -176,7 +179,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(None, Some(W_BISHOP))
               )
             )
-            , state
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
@@ -190,7 +192,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(None, Some(B_KING))
               )
             )
-            , state
           )
         )
         tui.eval("MOVE b1 a2") shouldBe Success(())
@@ -202,7 +203,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(None, None)
               )
             )
-            , state
           )
         )
       }
@@ -210,46 +210,68 @@ class TUISpec extends AnyWordSpec {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("fen /") shouldBe Success(())
         ctrl.field should be(
-          ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))), state)
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None),
+                Vector(None, None)
+              )
+            )
+          )
         )
         tui.eval("FEN 2/2") shouldBe Success(())
         ctrl.field should be(
-          ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))), state)
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None), 
+                Vector(None, None)
+              )
+            )
+          )
         )
         tui.eval("Fen k/1B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None), 
+                Vector(None, Some(W_BISHOP))
+              )
             )
-            , state
           )
         )
         tui.eval("loadfen k1/1B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None),
+                Vector(None, Some(W_BISHOP))
+              )
             )
-            , state
           )
         )
         tui.eval("loadFEN 1k/B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
             )
-            , state
           )
         )
         tui.eval("loadFen 1k/B1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
             )
-            , state
           )
         )
 
@@ -262,7 +284,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(W_BISHOP), Some(B_ROOK))
               )
             )
-            , state
           )
         )
         tui.eval("FEN kQ/rB") shouldBe Success(())
@@ -274,7 +295,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(B_ROOK), Some(W_BISHOP))
               )
             )
-            , state
           )
         )
       }
@@ -297,7 +317,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(W_QUEEN), Some(W_QUEEN))
               )
             )
-            , state
           )
         )
       }
@@ -311,7 +330,6 @@ class TUISpec extends AnyWordSpec {
                 Vector(Some(B_KING), Some(W_QUEEN))
               )
             )
-            , state
           )
         )
       }

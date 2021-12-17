@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -14,21 +14,22 @@ package model
 package gameDataComponent
 package gameDataBaseImpl
 
-import util.Matrix
 import ChessBoard.board
+import util.Matrix
 import util.Tile
+
 
 case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
 
-  def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
+  override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
-  def replace(tile: Tile, fill: Option[Piece]): ChessField = copy(field.replace(tile.row, tile.col, fill))
-  def replace(tile: Tile, fill: String):        ChessField = replace(tile, Piece.fromString(fill))
+  override def replace(tile: Tile, fill: Option[Piece]): ChessField = copy(field.replace(tile.row, tile.col, fill))
+  override def replace(tile: Tile, fill: String):        ChessField = replace(tile, Piece(fill))
 
-  def fill(filling: Option[Piece]): ChessField = copy(field.fill(filling))
-  def fill(filling: String):        ChessField = fill(Piece.fromString(filling))
+  override def fill(filling: Option[Piece]): ChessField = copy(field.fill(filling))
+  override def fill(filling: String):        ChessField = fill(Piece(filling))
 
-  def move(tile1: Tile, tile2: Tile): ChessField = {
+  override def move(tile1: Tile, tile2: Tile): ChessField = {
     val piece = field.cell(tile1.row, tile1.col)
     copy(
       field
@@ -37,7 +38,7 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
     )
   }
 
-  def loadFromFen(fen: String): ChessField = {
+  override def loadFromFen(fen: String): ChessField = {
     val fenList = fenToList(fen.toCharArray.toList, field.size).toVector
     copy(
       Matrix(
@@ -54,7 +55,7 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
             rest,
             size - (s.toInt - '0'.toInt)
           )
-        else Piece.fromChar(s) :: fenToList(rest, size - 1)
+        else Piece(s) :: fenToList(rest, size - 1)
       case _ => List.fill(size)(None)
     }
   }
@@ -65,7 +66,7 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
   override def stop = copy(field, state.stop)
 
   override def select(tile: Option[Tile]) = copy(field, state.select(tile))
-  def selected: Option[Tile] = state.selected
+  override def selected: Option[Tile] = state.selected
   
   def checkFile(check: Char): String = {
     if (

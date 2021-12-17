@@ -1,8 +1,20 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+
 import Piece._
 import PieceColor._
 import PieceType._
@@ -49,47 +61,47 @@ class PiecesSpec extends AnyWordSpec {
       Piece.values.map(p => p.toString).toSet.size should be(12)
     }
     "be created by either passing a String or a Char" in {
-      Piece.fromString("B_KING") should be(Some(B_KING))
-      Piece.fromString("W_KING") should be(Some(W_KING))
-      Piece.fromString("W_QUEEN") should be(Some(W_QUEEN))
-      Piece.fromString("W_rook") should be(Some(W_ROOK))
-      Piece.fromString("w_BiShOp") should be(Some(W_BISHOP))
-      Piece.fromString("w_knighT") should be(Some(W_KNIGHT))
-      Piece.fromString("w_PAWN") should be(Some(W_PAWN))
-      Piece.fromString("BKING") should be(None)
-      Piece.fromString("W") should be(None)
-      Piece.fromString("B_QUEEN") should be(Some(B_QUEEN))
-      Piece.fromString("B_ROOK") should be(Some(B_ROOK))
-      Piece.fromString("B_BISHOP") should be(Some(B_BISHOP))
-      Piece.fromString("B_KNIGHT") should be(Some(B_KNIGHT))
-      Piece.fromString("B_PAWN") should be(Some(B_PAWN))
-      Piece.fromString("b") should be(Some(B_BISHOP))
-      Piece.fromString("r") should be(Some(B_ROOK))
-      Piece.fromString("p") should be(Some(B_PAWN))
-      Piece.fromString("q") should be(Some(B_QUEEN))
-      Piece.fromString("n") should be(Some(B_KNIGHT))
-      Piece.fromString("k") should be(Some(B_KING))
-      Piece.fromString("B") should be(Some(W_BISHOP))
-      Piece.fromString("R") should be(Some(W_ROOK))
-      Piece.fromString("P") should be(Some(W_PAWN))
-      Piece.fromString("Q") should be(Some(W_QUEEN))
-      Piece.fromString("N") should be(Some(W_KNIGHT))
-      Piece.fromString("K") should be(Some(W_KING))
+      Piece("B_KING") should be(Some(B_KING))
+      Piece("W_KING") should be(Some(W_KING))
+      Piece("W_QUEEN") should be(Some(W_QUEEN))
+      Piece("W_rook") should be(Some(W_ROOK))
+      Piece("w_BiShOp") should be(Some(W_BISHOP))
+      Piece("w_knighT") should be(Some(W_KNIGHT))
+      Piece("w_PAWN") should be(Some(W_PAWN))
+      Piece("BKING") should be(None)
+      Piece("W") should be(None)
+      Piece("B_QUEEN") should be(Some(B_QUEEN))
+      Piece("B_ROOK") should be(Some(B_ROOK))
+      Piece("B_BISHOP") should be(Some(B_BISHOP))
+      Piece("B_KNIGHT") should be(Some(B_KNIGHT))
+      Piece("B_PAWN") should be(Some(B_PAWN))
+      Piece("b") should be(Some(B_BISHOP))
+      Piece("r") should be(Some(B_ROOK))
+      Piece("p") should be(Some(B_PAWN))
+      Piece("q") should be(Some(B_QUEEN))
+      Piece("n") should be(Some(B_KNIGHT))
+      Piece("k") should be(Some(B_KING))
+      Piece("B") should be(Some(W_BISHOP))
+      Piece("R") should be(Some(W_ROOK))
+      Piece("P") should be(Some(W_PAWN))
+      Piece("Q") should be(Some(W_QUEEN))
+      Piece("N") should be(Some(W_KNIGHT))
+      Piece("K") should be(Some(W_KING))
 
       Piece.values
         .map(p => p.toString)
-        .map(p => Piece.fromString(p))
+        .map(p => Piece(p))
         .map(p => p.getOrElse(None)) should be(Piece.values)
 
-      Piece.fromChar('k') should be(Some(B_KING))
-      Piece.fromChar('K') should be(Some(W_KING))
-      Piece.fromChar('Q') should be(Some(W_QUEEN))
-      Piece.fromChar('R') should be(Some(W_ROOK))
-      Piece.fromChar('B') should be(Some(W_BISHOP))
-      Piece.fromChar('N') should be(Some(W_KNIGHT))
-      Piece.fromChar('P') should be(Some(W_PAWN))
-      Piece.fromChar('a') should be(None)
-      Piece.fromChar('W') should be(None)
+      Piece('k') should be(Some(B_KING))
+      Piece('K') should be(Some(W_KING))
+      Piece('Q') should be(Some(W_QUEEN))
+      Piece('R') should be(Some(W_ROOK))
+      Piece('B') should be(Some(W_BISHOP))
+      Piece('N') should be(Some(W_KNIGHT))
+      Piece('P') should be(Some(W_PAWN))
+      Piece('a') should be(None)
+      Piece('W') should be(None)
     }
   }
 }

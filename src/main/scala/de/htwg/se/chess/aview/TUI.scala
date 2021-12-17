@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -12,17 +12,16 @@
 package de.htwg.se.chess
 package aview
 
-import controller._
-import scala.io.StdIn.readLine
-import util.Observer
 import scala.annotation.tailrec
+import scala.io.StdIn.readLine
 import scala.swing.Reactor
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
-import scala.reflect.ManifestFactory.NothingManifest
+
 import controller.controllerComponent._
 import util.Tile
+
 
 class TUI(controller: ControllerInterface) extends Reactor {
   var exitFlag = false
@@ -64,11 +63,11 @@ class TUI(controller: ControllerInterface) extends Reactor {
             printHelp()
         }
         case "i" | "insert" | "put" =>  //----------------------- Insert / Put
-            controller.executeAndNotify(controller.put, (Tile(in(1)), in(2)))
+            controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
         case "m" | "move" =>  //----------------------- Move
-            controller.executeAndNotify(controller.move, List(Tile(in(1)), Tile(in(2))))
+            controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
         case "cl" | "clear" =>  //----------------------- Fill
-          controller.executeAndNotify(controller.clear)
+          controller.executeAndNotify(controller.clear, ())
         case "fen" | "loadfen" =>  //----------------------- FenString
             controller.executeAndNotify(controller.putWithFen, in(1))
         case "z" | "undo" =>

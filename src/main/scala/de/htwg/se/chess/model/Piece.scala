@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -11,6 +11,7 @@
 
 package de.htwg.se.chess
 package model
+
 
 enum PieceType:
   case Rook, Queen, King, Pawn, Knight, Bishop
@@ -38,7 +39,7 @@ enum Piece(color: PieceColor, ptype: PieceType, name: String):
   override def toString: String = name
 
 object Piece:
-  def fromString(piece: String): Option[Piece] = {
+  def apply(piece: String): Option[Piece] = {
     piece.toUpperCase match {
       case "W_KING" | "W_QUEEN" | "W_ROOK" | "W_BISHOP" | "W_KNIGHT" |
           "W_PAWN" | "B_KING" | "B_QUEEN" | "B_ROOK" | "B_BISHOP" | "B_KNIGHT" |
@@ -49,7 +50,7 @@ object Piece:
         if (n < 0) then None else Some(Piece.fromOrdinal(n))
     }
   }
-  def fromChar(piece: Char): Option[Piece] = {
+  def apply(piece: Char): Option[Piece] = {
     val n = Piece.values.map(p => p.toString.toCharArray.apply(0)).indexOf(piece)
     if (n < 0) then None else Some(Piece.fromOrdinal(n))
   }

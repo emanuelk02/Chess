@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -14,10 +14,11 @@ package controller
 package controllerComponent
 package controllerBaseImpl
 
+import model.gameDataComponent.GameField
 import util.CommandInvoker
 import util.Command
 import util.ChainHandler
-import model.gameDataComponent.GameField
+
 
 class ChessCommandInvoker extends CommandInvoker[GameField] {
     override def doStep(command: Command[GameField]) = {

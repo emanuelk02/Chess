@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -14,12 +14,13 @@ package controller
 package controllerComponent
 package controllerBaseImpl
 
-import model.gameDataComponent.GameField
 import scala.swing.Publisher
 import scala.swing.event.Event
-import de.htwg.se.chess.util.Command
+
+import model.gameDataComponent.GameField
+import util.Command
 import util.Tile
-import model.gameDataComponent.gameDataBaseImpl.ChessField
+
 
 case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
@@ -37,15 +38,10 @@ case class Controller(var field: GameField, val commandHandler: ChessCommandInvo
     field = commandHandler.doStep(cmd)
     publish(cmd.event)
   }
-  def executeAndNotify(command: () => CommandInterface): Unit = {
-    val cmd = command()
-    field = commandHandler.doStep(cmd)
-    publish(cmd.event)
-  }
 
-  def move(args: List[Tile]): ChessCommand = new MoveCommand(args, field)
+  def move(args: Tuple2[Tile, Tile]): ChessCommand = new MoveCommand(args, field)
   def put(args: Tuple2[Tile, String]): ChessCommand = new PutCommand(args, field)
-  def clear(): ChessCommand = new ClearCommand(field)
+  def clear(args: Unit): ChessCommand = new ClearCommand(field)
   def putWithFen(args: String): ChessCommand = new FenCommand(args, field)
   def select(args: Option[Tile]): ChessCommand = new SelectCommand(args, field)
 

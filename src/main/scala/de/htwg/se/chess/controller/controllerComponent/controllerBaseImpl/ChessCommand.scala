@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -14,12 +14,12 @@ package controller
 package controllerComponent
 package controllerBaseImpl
 
+import scala.swing.event.Event
+
 import model.Piece
 import model.gameDataComponent.GameField
 import util.Command
 import util.Tile
-import scala.swing.event.Event
-import model.gameDataComponent.GameField
 
 trait ChessCommand(field: GameField) extends CommandInterface {
     protected val prevField = field
@@ -33,7 +33,7 @@ case class PutCommand(args: Tuple2[Tile, String], field: GameField) extends Ches
     override def event = new CommandExecuted
 }
 
-case class MoveCommand(args: List[Tile], field: GameField) extends ChessCommand(field) {
+case class MoveCommand(args: Tuple2[Tile, Tile], field: GameField) extends ChessCommand(field) {
     override def execute: GameField = 
         if (field.cell(args(0)).isDefined) 
             then field.move(args(0), args(1)) 

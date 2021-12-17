@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -15,14 +15,16 @@ package gui
 
 /* Useful reference: https://stackoverflow.com/questions/21077322/create-a-chess-board-with-jpanel */
 
-import util.Tile
 import scala.io.Source._
 import scala.swing._
 import scala.swing.Swing.LineBorder
 import scala.swing.event._
+
 import javax.swing.Icon
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+
 import controller.controllerComponent._
+import util.Tile
 
 
 class GuiDemo(controller: ControllerInterface) extends SimpleSwingApplication:

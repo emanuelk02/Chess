@@ -1,3 +1,14 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package controller
 package controllerComponent
@@ -5,14 +16,16 @@ package controllerBaseImpl
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
-import util.Matrix
-import model.Piece
+
+import scala.swing.Reactor
+
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl._
+import model.Piece
 import model.Piece._
 import util.Matrix
 import util.Tile
-import scala.swing.Reactor
+
 
 class TestObserver extends Reactor {
   var field = GameField()
@@ -34,14 +47,18 @@ class ControllerSpec extends AnyWordSpec {
       }
       "be instantiated with a full ChessField containing a Matrix given as a Vector of Vectors" in {
         val matr =
-          Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
+          Matrix[Option[Piece]](
+            Vector(
+              Vector(Some(W_PAWN), Some(B_KING))
+            )
+          )
         val cf = ChessField(matr)
         val ctrl = Controller(cf, new ChessCommandInvoker)
         ctrl.field.size should be(1)
         ctrl.cell(Tile(0, 0)).get should be(W_PAWN)
         ctrl.cell(Tile(0, 1)).get should be(B_KING)
-        ctrl.field.cell(Tile("A1")).get should be(W_PAWN)
-        ctrl.field.cell(Tile("B1")).get should be(B_KING)
+        ctrl.field.cell(Tile("A1", ctrl.size)).get should be(W_PAWN)
+        ctrl.field.cell(Tile(0, 1)).get should be(B_KING)
       }
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
@@ -49,17 +66,16 @@ class ControllerSpec extends AnyWordSpec {
     val ctrl = Controller(cf, new ChessCommandInvoker)
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
-        ctrl.field.size should be(2)
-        ctrl.put((Tile("A1"), "B_KING"))
-        ctrl.field.size should be(matr.size)
+        ctrl.size should be(2)
+        ctrl.put((Tile("A1", ctrl.size), "B_KING"))
+        ctrl.size should be(matr.size)
         ctrl.put(Tile("B2"), "b")
-        ctrl.field.size should be(matr.size)
         ctrl.field.size should be(matr.size)
       }
       "allow to replace single cells at any location by String and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put(Tile("A1"), "B_KING") should be (PutCommand((Tile("A1"), "B_KING"), ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("A1"), "B_KING"))
+        ctrl.put(Tile("A1", ctrl.size), "B_KING") should be (PutCommand((Tile("A1", ctrl.size), "B_KING"), ctrl.field))
+        ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "B_KING"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -70,8 +86,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.put(Tile("B2"), "B_KING") should be (PutCommand((Tile("B2"), "B_KING"), ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("B2"), "B_KING"))
+        ctrl.put(Tile("B2", ctrl.size), "B_KING") should be (PutCommand((Tile("B2", ctrl.size), "B_KING"), ctrl.field))
+        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), "B_KING"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -83,8 +99,8 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put((Tile("A1"), "k")) should be (PutCommand((Tile("A1"), "k"), ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("A1"), "k"))
+        ctrl.put((Tile("A1", ctrl.size), "k")) should be (PutCommand((Tile("A1", ctrl.size), "k"), ctrl.field))
+        ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "k"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -95,8 +111,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.put((Tile("B2"), "k")) should be (PutCommand((Tile("B2"), "k"),ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("B2"), "k"))
+        ctrl.put((Tile("B2", ctrl.size), "k")) should be (PutCommand((Tile("B2", ctrl.size), "k"),ctrl.field))
+        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), "k"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -110,8 +126,8 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to be fully cleared" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.clear() should be (ClearCommand(ctrl.field))
-        ctrl.executeAndNotify(ctrl.clear)
+        ctrl.clear(()) should be (ClearCommand(ctrl.field))
+        ctrl.executeAndNotify(ctrl.clear, ())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -122,8 +138,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.put((Tile("A1"), "W_KING")) should be (PutCommand((Tile("A1"), "W_KING"), ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("A1"), "W_KING"))
+        ctrl.put((Tile("A1", ctrl.size), "W_KING")) should be (PutCommand((Tile("A1", ctrl.size), "W_KING"), ctrl.field))
+        ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "W_KING"))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -137,9 +153,9 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to move contents of one tile into another and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.field = ctrl.field.replace(Tile("A1"), "B_KING")
-        ctrl.move(List(Tile("A1"), Tile("A2"))) should be (MoveCommand(List(Tile("A1"), Tile("A2")), ctrl.field))
-        ctrl.executeAndNotify(ctrl.move, List(Tile("A1"), Tile("A2")))
+        ctrl.field = ctrl.field.replace(Tile("A1", ctrl.size), "B_KING")
+        ctrl.move((Tile("A1", ctrl.size), Tile("A2", ctrl.size))) should be (MoveCommand((Tile("A1", ctrl.size), Tile("A2", ctrl.size)), ctrl.field))
+        ctrl.executeAndNotify(ctrl.move, (Tile("A1", ctrl.size), Tile("A2", ctrl.size)))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -150,8 +166,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.move(List(Tile("A2"), Tile("B2"))) should be (MoveCommand(List(Tile("A2"), Tile("B2")),ctrl.field))
-        ctrl.executeAndNotify(ctrl.move, List(Tile("A2"),Tile("B2")))
+        ctrl.move((Tile("A2", ctrl.size), Tile("B2", ctrl.size))) should be (MoveCommand((Tile("A2", ctrl.size), Tile("B2", ctrl.size)),ctrl.field))
+        ctrl.executeAndNotify(ctrl.move, (Tile("A2", ctrl.size),Tile("B2", ctrl.size)))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -163,10 +179,10 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.put((Tile("A1"), "B_KING")) should be (PutCommand((Tile("A1"), "B_KING"),ctrl.field))
-        ctrl.executeAndNotify(ctrl.put,(Tile("A1"), "B_KING"))
-        ctrl.move(List(Tile("A1"), Tile("B1"))) should be (MoveCommand(List(Tile("A1"), Tile("B1")), ctrl.field))
-        ctrl.executeAndNotify(ctrl.move, List(Tile("A1"), Tile("B1")))
+        ctrl.put((Tile("A1", ctrl.size), "B_KING")) should be (PutCommand((Tile("A1", ctrl.size), "B_KING"),ctrl.field))
+        ctrl.executeAndNotify(ctrl.put,(Tile("A1", ctrl.size), "B_KING"))
+        ctrl.move((Tile("A1", ctrl.size), Tile("B1", ctrl.size))) should be (MoveCommand((Tile("A1", ctrl.size), Tile("B1", ctrl.size)), ctrl.field))
+        ctrl.executeAndNotify(ctrl.move, (Tile("A1", ctrl.size), Tile("B1", ctrl.size)))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -177,8 +193,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.move(List(Tile("B1"), Tile("A2"))) should be (MoveCommand(List(Tile("B1"), Tile("A2")), ctrl.field))
-        ctrl.executeAndNotify(ctrl.move, List(Tile("B1"), Tile("A2")))
+        ctrl.move((Tile("B1", ctrl.size), Tile("A2", ctrl.size))) should be (MoveCommand((Tile("B1", ctrl.size), Tile("A2", ctrl.size)), ctrl.field))
+        ctrl.executeAndNotify(ctrl.move, (Tile("B1", ctrl.size), Tile("A2", ctrl.size)))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -278,11 +294,11 @@ class ControllerSpec extends AnyWordSpec {
       }
       "use its CommandInvoker to undo and redo commands" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.executeAndNotify(ctrl.put, (Tile("A1"), "k"))
+        ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "k"))
         ctrl.undo
         ctrl.field should be(ctrl.field.fill(Some(W_BISHOP)))
         ctrl.redo
-        ctrl.field should be(ctrl.field.replace(Tile("A1"), "k"))
+        ctrl.field should be(ctrl.field.replace(Tile("A1", ctrl.size), "k"))
       }
       "have a string representation like specified in ChessBoard" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))

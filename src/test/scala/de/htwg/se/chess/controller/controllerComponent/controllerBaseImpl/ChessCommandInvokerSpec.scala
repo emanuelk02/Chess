@@ -1,3 +1,14 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package controller
 package controllerComponent
@@ -6,11 +17,13 @@ package controllerBaseImpl
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
+import model.gameDataComponent.GameField
 import model._
 import model.Piece._
-import model.gameDataComponent.GameField
+
 import util.Matrix
 import util.Tile
+
 
 class ChessCommandInvokerSpec extends AnyWordSpec {
     "A ChessCommandInvoker" when {
@@ -19,7 +32,7 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
             val inv = new ChessCommandInvoker
 
             val put = PutCommand((Tile("A1"), "k"), field)
-            val move = MoveCommand(List(Tile("A1"), Tile("A2")), field)
+            val move = MoveCommand((Tile("A1"), Tile("A2")), field)
             val clear = ClearCommand(field)
             val fen = FenCommand("pppppppp/8/8/8/8/8/QQQQ4/8", field)
             val sel = SelectCommand(Some(Tile("A1")), field)
@@ -45,7 +58,7 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
                 inv.undoStep.get should be(field)
                 inv.redoStep.get should be(field)
 
-                inv.doStep(sel) should be(field)
+                inv.doStep(sel) should be(sel.execute)
                 inv.undoStep.get should be(field)
                 inv.redoStep.get should be(field)
             }

@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -22,11 +22,10 @@ import model.gameDataComponent.GameField
 class MockController extends ControllerInterface(GameField()) {
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
-  def executeAndNotify(command: () => CommandInterface): Unit = { }
 
-  def move(args: List[Tile]): CommandInterface = throw new UnsupportedOperationException()
+  def move(args: Tuple2[Tile, Tile]): CommandInterface = throw new UnsupportedOperationException()
   def put(args: Tuple2[Tile, String]): CommandInterface = throw new UnsupportedOperationException()
-  def clear(): CommandInterface = throw new UnsupportedOperationException()
+  def clear(args: Unit): CommandInterface = throw new UnsupportedOperationException()
   def putWithFen(args: String): CommandInterface = throw new UnsupportedOperationException()
   def select(tile: Option[Tile]): CommandInterface = throw new UnsupportedOperationException()
 

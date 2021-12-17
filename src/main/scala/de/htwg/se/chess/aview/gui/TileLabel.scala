@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -14,25 +14,28 @@ package aview
 package gui
 
 import scala.swing._
-import javax.swing.table._
 import scala.swing.event._
-import controller.controllerComponent._
-import java.awt.Color
-import de.htwg.se.chess.model.PieceColor
-import javax.imageio.ImageIO
-import java.awt.image.BufferedImage
-import java.io.File
-import util.Tile
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+
+import java.io.File
+import java.awt.Color
+import java.awt.image.BufferedImage
 import javax.swing.ImageIcon
+import javax.swing.table._
+import javax.imageio.ImageIO
+
+import controller.controllerComponent._
+import model.PieceColor
+import util.Tile
+
 
 class TileLabel(tile: Tile, controller: ControllerInterface) extends BoxPanel(Orientation.NoOrientation) {
     def selectReaction   = controller.executeAndNotify(controller.select, Some(tile))
     def unselectReaction = controller.executeAndNotify(controller.select, None)
     def moveReaction     = {
-        controller.executeAndNotify(controller.move, List(controller.selected.get, tile));
+        controller.executeAndNotify(controller.move, (controller.selected.get, tile));
         unselectReaction
     }
 

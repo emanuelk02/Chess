@@ -1,3 +1,14 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package model
 package gameDataComponent
@@ -8,6 +19,7 @@ import org.scalatest.matchers.should.Matchers._
 
 import controller.controllerComponent._
 import model.PieceColor
+
 
 class ChessStateSpec extends AnyWordSpec {
     "A ChessState" when {

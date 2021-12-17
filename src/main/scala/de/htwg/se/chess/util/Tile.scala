@@ -1,9 +1,9 @@
 /*                                                                                      *\
-**     _________  _________ _____ ______                                                **
-**    /  ___/  / /  /  ___//  __//  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
-**  \    /__/ /__/______//_____/\    /          Software Engineering | HTWG Constance   **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
 **   \__/                        \__/                                                   **
 **                                                                                      **
 \*                                                                                      */
@@ -11,6 +11,7 @@
 
 package de.htwg.se.chess
 package util
+
 
 case class Tile(file: Int, rank: Int, size: Int) {
     assert(file > 0 && file <= size, "Invalid file " + file)
@@ -46,5 +47,5 @@ object Tile {
     def apply(args: List[String]): List[Tile] = args.map(s => Tile(s, 8))
 
     def apply(row: Int, col: Int, size: Int) = new Tile(col + 1, size - row, size)
-    def apply(row: Int, col: Int): Tile = apply(col, row, 8)
+    def apply(row: Int, col: Int): Tile = apply(row, col, 8)
 }
