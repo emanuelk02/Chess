@@ -12,12 +12,6 @@ project/target
 project/project
 target/bg-jobs
 target/global-logging
-target/scala-3.0.2/api/fonts
-target/scala-3.0.2/api/hljs
-target/scala-3.0.2/api/images
-target/scala-3.0.2/api/scripts
-target/scala-3.0.2/api/styles
-target/scala-3.0.2/api/favicon.ico
 target/scala-3.0.2/classes
 target/scala-3.0.2/jacoco
 target/scala-3.0.2/test-classes
