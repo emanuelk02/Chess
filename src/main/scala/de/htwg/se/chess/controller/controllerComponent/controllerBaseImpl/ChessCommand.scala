@@ -70,7 +70,7 @@ case class FenCommand(args: String, field: GameField) extends ChessCommand(field
 case class SelectCommand(args: Option[Tile], field: GameField) extends ChessCommand(field) {
     override def execute: GameField = field.select(args)
     override def undo: GameField    = field
-    override def redo: GameField    = field
+    override def redo: GameField    = execute
     override def event = new Select(args)
 }
 

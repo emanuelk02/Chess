@@ -48,6 +48,7 @@ class MockControllerSpec extends AnyWordSpec {
         ctrl.hasSelected shouldBe false
     }
     "not change on undo/redo and start/stop and exit" in {
+      ctrl.executeAndNotify(ctrl.clear, ())
       ctrl.start
       ctrl.stop
       ctrl.undo

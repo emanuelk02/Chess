@@ -315,6 +315,15 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.isSelected(Tile("A2", ctrl.size)) should be (false)
         ctrl.hasSelected should be (false)
       }
+      "allow to start and stop the game" in {
+        var prevField = ctrl.field
+        ctrl.start
+        ctrl.field should be (prevField.start)
+
+        prevField = ctrl.field
+        ctrl.stop
+        ctrl.field should be (prevField.stop)
+      }
       "use its CommandInvoker to undo and redo commands" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "k"))
