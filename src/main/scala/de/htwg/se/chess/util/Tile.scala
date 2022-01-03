@@ -23,8 +23,6 @@ case class Tile(file: Int, rank: Int, size: Int) {
     def fileChar: Char = ('A' - 1 + file).toChar
     def rankChar: Char = rank.toString.apply(0)
 
-    def apply(args: String, size: Int): Tile = Tile(args, size)
-
     def ==(x: Tile) = this.file == x.file && this.rank == x.rank
 
     def +(x: Tuple2[Int, Int]): Tile = copy(file + x._1, rank + x._2)

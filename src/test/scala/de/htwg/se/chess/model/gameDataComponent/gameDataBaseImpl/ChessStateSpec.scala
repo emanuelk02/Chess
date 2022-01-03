@@ -35,11 +35,45 @@ class ChessStateSpec extends AnyWordSpec {
             }
         }
         "initialzied" should {
-            "change its behaviour dynamically, according to its handle and internal state" in {
-                val csOff = ChessState(false, None, PieceColor.White, (true, true), (true, true), 0, 0)
-                val csOn = ChessState(true, None, PieceColor.White, (true, true), (true, true), 0, 0)
+            "change its internal playing state" in {
+                var state = new ChessState
 
-                val field = ChessField()
+                state.start shouldBe 
+                    ChessState
+                    (
+                        true,
+                        state.selected,
+                        state.color,
+                        state.whiteCastle,
+                        state.blackCastle,
+                        state.halfMoves,
+                        state.fullMoves
+                    )
+
+                state.stop shouldBe
+                    ChessState
+                    (
+                        false,
+                        state.selected,
+                        state.color,
+                        state.whiteCastle,
+                        state.blackCastle,
+                        state.halfMoves,
+                        state.fullMoves
+                    )
+            }
+            "change its behaviour base on wether playing is set or not" in {
+                var state = new ChessState
+                
+                // test state.evaluateMove
+
+                // test state.evaluateFen
+
+                state = state.start
+
+                // test state.evaluateMove
+
+                an [IllegalArgumentException] should be thrownBy state.evaluateFen("")
             }
         }
     }

@@ -41,7 +41,6 @@ class MockController extends ControllerInterface(GameField()) {
   def fieldToString: String = ""
 
   def cell(tile: Tile): Option[Piece] = None
-  def unselect(rank: Int, file: Int): Unit = { }
   def selected: Option[Tile] = None
   def isSelected(tile: Tile): Boolean = false
   def hasSelected: Boolean = false

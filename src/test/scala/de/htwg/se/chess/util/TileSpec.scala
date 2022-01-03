@@ -43,7 +43,9 @@ class TileSpec extends AnyWordSpec {
             tile1 + (2, 2) shouldBe Tile("D4")
             tile1 - (0, 1) shouldBe new Tile(2, 1, 8)
             tile1 - (1, 1) shouldBe new Tile(1, 1, 8)
+            tile1 - new Tile(1, 1, 3) shouldBe new Tile(1, 1, 8)
 
+            an [AssertionError] should be thrownBy tile1 - tile2
             an [AssertionError] should be thrownBy tile2 - (2, 0)
             an [AssertionError] should be thrownBy tile2 - Tile(0, 2, 8)
         }

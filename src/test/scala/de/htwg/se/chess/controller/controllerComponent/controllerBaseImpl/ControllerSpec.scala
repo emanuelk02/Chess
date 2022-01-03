@@ -292,6 +292,29 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
       }
+      "allow to mark single tiles as selected; indicating that it will be modified" in {
+        val testTile = Some(Tile("A1", ctrl.size))
+
+        // Selecting specified tile
+        ctrl.select(testTile) should be(SelectCommand(testTile, ctrl.field))
+        ctrl.executeAndNotify(ctrl.select, testTile)
+        ctrl.field.selected should be (testTile)
+
+        ctrl.selected should be (testTile)
+        ctrl.isSelected(testTile.get) should be (true)
+        ctrl.isSelected(Tile("A2", ctrl.size)) should be (false)
+        ctrl.hasSelected should be (true)
+
+        // Unselecting by specifically selecting "None"
+        ctrl.select(None) should be(SelectCommand(None, ctrl.field))
+        ctrl.executeAndNotify(ctrl.select, None)
+        ctrl.field.selected should be (None)
+
+        ctrl.selected should be (None)
+        ctrl.isSelected(testTile.get) should be (false)
+        ctrl.isSelected(Tile("A2", ctrl.size)) should be (false)
+        ctrl.hasSelected should be (false)
+      }
       "use its CommandInvoker to undo and redo commands" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "k"))

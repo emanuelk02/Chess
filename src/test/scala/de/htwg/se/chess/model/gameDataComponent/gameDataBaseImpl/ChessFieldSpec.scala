@@ -269,6 +269,31 @@ class ChessFieldSpec extends AnyWordSpec {
           )
         )
       }
+      "allow to selected single tiles to indicate that they will be modified" in {
+        cf.selected should be (None)
+        
+        val tile = Tile("A1", cf.size)
+        cf.select(Some(tile)) should be(
+          ChessField(
+            cf.field,
+            cf.state.select(Some(tile))
+          )
+        )
+      }
+      "allow to start and stop the game by changing its state" in {
+        cf.start should be(
+          ChessField(
+              cf.field,
+              cf.state.start
+            )
+        )
+        cf.stop should be(
+          ChessField(
+              cf.field,
+              cf.state.stop
+            )
+        )
+      }
       "allow to check validity of inputs" in {
         cf.checkFile('A') should be("")
         cf.checkFile('B') should be("")

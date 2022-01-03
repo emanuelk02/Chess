@@ -28,10 +28,6 @@ case class Controller(var field: GameField, val commandHandler: ChessCommandInvo
     this(GameField(), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
-  def this(ch: ChessCommandInvoker) = {
-    this(GameField(), ch)
-    this.field = field.loadFromFen(startingFen)
-  }
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = {
     val cmd = command(args)
