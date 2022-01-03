@@ -42,7 +42,7 @@ The text interface allows for following commands and inputs:
 | **start** | Starts the game, so that you can play | |
 | **undo** | Reverts the last changes you've done | `z` |
 | **redo** | Redoes the last changes you've undone | `y` |
-| **exit** | Quits the program | |
+| **exit** | Quits the program | `q` |
 
 - All inputs are _case insensitive_
 

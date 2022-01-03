@@ -75,7 +75,7 @@ class TUI(controller: ControllerInterface) extends Reactor {
           controller.undo
         case "y" | "redo" =>
           controller.redo
-        case "exit" => controller.exit //----------------------- Exit
+        case "exit" | "q" => controller.exit //----------------------- Exit
         case _ =>       //----------------------- Invalid
           throw new IllegalArgumentException("Unknown Command")
       }
@@ -108,7 +108,7 @@ class TUI(controller: ControllerInterface) extends Reactor {
 
     cl / clear          clears entire board
 
-    fen / FEN / Fen / loadFEN <fen-string>
+    fen / loadFEN <fen-string>
                         initializes a chess position from given FEN-String
                             
     start               starts the game, prohibiting anything but the move command
@@ -117,7 +117,7 @@ class TUI(controller: ControllerInterface) extends Reactor {
     
     y / redo            redoes the last changes you've undone
 
-    exit                quits the program
+    q / exit                quits the program
     """.stripMargin)
   }
 

@@ -22,7 +22,7 @@ import util.ChainHandler
 
 class ChessCommandInvoker extends CommandInvoker[GameField] {
     override def doStep(command: Command[GameField]) = {
-        if chainInstanceChecker.handleRequest(command).isDefined 
+        if chainInstanceChecker.handleRequest(command).isEmpty
             then undoStack = command::undoStack
         command.execute
     }
@@ -34,5 +34,5 @@ class ChessCommandInvoker extends CommandInvoker[GameField] {
         )
     )
 
-    def checkClass(typ: Class[_])(in: Command[GameField]): Option[Command[GameField]] = if in.getClass eq typ then None else Some(in)
+    def checkClass(typ: Class[_])(in: Command[GameField]): Option[Command[GameField]] = if in.getClass eq typ then Some(in) else None
 }

@@ -19,6 +19,6 @@
 
 ## [Pieces](src/main/resources/pieces)
   
- - For the pieces we used a freely available png at [Vipping.com](https://www.vippng.com/maxp/TRihoT/)
+ - For the pieces we used a freely available png at [vippng.com](https://www.vippng.com/maxp/TRihoT/)
 
 ![github-pieces](https://user-images.githubusercontent.com/92474958/146582931-bf7e4aa4-ce28-4883-8337-711be60ddfc4.png)

@@ -29,7 +29,7 @@ case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Op
           else if successor.isDefined
             then successor.get.handleRequest(in) 
             else None
-      case f: Failure[Option[R]] => if (successor.isDefined) successor.get.handleRequest(in) else None
+      case f: Failure[Option[R]] => if (successor.isDefined) then successor.get.handleRequest(in) else None
     }
   }
 }
