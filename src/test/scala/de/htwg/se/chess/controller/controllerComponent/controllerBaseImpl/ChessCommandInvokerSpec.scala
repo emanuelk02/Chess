@@ -55,12 +55,12 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
                 inv.redoStep.get should be(fen.redo)
 
                 inv.doStep(err) should be(field)
-                inv.undoStep.get should be(field)
-                inv.redoStep.get should be(field)
+                inv.undoStep.get should be(fen.undo)
+                inv.redoStep.get should be(fen.redo)
 
                 inv.doStep(sel) should be(sel.execute)
-                inv.undoStep.get should be(field)
-                inv.redoStep.get should be(field)
+                inv.undoStep.get should be(fen.undo)
+                inv.redoStep.get should be(fen.redo)
             }
         }
     }
