@@ -119,6 +119,23 @@ class ChessCommandSpec extends AnyWordSpec {
             fen2.redo should be(field.loadFromFen(fenStr2))
         }
     }
+    val tile = Tile("A1", field.size)
+    val sel = SelectCommand(Some(tile), field)
+    val sel2 = SelectCommand(None, field)
+    "A SelectCommand" should {
+        "mark a single tile as selected" in {
+            sel.execute should be (field.select(Some(tile)))
+            sel.undo should be (field)
+            sel.redo should be (field.select(Some(tile)))
+            sel.event should be (new Select(Some(tile)))
+
+            sel2.execute should be (field.select(None))
+            sel2.undo should be (field)
+            sel2.redo should be (field.select(None))
+            sel2.event should be (new Select(None))
+        }
+    }
+
     val errCmd = ErrorCommand("An error occured", field)
     "An ErrorCommand" should {
         "catch errors and return an unmodified ChessField" in {
