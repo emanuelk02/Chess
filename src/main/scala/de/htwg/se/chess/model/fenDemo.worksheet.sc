@@ -85,7 +85,7 @@ import javax.swing.SwingConstants
 import controller.controllerComponent.controllerBaseImpl.Controller
 import util.Tile
 
-val ctrlt = new Controller()
+val ctrl = new Controller()
 
 var tiles = Array.ofDim[Tuple2[Int, Int]](fieldsize, fieldsize)
 val chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
@@ -121,3 +121,59 @@ chessBoard.contents.update(2, new Label() {text = (-1,-1).toString} )
 chessBoard.contents.toList.foreach{ s => print(s.asInstanceOf[Label].text)}
 val tes = chessBoard.contents(2)
 tes.asInstanceOf[Label].text
+
+
+val fenTest = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b b Kkq a2 1 2"
+
+val cutFen = fenTest.dropWhile(c => !c.equals(' ')).drop(1)
+
+val st = new ChessState
+
+st.toFenPart
+
+val st2 = ChessState(fenTest)
+
+st2.toFenPart
+
+import model.PieceType._
+import model.PieceColor
+import model.PieceColor.{White, Black}
+import de.htwg.se.chess.util.ChainHandler
+
+val playing: Boolean = false
+val selected: Option[Tile] = None
+val color: PieceColor = Black
+val whiteCastle: Castles = Castles()
+val blackCastle: Castles = Castles()
+val halfMoves: Int = 0
+val fullMoves: Int = 1
+val enPassant: Option[Tile] = None
+
+val move: Tuple2[Tile, Tile] = (Tile("H6"), Tile("H3"))
+val srcPiece: Piece = B_ROOK
+val destPiece: Option[Piece] = None
+
+val whiteCastleChain = ChainHandler[Tuple3[Tile, Piece, Option[Piece]], Castles](List[Tuple3[Tile, Piece, Option[Piece]] => Option[Castles]]
+    (
+        ( in => if (color == White) then None else Some(whiteCastle) ),
+        ( in => if (whiteCastle.queenSide ||whiteCastle.kingSide) then None else Some(whiteCastle) ),
+        ( in => if (in(1).getType == King) then Some(Castles(false, false)) else None ),
+        ( in => if (in(1).getType == Rook) then None else Some(whiteCastle) ),
+        ( in => if (in(0).file == 1 && in(0).rank == 1) then Some(Castles(whiteCastle.queenSide, false)) else None),
+        ( in => if (in(0).file == 8 && in(0).rank == 1) then Some(Castles(false, whiteCastle.kingSide)) else Some(whiteCastle))
+    )
+)
+
+val blackCastleChain = ChainHandler[Tuple3[Tile, Piece, Option[Piece]], Castles](List[Tuple3[Tile, Piece, Option[Piece]] => Option[Castles]]
+    (
+        ( in => if (color == Black) then None else Some(blackCastle) ),
+        ( in => if (blackCastle.queenSide || blackCastle.kingSide) then None else Some(blackCastle) ),
+        ( in => if (in(1).getType == King) then Some(Castles(false, false)) else None ),
+        ( in => if (in(1).getType == Rook) then None else Some(blackCastle) ),
+        ( in => if (in(0).file == 1 && in(0).rank == 8) then Some(Castles(blackCastle.queenSide, false)) else None),
+        ( in => if (in(0).file == 8 && in(0).rank == 8) then Some(Castles(false, blackCastle.kingSide)) else Some(blackCastle))
+    )
+)
+
+val result = whiteCastleChain.handleRequest(whiteCastle).get
+val result2 = blackCastleChain.handleRequest(whiteCastle).get

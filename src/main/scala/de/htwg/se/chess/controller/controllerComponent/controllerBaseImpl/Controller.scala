@@ -23,7 +23,7 @@ import util.Tile
 
 
 case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
-  val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+  val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   def this() = {
     this(GameField(), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)

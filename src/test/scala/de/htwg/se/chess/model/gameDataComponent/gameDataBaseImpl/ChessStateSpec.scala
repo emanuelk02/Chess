@@ -26,44 +26,25 @@ class ChessStateSpec extends AnyWordSpec {
         "created" should {
             "store the default state values of a chess game" in {
                 val default = new ChessState
-                default.playing should be(false)
-                default.color should be(PieceColor.White)
-                default.whiteCastle should be((true, true))
-                default.blackCastle should be((true, true))
-                default.halfMoves should be(0)
-                default.fullMoves should be(0)
+                default.playing should be (false)
+                default.color should be (PieceColor.White)
+                default.whiteCastle should be (Castles(true, true))
+                default.blackCastle should be (Castles(true, true))
+                default.halfMoves should be (0)
+                default.fullMoves should be (1)
+                default.enPassant should be (None)
             }
         }
         "initialzied" should {
             "change its internal playing state" in {
-                var state = new ChessState
+                var state = new ChessState()
 
-                state.start shouldBe 
-                    ChessState
-                    (
-                        true,
-                        state.selected,
-                        state.color,
-                        state.whiteCastle,
-                        state.blackCastle,
-                        state.halfMoves,
-                        state.fullMoves
-                    )
+                state.start shouldBe state.copy(true)
 
-                state.stop shouldBe
-                    ChessState
-                    (
-                        false,
-                        state.selected,
-                        state.color,
-                        state.whiteCastle,
-                        state.blackCastle,
-                        state.halfMoves,
-                        state.fullMoves
-                    )
+                state.stop shouldBe state.copy(false)
             }
             "change its behaviour base on wether playing is set or not" in {
-                var state = new ChessState
+                var state = new ChessState()
                 
                 // test state.evaluateMove
 
