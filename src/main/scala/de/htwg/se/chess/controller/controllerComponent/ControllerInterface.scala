@@ -42,7 +42,7 @@ import util.Tile
  * Each CommandInterface holds such an Event, so that it is not necessecary to
  * use case matching to determine which Event to publish.
  * Predefined Events include:
-     - CommandExecuted: Simply signals that anything has changes
+     - CommandExecuted: Simply signals that anything has changed
      - MoveEvent:       Signals on a move being executed and also contains the affected Tiles
      - Select:          Signals that a tile was selected or unselected and also which it was (or None)
      - ErrorEvent:      Conveys that an error has occurred and also an error message
@@ -53,7 +53,7 @@ import util.Tile
  * @param field     Holds all data needed to specify the game and to execute any inputs on
  * */
 trait ControllerInterface(field: GameField) extends Publisher{
-    /** Size of the board in rows **/
+    /** Size of the board in rows */
     val size = field.size
 
     /**
@@ -104,17 +104,17 @@ trait ControllerInterface(field: GameField) extends Publisher{
      * */
     def select(args: Option[Tile]): CommandInterface
 
-    /** Starts the game. Prohibiting free placement and illegal moves. **/
+    /** Starts the game. Prohibiting free placement and illegal moves. */
     def start: Unit
-    /** Stops the game. Returns to free placement and free moves. **/
+    /** Stops the game. Returns to free placement and free moves. */
     def stop: Unit
-    /** Undoes the last executed Command. **/
+    /** Undoes the last executed Command. */
     def undo: Unit
-    /** Redoes the last undone Command. **/
+    /** Redoes the last undone Command. */
     def redo: Unit
-    /** Sends a signal to all subscribers that the application shall be closed. **/
+    /** Sends a signal to all subscribers that the application shall be closed. */
     def exit: Unit
-    /** Provides a string representation of the current board. @return String representation of a Chess Board **/
+    /** Provides a string representation of the current board. @return String representation of a Chess Board */
     def fieldToString: String
     /** 
      * Gives the piece stored at given tile.
@@ -122,7 +122,7 @@ trait ControllerInterface(field: GameField) extends Publisher{
      * @return          Some(Piece) if the tile contains a piece | None, if the tile does not contain a piece
      * */
     def cell(tile: Tile): Option[Piece]
-    /** Gives the currently selected Tile @return Some(Tile) if a tile is selected | None if no tile is currently selected **/
+    /** Gives the currently selected Tile @return Some(Tile) if a tile is selected | None if no tile is currently selected */
     def selected: Option[Tile]
     /** 
      * Checks wether a certain tile is the currently selected one.
@@ -130,7 +130,7 @@ trait ControllerInterface(field: GameField) extends Publisher{
      * @return          true is tile is the currently selcted one, false if it is not
      * */
     def isSelected(tile: Tile): Boolean
-    /** Checks if a tile is currently selected @return true if any tile is selected, false if not **/
+    /** Checks if a tile is currently selected @return true if any tile is selected, false if not */
     def hasSelected: Boolean
 }
 
@@ -143,13 +143,13 @@ trait CommandInterface extends Command[GameField] {
     def event: Event
 }
 
-/** Simply signals that anything has changes **/
+/** Simply signals that anything has changes */
 class CommandExecuted extends Event
-/** Conveys that an error has occurred and also an error message @param msg error message **/
+/** Conveys that an error has occurred and also an error message @param msg error message */
 case class ErrorEvent(msg: String) extends Event
-/** Signals that a tile was selected or unselected and also which it was @param tile selected tile or None if something was unselected **/
+/** Signals that a tile was selected or unselected and also which it was @param tile selected tile or None if something was unselected */
 case class Select(tile: Option[Tile]) extends Event
-/** Signals on a move being executed and also contains the affected Tiles @param tile1 source tile @param tile2 destination tile **/
+/** Signals on a move being executed and also contains the affected Tiles @param tile1 source tile @param tile2 destination tile */
 case class MoveEvent(tile1: Tile, tile2: Tile) extends Event
-/** Signals that the application should be terminated **/
+/** Signals that the application should be terminated */
 class ExitEvent extends Event

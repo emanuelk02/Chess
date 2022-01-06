@@ -112,12 +112,12 @@ trait GameField(field: Matrix[Option[Piece]]) {
      * @return      The same field but with the tile selected/unselected
      * */
     def select(tile: Option[Tile]): GameField
-    /** Gives the currently selected tile, if there is one. @return Some(Tile) if a tile is selected or None, if not **/
+    /** Gives the currently selected tile, if there is one. @return Some(Tile) if a tile is selected or None, if not */
     def selected: Option[Tile]
 
-    /** Starts the game. Prohibiting free placement and illegal moves. @return The same field but now in an active playing state **/
+    /** Starts the game. Prohibiting free placement and illegal moves. @return The same field but now in an active playing state */
     def start: GameField
-    /** Stops the game. Returns to free placement and free moves. @return The same field but not in a playing state **/
+    /** Stops the game. Returns to free placement and free moves. @return The same field but not in a playing state */
     def stop:  GameField
 }
 
