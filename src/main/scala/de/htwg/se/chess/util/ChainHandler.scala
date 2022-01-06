@@ -1,9 +1,22 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package util
+
 
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+
 
 case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Option[R]) {
   private def handle(in: R): Try[Option[R]] = Try(function(in))
@@ -16,7 +29,7 @@ case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Op
           else if successor.isDefined
             then successor.get.handleRequest(in) 
             else None
-      case f: Failure[Option[R]] => if (successor.isDefined) successor.get.handleRequest(in) else None
+      case f: Failure[Option[R]] => if (successor.isDefined) then successor.get.handleRequest(in) else None
     }
   }
 }

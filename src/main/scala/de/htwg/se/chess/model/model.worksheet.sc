@@ -419,7 +419,7 @@ inv.doStep(sel)
 inv.undoStep.get
 inv.redoStep.get
 
-import de.htwg.se.chess.model.Tile
+import de.htwg.se.chess.model.gameDataComponent.gameDataBaseImpl._
 
 val tile1 = new Tile(1, 2)
 val tile2 = Tile(1, 2, 3)
@@ -429,4 +429,4 @@ tile1 + tile2
 tile1 + (2, 2)
 tile1 - (0, 1)
 
-tile2 - (1, 0)
+Try(tile2 - (1, 0))

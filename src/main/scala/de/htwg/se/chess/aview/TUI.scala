@@ -1,25 +1,37 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package aview
 
-import controller._
-import scala.io.StdIn.readLine
-import util.Observer
 import scala.annotation.tailrec
+import scala.io.StdIn.readLine
 import scala.swing.Reactor
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
-import scala.reflect.ManifestFactory.NothingManifest
 
-class TUI(controller: Controller) extends Reactor {
+import controller.controllerComponent._
+import util.Tile
+
+
+class TUI(controller: ControllerInterface) extends Reactor {
   var exitFlag = false
   listenTo(controller)
 
   reactions += {
     case e: CommandExecuted => update
-    case e: MoveEvent => update; print("Move" + e.tile1 + " to " + e.tile2 + "\n")
+    case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
-    case e: Select => print((('A' + e.file).toChar.toString + (e.rank + 1).toString) + (if (controller.isSelected(e.rank, e.file)) then " selected\n" else " unselected\n"));
+    case e: Select => print("Select " + e.tile)
     case e: ExitEvent => exitFlag = true
   }
 
@@ -28,8 +40,6 @@ class TUI(controller: Controller) extends Reactor {
   )
   update
   print("\n\n")
-
-  def this() = this(new Controller())
 
   @tailrec
   final def run: Unit = {
@@ -54,18 +64,18 @@ class TUI(controller: Controller) extends Reactor {
             printHelp()
         }
         case "i" | "insert" | "put" =>  //----------------------- Insert / Put
-            controller.executeAndNotify(controller.put, List(in(1), in(2)))
+            controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
         case "m" | "move" =>  //----------------------- Move
-            controller.executeAndNotify(controller.move, List(in(1), in(2)))
+            controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
         case "cl" | "clear" =>  //----------------------- Fill
-          controller.executeAndNotify(controller.clear)
+          controller.executeAndNotify(controller.clear, ())
         case "fen" | "loadfen" =>  //----------------------- FenString
-            controller.executeAndNotify(controller.putWithFen, List(in(1)))
+            controller.executeAndNotify(controller.putWithFen, in(1))
         case "z" | "undo" =>
           controller.undo
         case "y" | "redo" =>
           controller.redo
-        case "exit" => controller.exit //----------------------- Exit
+        case "exit" | "q" => controller.exit //----------------------- Exit
         case _ =>       //----------------------- Invalid
           throw new IllegalArgumentException("Unknown Command")
       }
@@ -98,7 +108,7 @@ class TUI(controller: Controller) extends Reactor {
 
     cl / clear          clears entire board
 
-    fen / FEN / Fen / loadFEN <fen-string>
+    fen / loadFEN <fen-string>
                         initializes a chess position from given FEN-String
                             
     start               starts the game, prohibiting anything but the move command
@@ -107,7 +117,7 @@ class TUI(controller: Controller) extends Reactor {
     
     y / redo            redoes the last changes you've undone
 
-    exit                quits the program
+    q / exit                quits the program
     """.stripMargin)
   }
 

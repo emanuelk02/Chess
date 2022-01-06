@@ -1,56 +1,51 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
-import model.Piece
-import model.Piece._
-import model.ChessField
-import controller.Controller
-import util.Matrix
-import de.htwg.se.chess.controller.ChessCommandInvoker
+
 import scala.util.Success
 import scala.util.Failure
 import scala.util.Try
 
+import controller.controllerComponent.controllerBaseImpl._
+import model.gameDataComponent.gameDataBaseImpl._
+import model.Piece
+import model.Piece._
+import util.Matrix
+
+
 class TUISpec extends AnyWordSpec {
   "A TUI" when {
-    val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
+    val matr = Matrix[Option[Piece]](
+      Vector(
+        Vector(Some(W_BISHOP), Some(B_KING)), 
+        Vector(Some(W_PAWN), Some(W_BISHOP))
+      )
+    )
     val cf = ChessField(matr)
     val ctrl = Controller(cf, new ChessCommandInvoker)
     val tui = TUI(ctrl)
-    "created" should {
-      "be created using the explicit constructor" in {
-        val tui2 = new TUI()
-      }
-      "alternatively be instantiated with a Controller storing a full ChessField containing a Matrix given as a Vector of Vectors" in {
-        ctrl.field.field.size should be(1)
-        ctrl.field.field.cell(0, 0).get should be(W_PAWN)
-        ctrl.field.field.cell(0, 1).get should be(B_KING)
-        ctrl.field.cell("A1").get should be(W_PAWN)
-        ctrl.field.cell("B1").get should be(B_KING)
-      }
-    }
-    /*"ran" should {
-            "detect input from console and display modifications based on it" in {
-                tui.run
-                print("i A1 q")
-                ctrl.field.cell('A', 1).get should be(B_QUEEN)
-            }
-        }*/
     "filled" should {
-      val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-      val cf = ChessField(matr)
-      val ctrl = Controller(cf, new ChessCommandInvoker)
-      val tui = TUI(ctrl)
       "not have a diferent sized ChessField based on contents" in {
-        ctrl.field.field.size should be(2)
+        ctrl.size should be(2)
         tui.eval("i A1 B_KING") shouldBe Success(())
-        ctrl.field.field.size should be(matr.size)
+        ctrl.size should be(matr.size)
         tui.eval("i B2 b") shouldBe Success(())
-        ctrl.field.field.size should be(matr.size)
+        ctrl.size should be(matr.size)
         tui.eval("fen 1B/kQ") shouldBe Success(())
-        ctrl.field.field.size should be(matr.size)
+        ctrl.size should be(matr.size)
       }
 
       "detect missing arguments" in {
@@ -215,17 +210,34 @@ class TUISpec extends AnyWordSpec {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         tui.eval("fen /") shouldBe Success(())
         ctrl.field should be(
-          ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None),
+                Vector(None, None)
+              )
+            )
+          )
         )
         tui.eval("FEN 2/2") shouldBe Success(())
         ctrl.field should be(
-          ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None), 
+                Vector(None, None)
+              )
+            )
+          )
         )
         tui.eval("Fen k/1B") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None), 
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -233,7 +245,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None),
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
@@ -241,7 +256,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
             )
           )
         )
@@ -249,7 +267,10 @@ class TUISpec extends AnyWordSpec {
         ctrl.field should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
             )
           )
         )

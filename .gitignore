@@ -1,8 +1,25 @@
 .metals/
 .vscode
+.idea
 .bsp
 .game/
-target/
 .metals
 .bloop
 metals.sbt
+
+# exlude class and binaries
+project/target
+project/project
+target/bg-jobs
+target/global-logging
+target/scala-3.0.2/classes
+target/scala-3.0.2/jacoco
+target/scala-3.0.2/test-classes
+target/scala-3.0.2/test-zinc
+target/scala-3.0.2/update
+target/scala-3.0.2/zinc
+target/scala-3.0.2/*.jar
+target/streams
+target/task-temp-directory
+target/test-reports
+target/.history3
