@@ -14,9 +14,12 @@ package model
 package gameDataComponent
 package gameDataBaseImpl
 
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+
 import ChessBoard.board
 import util.Matrix
-import util.Tile
 
 
 case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
@@ -31,11 +34,19 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
 
   override def move(tile1: Tile, tile2: Tile): ChessField = {
     val piece = field.cell(tile1.row, tile1.col)
-    copy(
-      field
-        .replace(tile2.row, tile2.col, piece)
-        .replace(tile1.row, tile1.col, None )
-    )
+    checkMove(tile1, tile2) match {
+      case s: Success[Unit] => {
+        copy(
+          field
+            .replace(tile2.row, tile2.col, piece)
+            .replace(tile1.row, tile1.col, None ),
+          state.evaluateMove((tile1, tile2), cell(tile1).get, cell(tile2))
+        )
+      }
+      case f: Failure[Unit] => {
+        this
+      }
+    }
   }
 
   override def loadFromFen(fen: String): ChessField = {
@@ -68,18 +79,15 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
   override def selected: Option[Tile] = state.selected
   
   def checkFile(check: Char): String = {
-    if (
-      check.toLower.toInt - 'a'.toInt < 0 || check.toLower.toInt - 'a'.toInt > field.size - 1
-    )
-      return ("Tile file is invalid")
-    return ("")
+    if (check.toLower.toInt - 'a'.toInt < 0 || check.toLower.toInt - 'a'.toInt > field.size - 1)
+      then "Tile file is invalid"
+      else ""
   }
 
   def checkRank(check: Int): String = {
     if (check < 1 || check > field.size)
-      return ("Tile rank is invalid")
-    else
-      return ("")
+      then "Tile rank is invalid"
+      else ""
   }
   def checkTile(check: String): String = {
     if (check.length == 2) {
@@ -87,7 +95,7 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
         case ""        => return checkRank(check(1).toInt - '0'.toInt)
         case s: String => return s
       }
-    } else return ("Invalid format")
+    } else "Invalid format"
   }
   def checkFen(check: String): String = {
     val splitted = check.split('/')
@@ -104,20 +112,18 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
           if c.isDigit then count = count + c.toLower.toInt - '0'.toInt
           else count = count + 1
         })
-      if count > field.size then
-        "Invalid string: \"" + splitted(
-          ind
-        ).mkString + "\" at index " + ind.toString + "\n"
-      else ""
+      if count > field.size 
+        then "Invalid string: \"" + splitted(ind).mkString + "\" at index " + ind.toString + "\n"
+        else ""
     }
     res.mkString
   }
 
-  def checkMove(tile1: String, tile2: String): String = {
-    ""
+  def checkMove(tile1: Tile, tile2: Tile): Try[Unit] = {
+    Success(())
   }
 
-  override def toString: String = board(3, 1, field) + state.toFenPart + "\n"
+  override def toString: String = board(3, 1, field) + state.toString + "\n"
 }
 
 object ChessField {

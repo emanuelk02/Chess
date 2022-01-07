@@ -21,10 +21,10 @@ import scala.swing.Reactor
 
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl._
+import model.Tile
 import model.Piece
 import model.Piece._
 import util.Matrix
-import util.Tile
 
 class MockControllerSpec extends AnyWordSpec {
   "A MockController" should {

@@ -20,9 +20,8 @@ import org.scalatest.matchers.should.Matchers._
 import model.gameDataComponent.GameField
 import model._
 import model.Piece._
-
+import model.Tile
 import util.Matrix
-import util.Tile
 
 
 class ChessCommandInvokerSpec extends AnyWordSpec {

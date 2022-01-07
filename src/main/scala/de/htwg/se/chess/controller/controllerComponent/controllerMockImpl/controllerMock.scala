@@ -14,10 +14,11 @@ package controller
 package controllerComponent
 package controllerMockImpl
 
-import util.Matrix
-import util.Tile
+import model.Tile
 import model.Piece
 import model.gameDataComponent.GameField
+import util.Matrix
+
 
 class MockController extends ControllerInterface(GameField()) {
 

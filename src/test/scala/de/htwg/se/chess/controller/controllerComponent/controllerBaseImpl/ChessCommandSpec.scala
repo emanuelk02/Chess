@@ -20,10 +20,10 @@ import org.scalatest.matchers.should.Matchers._
 import controllerBaseImpl.ChessCommand
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl._
+import model.Tile
 import model.Piece
 import model.Piece._
 import util.Matrix
-import util.Tile
 
 
 case class TestChessCommand(field: GameField) extends ChessCommand(field) {
