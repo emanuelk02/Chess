@@ -64,7 +64,9 @@ class ChessFieldSpec extends AnyWordSpec {
         cf_temp.cell(Tile("b2", cf.size)) should be(Some(B_QUEEN)) // B2
       }
       "not have a diferent sized matrix based on contents" in {
+        cf.size should be (2)
         cf.field.size should be(2)
+        cf.state.size should be(2)
         cf.replace(Tile(0, 0), Some(B_KING)).field.size should be(matr.size)
         cf.replace(Tile(0, 1), Some(B_KING)).field.size should be(matr.size)
         cf.fill(None).field.size should be(matr.size)
@@ -213,42 +215,68 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation" in {
-        cf.loadFromFen("/") should be(
-          ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
-        )
-        cf.loadFromFen("2/2") should be(
-          ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
-        )
-        cf.loadFromFen("k/1B") should be(
+        cf.loadFromFen("/ w KQkq - 0 1") should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(None, None),
+                Vector(None, None)
+              )
+            ),
+          )
+        )
+        cf.loadFromFen("2/2 w KQkq - 0 1") should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None), 
+                Vector(None, None)
+              )
+            )
+          )
+        ) 
+        cf.loadFromFen("k/1B w KQkq - 0 1") should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(B_KING), None), 
+                Vector(None, Some(W_BISHOP))
+              )
             )
           )
         )
-        cf.loadFromFen("k1/1B") should be(
+        cf.loadFromFen("k1/1B w KQkq - 0 1") should be(
           ChessField(
             Matrix(
-              Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP)))
+              Vector(
+                Vector(Some(B_KING), None), 
+                Vector(None, Some(W_BISHOP))
+                )
             )
           )
         )
-        cf.loadFromFen("1k/B") should be(
+        cf.loadFromFen("1k/B w KQkq - 0 1") should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)), 
+                Vector(Some(W_BISHOP), None)
+              )
             )
           )
         )
-        cf.loadFromFen("1k/B1") should be(
+        cf.loadFromFen("1k/B1 w KQkq - 0 1") should be(
           ChessField(
             Matrix(
-              Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None))
+              Vector(
+                Vector(None, Some(B_KING)), 
+                Vector(Some(W_BISHOP), None)
+              )
             )
           )
         )
 
-        cf.loadFromFen("Qk/Br") should be(
+        cf.loadFromFen("Qk/Br w KQkq - 0 1") should be(
           ChessField(
             Matrix(
               Vector(
@@ -258,7 +286,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.loadFromFen("kQ/rB") should be(
+        cf.loadFromFen("kQ/rB w KQkq - 0 1") should be(
           ChessField(
             Matrix(
               Vector(
@@ -329,7 +357,7 @@ class ChessFieldSpec extends AnyWordSpec {
       }
       "have a string representation like specified in ChessBoard" in {
         import gameDataBaseImpl.ChessBoard.board
-        cf.toString should be(board(3, 1, cf.field))
+        cf.toString should be(board(3, 1, cf.field) + cf.state.toFenPart + "\n")
       }
     }
   }

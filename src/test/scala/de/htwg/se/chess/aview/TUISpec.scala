@@ -44,7 +44,7 @@ class TUISpec extends AnyWordSpec {
         ctrl.size should be(matr.size)
         tui.eval("i B2 b") shouldBe Success(())
         ctrl.size should be(matr.size)
-        tui.eval("fen 1B/kQ") shouldBe Success(())
+        tui.eval("fen 1B/kQ w KQkq - 0 1") shouldBe Success(())
         ctrl.size should be(matr.size)
       }
 
@@ -208,7 +208,7 @@ class TUISpec extends AnyWordSpec {
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        tui.eval("fen /") shouldBe Success(())
+        tui.eval("fen / w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -219,7 +219,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("FEN 2/2") shouldBe Success(())
+        tui.eval("FEN 2/2 w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -230,7 +230,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("Fen k/1B") shouldBe Success(())
+        tui.eval("Fen k/1B w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -241,7 +241,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("loadfen k1/1B") shouldBe Success(())
+        tui.eval("loadfen k1/1B w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -252,7 +252,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("loadFEN 1k/B") shouldBe Success(())
+        tui.eval("loadFEN 1k/B w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -263,7 +263,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("loadFen 1k/B1") shouldBe Success(())
+        tui.eval("loadFen 1k/B1 w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -275,7 +275,7 @@ class TUISpec extends AnyWordSpec {
           )
         )
 
-        tui.eval("fen Qk/Br") shouldBe Success(())
+        tui.eval("fen Qk/Br w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -286,7 +286,7 @@ class TUISpec extends AnyWordSpec {
             )
           )
         )
-        tui.eval("FEN kQ/rB") shouldBe Success(())
+        tui.eval("FEN kQ/rB w KQkq - 0 1") shouldBe Success(())
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -305,7 +305,7 @@ class TUISpec extends AnyWordSpec {
         tui.eval("ExIt awdaf") shouldBe Success(())
       }
       "allow to undo and redo recent changes" in {
-        tui.eval("fen QQ/QQ") shouldBe Success(())
+        tui.eval("fen QQ/QQ w KQkq - 0 1") shouldBe Success(())
         tui.eval("i A1 k") shouldBe Success(())
 
         tui.eval("undo") shouldBe Success(())

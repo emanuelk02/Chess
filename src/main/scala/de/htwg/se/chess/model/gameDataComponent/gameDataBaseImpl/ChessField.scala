@@ -122,5 +122,5 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
 
 object ChessField {
   def apply(): ChessField = new ChessField(new Matrix(8, None), new ChessState())
-  def apply(field: Matrix[Option[Piece]]): ChessField = new ChessField(field, new ChessState())
+  def apply(field: Matrix[Option[Piece]]): ChessField = new ChessField(field, ChessState(size = field.size))
 }

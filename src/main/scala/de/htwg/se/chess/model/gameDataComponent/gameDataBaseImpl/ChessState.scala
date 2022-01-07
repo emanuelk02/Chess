@@ -33,7 +33,7 @@ case class ChessState
     size: Int = 8
     ):
     
-    def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalArgumentException("Cannot set the boards contents while a game is active") else ChessState(fen)
+    def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalArgumentException("Cannot set the boards contents while a game is active") else ChessState(fen, size)
 
     def evaluateMove(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState =
         if (playing) then applyMovePlaying(move, srcPiece, destPiece) else applyMoveIdle(move, srcPiece, destPiece)
@@ -87,7 +87,7 @@ case class ChessState
 
 
 object ChessState:
-    def apply(fen: String): ChessState = {
+    def apply(fen: String, size: Int): ChessState = {
         var cutFen = fen.dropWhile(c => !c.equals(' ')).drop(1)
 
         val col: PieceColor = if (cutFen(0).toLower == 'w') 
@@ -118,7 +118,7 @@ object ChessState:
 
         val fullM = cutFen.toInt
 
-        ChessState(false, None, col, whiteC, blackC, halfM, fullM, enP)
+        ChessState(false, None, col, whiteC, blackC, halfM, fullM, enP, size)
     }
 
 case class Castles(queenSide: Boolean = true, kingSide: Boolean = true):
