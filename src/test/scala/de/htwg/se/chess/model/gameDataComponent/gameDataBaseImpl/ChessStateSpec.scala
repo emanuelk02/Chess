@@ -145,7 +145,7 @@ class ChessStateSpec extends AnyWordSpec {
                 an [AssertionError] should be thrownBy state.evaluateFen("... b Qk I3 1 2")
 
                 //------------------------------------------------ Playing State
-                state = ChessState(true)
+                state = ChessState(playing = true)
 
                 // test state.evaluateMove
                 def checkPlayStateMove(state: ChessState, move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece])

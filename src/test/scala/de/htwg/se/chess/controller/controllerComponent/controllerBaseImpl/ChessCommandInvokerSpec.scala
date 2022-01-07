@@ -34,7 +34,7 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
             val put = PutCommand((Tile("A1"), "k"), field)
             val move = MoveCommand((Tile("A1"), Tile("A2")), field)
             val clear = ClearCommand(field)
-            val fen = FenCommand("pppppppp/8/8/8/8/8/QQQQ4/8", field)
+            val fen = FenCommand("pppppppp/8/8/8/8/8/QQQQ4/8 w KQkq - 0 1", field)
             val sel = SelectCommand(Some(Tile("A1")), field)
             val err = ErrorCommand("Error", field)
             "allow to execute and remember all these commands over the controller but not change on error" in {

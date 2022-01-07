@@ -131,7 +131,7 @@ val st = new ChessState
 
 st.toFenPart
 
-val st2 = ChessState(fenTest)
+val st2 = ChessState(fenTest, 8)
 
 st2.toFenPart
 
@@ -181,4 +181,6 @@ val result2 = blackCastleChain.handleRequest(move(0), srcPiece, destPiece).get
 White.toString
 Black.toString
 
-ChessState("... c Kq - 1 2")
+val in = ("fen 1B/kQ w KQkq - 0 1").split(" ")
+
+in.drop(1).mkString(" ")

@@ -103,10 +103,10 @@ class ChessCommandSpec extends AnyWordSpec {
             clear.redo should be(field.fill(None))
         }
     }
-    val fenStr = "QQ/KK"
+    val fenStr = "QQ/KK w KQkq - 0 1"
     val fen = FenCommand(fenStr, field)
 
-    val fenStr2 = "1B/K1"
+    val fenStr2 = "1B/K1 w KQkq - 0 1"
     val fen2 = FenCommand(fenStr2, field)
     "A FenCommand" should {
         "Fill the board according to given Fen String" in {
