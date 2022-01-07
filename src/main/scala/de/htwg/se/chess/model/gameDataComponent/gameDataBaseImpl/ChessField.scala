@@ -39,11 +39,12 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
   }
 
   override def loadFromFen(fen: String): ChessField = {
-    val fenList = fenToList(fen.toCharArray.toList, field.size).toVector
+    val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, field.size).toVector
     copy(
       Matrix(
         Vector.tabulate(field.size) { rank =>  fenList.drop(rank * field.size).take(field.size) }
-      )
+      ),
+      state.evaluateFen(fen)
     )
   }
   def fenToList(fen: List[Char], size: Int): List[Option[Piece]] = {
@@ -59,8 +60,6 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
       case _ => List.fill(size)(None)
     }
   }
-
-  override def toString: String = board(3, 1, field)
   
   override def start = copy(field, state.start)
   override def stop = copy(field, state.stop)
@@ -117,9 +116,11 @@ case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends G
   def checkMove(tile1: String, tile2: String): String = {
     ""
   }
+
+  override def toString: String = board(3, 1, field) + state.toFenPart + "\n"
 }
 
 object ChessField {
   def apply(): ChessField = new ChessField(new Matrix(8, None), new ChessState())
-  def apply(field: Matrix[Option[Piece]]): ChessField = new ChessField(field, new ChessState())
+  def apply(field: Matrix[Option[Piece]]): ChessField = new ChessField(field, ChessState(size = field.size))
 }

@@ -35,6 +35,7 @@ class TestObserver extends Reactor {
     case e: ErrorEvent => field = ChessField().fill(e.msg)
     case e: MoveEvent => field = ChessField().replace(e.tile2, "Q")
     case e: ExitEvent => throw new Error("Non-Exitable")
+    case e: GameEnded => field = null
   }
 }
 
@@ -208,18 +209,18 @@ class ControllerSpec extends AnyWordSpec {
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
-        ctrl.putWithFen("/") should be (FenCommand("/", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "/")
+        ctrl.putWithFen("/ w KQkq - 0 1") should be (FenCommand("/ w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "/ w KQkq - 0 1")
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
         )
-        ctrl.putWithFen("2/2") should be (FenCommand("2/2", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "2/2")
+        ctrl.putWithFen("2/2 w KQkq - 0 1") should be (FenCommand("2/2 w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "2/2 w KQkq - 0 1")
         ctrl.field should be(
           ChessField(Matrix(Vector(Vector(None, None), Vector(None, None))))
         )
-        ctrl.putWithFen("k/1B") should be(FenCommand("k/1B", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "k/1B")
+        ctrl.putWithFen("k/1B w KQkq - 0 1") should be(FenCommand("k/1B w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "k/1B w KQkq - 0 1")
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -230,8 +231,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("k1/1B") should be (FenCommand("k1/1B", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "k1/1B")
+        ctrl.putWithFen("k1/1B w KQkq - 0 1") should be (FenCommand("k1/1B w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "k1/1B w KQkq - 0 1")
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -242,8 +243,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("1k/B") should be (FenCommand("1k/B", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "1k/B")
+        ctrl.putWithFen("1k/B w KQkq - 0 1") should be (FenCommand("1k/B w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "1k/B w KQkq - 0 1")
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -254,8 +255,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("1k/B1") should be (FenCommand("1k/B1", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "1k/B1")
+        ctrl.putWithFen("1k/B1 w KQkq - 0 1") should be (FenCommand("1k/B1 w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "1k/B1 w KQkq - 0 1")
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -267,8 +268,8 @@ class ControllerSpec extends AnyWordSpec {
           )
         )
 
-        ctrl.putWithFen("Qk/Br") should be(FenCommand("Qk/Br", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "Qk/Br")
+        ctrl.putWithFen("Qk/Br w KQkq - 0 1") should be(FenCommand("Qk/Br w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "Qk/Br w KQkq - 0 1")
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -279,8 +280,8 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         )
-        ctrl.putWithFen("kQ/rB") should be(FenCommand("kQ/rB", ctrl.field))
-        ctrl.executeAndNotify(ctrl.putWithFen, "kQ/rB")
+        ctrl.putWithFen("kQ/rB w KQkq - 0 1") should be(FenCommand("kQ/rB w KQkq - 0 1", ctrl.field))
+        ctrl.executeAndNotify(ctrl.putWithFen, "kQ/rB w KQkq - 0 1")
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -336,7 +337,7 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         import model.gameDataComponent.gameDataBaseImpl.ChessBoard.board
         ctrl.fieldToString should be(cf.toString)
-        ctrl.fieldToString should be(board(3, 1, cf.field))
+        ctrl.fieldToString should be(board(3, 1, cf.field) + cf.state.toFenPart + "\n")
       }
     }
   }

@@ -59,4 +59,8 @@ class ChessEventSpec extends AnyWordSpec {
     "An ExitEvent should notify that each Observer should end execution" in {
         an [Error] should be thrownBy ctrl.publish(new ExitEvent)
     }
+    "A GameEnded should notify that the game has concluded in a win or a draw" in {
+        ctrl.publish(new GameEnded(None))
+        obs.field shouldBe null
+    }
 }

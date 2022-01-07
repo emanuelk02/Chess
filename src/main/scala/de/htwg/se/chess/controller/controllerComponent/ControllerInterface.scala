@@ -18,6 +18,7 @@ import scala.swing.event.Event
 
 import model.gameDataComponent.GameField
 import model.Piece
+import model.PieceColor
 import util.Command
 import util.Tile
 
@@ -153,3 +154,5 @@ case class Select(tile: Option[Tile]) extends Event
 case class MoveEvent(tile1: Tile, tile2: Tile) extends Event
 /** Signals that the application should be terminated */
 class ExitEvent extends Event
+/** Signals that one player has won or the game is a draw @param color winning color or none for draw */
+case class GameEnded(color: Option[PieceColor]) extends Event
