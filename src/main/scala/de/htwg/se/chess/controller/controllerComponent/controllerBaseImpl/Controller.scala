@@ -18,8 +18,8 @@ import scala.swing.Publisher
 import scala.swing.event.Event
 
 import model.gameDataComponent.GameField
+import model.Tile
 import util.Command
-import util.Tile
 
 
 case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {

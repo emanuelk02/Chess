@@ -30,7 +30,7 @@ import javax.imageio.ImageIO
 
 import controller.controllerComponent._
 import model.PieceColor
-import util.Tile
+import model.Tile
 
 
 class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1, 1) {

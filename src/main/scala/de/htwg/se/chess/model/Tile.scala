@@ -10,10 +10,10 @@
 
 
 package de.htwg.se.chess
-package util
+package model
 
 
-case class Tile(file: Int, rank: Int, size: Int) {
+case class Tile(file: Int, rank: Int, size: Int = 8) {
     assert(file > 0 && file <= size, "Invalid file " + file)
     assert(rank > 0 && rank <= size, "Invalid rank " + rank)
 
@@ -36,14 +36,14 @@ case class Tile(file: Int, rank: Int, size: Int) {
 
 object Tile {
     def apply(args: List[Char], size: Int): Tile = new Tile(args(0).toLower.toInt - 'a'.toInt + 1, (args(1).toInt - '0'.toInt), size)
-    def apply(args: List[Char]): Tile = new Tile(args(0).toLower.toInt - 'a'.toInt + 1, (args(1).toInt - '0'.toInt), 8)
+    def apply(args: List[Char]): Tile = new Tile(args(0).toLower.toInt - 'a'.toInt + 1, (args(1).toInt - '0'.toInt))
 
     def apply(args: String, size: Int): Tile = apply(List(args(0), args(1)), size)
-    def apply(args: String): Tile = apply(List(args(0), args(1)), 8)
+    def apply(args: String): Tile = apply(List(args(0), args(1)))
 
     def apply(args: List[String], size: Int): List[Tile] = args.map(s => Tile(s, size))
-    def apply(args: List[String]): List[Tile] = args.map(s => Tile(s, 8))
+    def apply(args: List[String]): List[Tile] = args.map(s => Tile(s))
 
-    def apply(row: Int, col: Int, size: Int) = new Tile(col + 1, size - row, size)
-    def apply(row: Int, col: Int): Tile = apply(row, col, 8)
+    def withRowCol(row: Int, col: Int, size: Int) = new Tile(col + 1, size - row, size)
+    def withRowCol(row: Int, col: Int): Tile = withRowCol(row, col, 8)
 }

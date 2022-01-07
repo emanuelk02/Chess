@@ -16,8 +16,7 @@ package gameDataBaseImpl
 
 import PieceColor._
 import PieceType._
-import util.Tile
-import de.htwg.se.chess.util.ChainHandler
+import util.ChainHandler
 
 
 case class ChessState
@@ -50,8 +49,6 @@ case class ChessState
 
     def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
-            whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == White then color else PieceColor.invert(color), whiteCastle)).get,
-            blackCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == Black then color else PieceColor.invert(color), blackCastle)).get,
             enPassant = 
                 if  (srcPiece.getType == Pawn && 
                     ((move(1).rank - move(0).rank) == 2 || (move(0).rank - move(1).rank == 2)))
@@ -84,6 +81,26 @@ case class ChessState
         whiteCastle.toString.toUpperCase + blackCastle.toString + " " +
         (if (enPassant.isEmpty) then "-" else enPassant.get.toString.toLowerCase) + " " +
         halfMoves.toString + " " + fullMoves.toString
+    
+    override def toString: String = {
+        val strB = new java.lang.StringBuilder
+
+        strB.append(if (playing) then "playing" else "idle")
+            .append(" selected: ")
+            .append(if (selected.isDefined) then selected.get.toString else "-")
+            .append("\n")
+            .append(if (color == PieceColor.White) then "w" else "b")
+            .append(" ")
+            .append(whiteCastle.toString.toUpperCase + blackCastle.toString)
+            .append(" ")
+            .append(if (enPassant.isEmpty) then "-" else enPassant.get.toString.toLowerCase)
+            .append(" ")
+            .append(halfMoves.toString)
+            .append(" ")
+            .append(fullMoves.toString)
+
+        strB.toString
+    }
 
 
 object ChessState:

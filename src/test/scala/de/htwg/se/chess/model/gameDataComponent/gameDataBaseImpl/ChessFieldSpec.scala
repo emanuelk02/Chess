@@ -18,7 +18,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import model.Piece._
-import util.Tile
+import model.Tile
 import util.Matrix
 
 
@@ -41,10 +41,10 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.field.size should be(2)
         cf.field.cell(0, 0).get should be(W_BISHOP)
         cf.field.cell(0, 1).get should be(B_QUEEN)
-        cf.cell(Tile(0, 0)).get should be(W_BISHOP)
-        cf.cell(Tile(0, 1)).get should be(B_QUEEN)
-        cf.cell(Tile(1, 0)).get should be(W_PAWN)
-        cf.cell(Tile(1, 1)).get should be(B_KING)
+        cf.cell(Tile.withRowCol(0, 0)).get should be(W_BISHOP)
+        cf.cell(Tile.withRowCol(0, 1)).get should be(B_QUEEN)
+        cf.cell(Tile.withRowCol(1, 0)).get should be(W_PAWN)
+        cf.cell(Tile.withRowCol(1, 1)).get should be(B_KING)
         cf.cell(Tile("A1", cf.size)).get should be(W_PAWN)
         cf.cell(Tile("B1", cf.size)).get should be(B_KING)
       }
@@ -54,10 +54,10 @@ class ChessFieldSpec extends AnyWordSpec {
       val cf = ChessField(matr)
       "return contents from single cells using file: Int, rank: Int or String parameters" in {
         val cf_temp = cf.replace(Tile("A1", cf.size), "B_KING").replace(Tile("B2", cf.size), "B_QUEEN")
-        cf_temp.cell(Tile(1, 0)) should be(Some(B_KING)) // A1
-        cf_temp.cell(Tile(1, 1)) should be(Some(W_BISHOP)) // B1
-        cf_temp.cell(Tile(0, 0)) should be(Some(W_BISHOP)) // A2
-        cf_temp.cell(Tile(0, 1)) should be(Some(B_QUEEN)) // B2
+        cf_temp.cell(Tile.withRowCol(1, 0)) should be(Some(B_KING)) // A1
+        cf_temp.cell(Tile.withRowCol(1, 1)) should be(Some(W_BISHOP)) // B1
+        cf_temp.cell(Tile.withRowCol(0, 0)) should be(Some(W_BISHOP)) // A2
+        cf_temp.cell(Tile.withRowCol(0, 1)) should be(Some(B_QUEEN)) // B2
         cf_temp.cell(Tile("A1", cf.size)) should be(Some(B_KING)) // A1
         cf_temp.cell(Tile("B1", cf.size)) should be(Some(W_BISHOP)) // B1
         cf_temp.cell(Tile("a2", cf.size)) should be(Some(W_BISHOP)) // A2
@@ -67,8 +67,8 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.size should be (2)
         cf.field.size should be(2)
         cf.state.size should be(2)
-        cf.replace(Tile(0, 0), Some(B_KING)).field.size should be(matr.size)
-        cf.replace(Tile(0, 1), Some(B_KING)).field.size should be(matr.size)
+        cf.replace(Tile.withRowCol(0, 0), Some(B_KING)).field.size should be(matr.size)
+        cf.replace(Tile.withRowCol(0, 1), Some(B_KING)).field.size should be(matr.size)
         cf.fill(None).field.size should be(matr.size)
       }
       "throw an IndexOutOfBoundsException when trying to access fields outside of the matrix" in {
@@ -77,7 +77,7 @@ class ChessFieldSpec extends AnyWordSpec {
         an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile("Z2", 26))
       }
       "allow to replace single cells at any location by either an Option or String and return the new ChessField" in {
-        cf.replace(Tile(0, 0), Some(B_KING)) should be(
+        cf.replace(Tile.withRowCol(0, 0), Some(B_KING)) should be(
           ChessField(
             Matrix(
               Vector(
@@ -87,7 +87,7 @@ class ChessFieldSpec extends AnyWordSpec {
             )
           )
         )
-        cf.replace(Tile(1, 1), Some(B_KING)) should be(
+        cf.replace(Tile.withRowCol(1, 1), Some(B_KING)) should be(
           ChessField(
             Matrix(
               Vector(
@@ -353,11 +353,11 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.checkFen("bbb/k2") should be("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
 
         /* Not Implemented yet */
-        cf.checkMove("", "") should be("")
+        //cf.checkMove
       }
       "have a string representation like specified in ChessBoard" in {
         import gameDataBaseImpl.ChessBoard.board
-        cf.toString should be(board(3, 1, cf.field) + cf.state.toFenPart + "\n")
+        cf.toString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
       }
     }
   }

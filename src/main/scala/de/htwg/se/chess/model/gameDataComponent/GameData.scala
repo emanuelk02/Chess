@@ -14,8 +14,8 @@ package model
 package gameDataComponent
 
 import gameDataBaseImpl.ChessField
+import model.Tile
 import util.Matrix
-import util.Tile
 
 
 /**

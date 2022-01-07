@@ -21,7 +21,7 @@ import controller.controllerComponent._
 import model.PieceColor
 import model.PieceColor.{White, Black}
 import model.Piece._
-import util.Tile
+import model.Tile
 
 
 class ChessStateSpec extends AnyWordSpec {
@@ -75,27 +75,27 @@ class ChessStateSpec extends AnyWordSpec {
 
                 // Castles White
                 checkIdleStateMove(state, (Tile("A1"), Tile("A5")), W_ROOK, None)
-                    (Castles(false, true), Castles(true, true), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 checkIdleStateMove(state, (Tile("H1"), Tile("H5")), W_ROOK, None) 
-                    (Castles(true, false), Castles(true, true), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 checkIdleStateMove(state, (Tile("E1"), Tile("G1")), W_KING, Some(B_KNIGHT))
-                    (Castles(false, false), Castles(true, true), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 // Castles Black
                 checkIdleStateMove(state, (Tile("H8"), Tile("H5")), B_ROOK, None) 
-                    (Castles(true, true), Castles(true, false), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 checkIdleStateMove(state, (Tile("A8"), Tile("A5")), B_ROOK, None) 
-                    (Castles(true, true), Castles(false, true), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 checkIdleStateMove(state, (Tile("E8"), Tile("G8")), B_KING, Some(B_KNIGHT))
-                    (Castles(true, true), Castles(false, false), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
 
                 state = state.copy(color = Black)
                 // Castles Black
                 checkIdleStateMove(state, (Tile("H8"), Tile("H5")), B_ROOK, None) 
-                    (Castles(true, true), Castles(true, false), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 checkIdleStateMove(state, (Tile("A8"), Tile("A5")), B_ROOK, None) 
-                    (Castles(true, true), Castles(false, true), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 checkIdleStateMove(state, (Tile("E8"), Tile("G8")), B_KING, Some(B_KNIGHT))
-                    (Castles(true, true), Castles(false, false), state.enPassant)
+                    (Castles(true, true), Castles(true, true), state.enPassant)
                 
 
                 // test state.evaluateFen
@@ -256,6 +256,32 @@ class ChessStateSpec extends AnyWordSpec {
                 state.copy(enPassant = Some(Tile("F3"))).toFenPart shouldBe "w KQkq f3 0 1"
                 state.copy(halfMoves = 19).toFenPart shouldBe "w KQkq - 19 1"
                 state.copy(fullMoves = 42).toFenPart shouldBe "w KQkq - 0 42"
+            }
+            "have a string representation containing the playing state variables and its FEN part" in {
+                val state = ChessState()
+
+                state.toString shouldBe "idle selected: -\nw KQkq - 0 1"
+                state.start.toString shouldBe "playing selected: -\nw KQkq - 0 1"
+                state.select(Some(Tile("A2"))).toString shouldBe "idle selected: A2\nw KQkq - 0 1"
+                state.select(Some(Tile("H8"))).toString shouldBe "idle selected: H8\nw KQkq - 0 1"
+                state.copy(color = Black).toString shouldBe "idle selected: -\nb KQkq - 0 1"
+                state.copy(whiteCastle = Castles(false, true)).toString shouldBe "idle selected: -\nw Kkq - 0 1"
+                state.copy(blackCastle = Castles(true, false)).toString shouldBe "idle selected: -\nw KQq - 0 1"
+                state.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toString shouldBe "idle selected: -\nw  - 0 1"
+                state.copy(enPassant = Some(Tile("F3"))).toString shouldBe "idle selected: -\nw KQkq f3 0 1"
+                state.copy(halfMoves = 19).toString shouldBe "idle selected: -\nw KQkq - 19 1"
+                state.copy(fullMoves = 42).toString shouldBe "idle selected: -\nw KQkq - 0 42"
+
+                val state2 = ChessState(playing = true)
+
+                state2.toString shouldBe "playing selected: -\nw KQkq - 0 1"
+                state2.copy(color = Black).toString shouldBe "playing selected: -\nb KQkq - 0 1"
+                state2.copy(whiteCastle = Castles(false, true)).toString shouldBe "playing selected: -\nw Kkq - 0 1"
+                state2.copy(blackCastle = Castles(true, false)).toString shouldBe "playing selected: -\nw KQq - 0 1"
+                state2.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toString shouldBe "playing selected: -\nw  - 0 1"
+                state2.copy(enPassant = Some(Tile("F3"))).toString shouldBe "playing selected: -\nw KQkq f3 0 1"
+                state2.copy(halfMoves = 19).toString shouldBe "playing selected: -\nw KQkq - 19 1"
+                state2.copy(fullMoves = 42).toString shouldBe "playing selected: -\nw KQkq - 0 42"
             }
         }
     }

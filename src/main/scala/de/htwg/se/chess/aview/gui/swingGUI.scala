@@ -25,7 +25,7 @@ import javax.swing.WindowConstants.EXIT_ON_CLOSE
 import javax.swing.SwingConstants
 
 import controller.controllerComponent._
-import util.Tile
+import model.Tile
 
 
 class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
@@ -50,7 +50,7 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                 contents += (col match {
                     case 0 => new Label((fieldsize - row).toString) { preferredSize = new Dimension(30,100) }
                     case _ => {
-                        tiles(row)(col - 1) = new TileLabel(Tile(row, col - 1, fieldsize), controller)
+                        tiles(row)(col - 1) = new TileLabel(Tile.withRowCol(row, col - 1, fieldsize), controller)
                         tiles(row)(col - 1)
                     }
                 })

@@ -16,7 +16,7 @@ package gui
 import scala.swing.Reactor
 
 import controller.controllerComponent.ControllerInterface
-import util.Tile
+import model.Tile
 
 import scalafx.Includes._
 import scalafx.application.JFXApp3

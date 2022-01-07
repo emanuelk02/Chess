@@ -21,10 +21,10 @@ import scala.swing.Reactor
 
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl._
+import model.Tile
 import model.Piece
 import model.Piece._
 import util.Matrix
-import util.Tile
 
 
 class TestObserver extends Reactor {
@@ -56,10 +56,10 @@ class ControllerSpec extends AnyWordSpec {
         val cf = ChessField(matr)
         val ctrl = Controller(cf, new ChessCommandInvoker)
         ctrl.field.size should be(1)
-        ctrl.cell(Tile(0, 0)).get should be(W_PAWN)
-        ctrl.cell(Tile(0, 1)).get should be(B_KING)
+        ctrl.cell(Tile.withRowCol(0, 0)).get should be(W_PAWN)
+        ctrl.cell(Tile.withRowCol(0, 1)).get should be(B_KING)
         ctrl.field.cell(Tile("A1", ctrl.size)).get should be(W_PAWN)
-        ctrl.field.cell(Tile(0, 1)).get should be(B_KING)
+        ctrl.field.cell(Tile.withRowCol(0, 1)).get should be(B_KING)
       }
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
@@ -337,7 +337,7 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field = ctrl.field.fill(Some(W_BISHOP))
         import model.gameDataComponent.gameDataBaseImpl.ChessBoard.board
         ctrl.fieldToString should be(cf.toString)
-        ctrl.fieldToString should be(board(3, 1, cf.field) + cf.state.toFenPart + "\n")
+        ctrl.fieldToString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
       }
     }
   }

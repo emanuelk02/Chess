@@ -22,8 +22,8 @@ import scala.swing.event.Event
 
 import model.gameDataComponent.gameDataBaseImpl.ChessField
 import model.gameDataComponent.GameField
+import model.Tile
 import util.Matrix
-import util.Tile
 
 
 case class TestEvent(field: GameField) extends Event

@@ -17,10 +17,10 @@ import scala.swing.Publisher
 import scala.swing.event.Event
 
 import model.gameDataComponent.GameField
+import model.Tile
 import model.Piece
 import model.PieceColor
 import util.Command
-import util.Tile
 
 
 /**
