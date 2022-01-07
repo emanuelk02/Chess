@@ -226,6 +226,13 @@ class ChessStateSpec extends AnyWordSpec {
                     )
                 )
 
+                state.applyMovePlaying((Tile("A2"), Tile("A4")), W_PAWN, None)
+                (
+                    state.copy(
+                        color = Black,
+                        enPassant = Some(Tile("A3"))
+                    )
+                )
                 state.applyMovePlaying((Tile("A8"), Tile("A5")), B_ROOK, None) 
                 (
                     state.copy(
