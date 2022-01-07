@@ -17,15 +17,21 @@ package controllerBaseImpl
 import scala.swing.Publisher
 import scala.swing.event.Event
 
+import com.google.inject.name.Names
+import com.google.inject.{Guice, Inject}
+import net.codingwell.scalaguice.InjectorExtensions._
+
 import model.gameDataComponent.GameField
 import model.Tile
 import util.Command
 
 
-case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
+case class Controller @Inject() (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface {
+  override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   def this() = {
-    this(GameField(), new ChessCommandInvoker)
+    val injector = Guice.createInjector(new ChessModule)
+    this(injector.getInstance(classOf[GameField]), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
 

@@ -18,11 +18,15 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
+import com.google.inject.name.Names
+import com.google.inject.{Guice, Inject}
+import net.codingwell.scalaguice.InjectorExtensions._
+
 import ChessBoard.board
 import util.Matrix
 
 
-case class ChessField(field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
+case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
 
   override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 

@@ -53,9 +53,9 @@ import util.Command
  * 
  * @param field     Holds all data needed to specify the game and to execute any inputs on
  * */
-trait ControllerInterface(field: GameField) extends Publisher{
+trait ControllerInterface extends Publisher{
     /** Size of the board in rows */
-    val size = field.size
+    def size: Int
 
     /**
      * Calls a given function to receive a Command, which will be executed.
