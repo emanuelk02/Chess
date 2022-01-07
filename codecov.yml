@@ -1,0 +1,10 @@
+ignore:
+  - "**/aview/gui/"
+  - "**/Chess.scala"
+  - "**/resources/"
+
+coverage:
+  status:
+    patch:
+      default:
+        target: 90%
