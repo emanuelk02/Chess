@@ -30,8 +30,7 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
   override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   def this() = {
-    val injector = Guice.createInjector(new ChessModule)
-    this(injector.getInstance(classOf[GameField]), new ChessCommandInvoker)
+    this(Guice.createInjector(new ChessModule).getInstance(classOf[GameField]), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
 
