@@ -24,9 +24,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build Project and export Coverage
+      - name: Build Project and export Coverage to Coveralls
         env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           export CI_BRANCH="${GITHUB_REF#refs/heads/}"
           sbt clean jacoco jacocoCoveralls
+      - name: Run Tests for Codecov
+        run:  sbt jacoco
+      - name: Download Codecov
+        run: curl -Os https://uploader.codecov.io/latest/linux/codecov
+      - name: Add x Flag
+        run: chmod +x codecov
+      - name: Run Codecov
+        run: ./codecov -t ${{ secrets.CODECOV_TOKEN }}
