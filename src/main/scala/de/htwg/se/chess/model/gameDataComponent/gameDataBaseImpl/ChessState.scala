@@ -35,8 +35,7 @@ case class ChessState
     
     def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalArgumentException("Cannot set the boards contents while a game is active") else ChessState(fen, size)
 
-    def evaluateMove(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState =
-        if (playing) then applyMovePlaying(move, srcPiece, destPiece) else applyMoveIdle(move, srcPiece, destPiece)
+    val  evaluateMove = if (playing) then applyMovePlaying else applyMoveIdle
 
     val checkCastleChain = ChainHandler[Tuple4[Tile, Piece, PieceColor, Castles], Castles](List[Tuple4[Tile, Piece, PieceColor, Castles] => Option[Castles]]
         (
@@ -49,7 +48,7 @@ case class ChessState
         )
     )
 
-    private def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
             whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == White then color else PieceColor.invert(color), whiteCastle)).get,
             blackCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == Black then color else PieceColor.invert(color), blackCastle)).get,
@@ -60,7 +59,7 @@ case class ChessState
         )
     }
 
-    private def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
             color = PieceColor.invert(color),
             whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, White, whiteCastle)).get,
@@ -70,7 +69,8 @@ case class ChessState
             enPassant = 
                 if  (srcPiece.getType == Pawn && 
                     ((move(1).rank - move(0).rank) == 2 || (move(0).rank - move(1).rank == 2)))
-                    then Some(new Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) else None
+                    then Some(new Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) 
+                    else None
         )
     }
 
