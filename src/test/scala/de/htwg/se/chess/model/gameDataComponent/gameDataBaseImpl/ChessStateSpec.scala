@@ -226,6 +226,16 @@ class ChessStateSpec extends AnyWordSpec {
                     )
                 )
 
+                state.applyMovePlaying((Tile("A8"), Tile("A5")), B_ROOK, None) 
+                (
+                    state.copy(
+                        whiteCastle = Castles(true, true),
+                        blackCastle = Castles(true, false),
+                        halfMoves = 1,
+                        fullMoves = 2
+                    )
+                )
+
                 an [IllegalArgumentException] should be thrownBy state.evaluateFen("")
             }
             "be convertible into its part of the FEN representation" in {

@@ -48,7 +48,7 @@ case class ChessState
         )
     )
 
-    private def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
             whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == White then color else PieceColor.invert(color), whiteCastle)).get,
             blackCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == Black then color else PieceColor.invert(color), blackCastle)).get,
@@ -59,7 +59,7 @@ case class ChessState
         )
     }
 
-    private def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
             color = PieceColor.invert(color),
             whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, White, whiteCastle)).get,
