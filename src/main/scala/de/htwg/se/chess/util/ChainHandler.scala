@@ -18,12 +18,12 @@ import scala.util.Success
 import scala.util.Failure
 
 
-case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Option[R]) {
-  private def handle(in: R): Try[Option[R]] = Try(function(in))
+case class ChainHandler[I, R](successor: Option[ChainHandler[I, R]])(function: I => Option[R]) {
+  private def handle(in: I): Try[Option[R]] = Try(function(in))
 
-  def handleRequest(in: R): Option[R] = {
+  def handleRequest(in: I): Option[R] = {
     handle(in) match {
-      case s: Success[Option[R]] => 
+      case s: Success[Option[R]] =>
         if s.get.isDefined
           then s.get 
           else if successor.isDefined
@@ -35,11 +35,11 @@ case class ChainHandler[R](successor: Option[ChainHandler[R]])(function: R => Op
 }
 
 object ChainHandler {
-  def apply[R](list: List[(R) => (Option[R])]): ChainHandler[R] = {
+  def apply[I, R](list: List[(I) => (Option[R])]): ChainHandler[I, R] = {
     list match {
-        case Nil => ChainHandler[R](None)(_ => None)
-        case func :: Nil => ChainHandler[R](None)(func)
-        case func :: tail => ChainHandler[R](Some(ChainHandler(tail)))(func)
+        case Nil => ChainHandler[I, R](None)(_ => None)
+        case func :: Nil => ChainHandler[I, R](None)(func)
+        case func :: tail => ChainHandler[I, R](Some(ChainHandler(tail)))(func)
     }
   }
 }

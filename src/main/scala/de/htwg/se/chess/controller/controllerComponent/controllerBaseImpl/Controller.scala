@@ -18,12 +18,12 @@ import scala.swing.Publisher
 import scala.swing.event.Event
 
 import model.gameDataComponent.GameField
+import model.Tile
 import util.Command
-import util.Tile
 
 
 case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
-  val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+  val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   def this() = {
     this(GameField(), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)

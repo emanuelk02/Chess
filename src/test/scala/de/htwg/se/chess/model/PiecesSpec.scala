@@ -15,9 +15,10 @@ package model
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import Piece._
 import PieceColor._
 import PieceType._
+import Piece._
+
 
 class PiecesSpec extends AnyWordSpec {
   "A Piece" should {
@@ -45,17 +46,20 @@ class PiecesSpec extends AnyWordSpec {
       )
     }
     "return its color as part of an Enum PieceColor" in {
-      W_KING.getColor should be(PieceColor.White)
-      B_KING.getColor should be(PieceColor.Black)
+      W_KING.getColor should be(White)
+      B_KING.getColor should be(Black)
+
+      PieceColor.invert(W_KING.getColor) shouldBe Black
+      PieceColor.invert(B_KING.getColor) shouldBe White
     }
     "return its type as part of an Enum PieceType" in {
-      W_KING.getType should be(PieceType.King)
-      B_KING.getType should be(PieceType.King)
-      W_QUEEN.getType should be(PieceType.Queen)
-      W_ROOK.getType should be(PieceType.Rook)
-      W_BISHOP.getType should be(PieceType.Bishop)
-      W_KNIGHT.getType should be(PieceType.Knight)
-      W_PAWN.getType should be(PieceType.Pawn)
+      W_KING.getType should be(King)
+      B_KING.getType should be(King)
+      W_QUEEN.getType should be(Queen)
+      W_ROOK.getType should be(Rook)
+      W_BISHOP.getType should be(Bishop)
+      W_KNIGHT.getType should be(Knight)
+      W_PAWN.getType should be(Pawn)
     }
     "have a unique String representation" in {
       Piece.values.map(p => p.toString).toSet.size should be(12)

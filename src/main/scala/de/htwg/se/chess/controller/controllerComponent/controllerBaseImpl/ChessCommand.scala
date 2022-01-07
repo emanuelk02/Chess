@@ -16,10 +16,10 @@ package controllerBaseImpl
 
 import scala.swing.event.Event
 
+import model.Tile
 import model.Piece
 import model.gameDataComponent.GameField
 import util.Command
-import util.Tile
 
 trait ChessCommand(field: GameField) extends CommandInterface {
     protected val prevField = field
