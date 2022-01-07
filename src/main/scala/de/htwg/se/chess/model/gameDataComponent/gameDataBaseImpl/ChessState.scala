@@ -29,44 +29,48 @@ case class ChessState
     blackCastle: Castles = Castles(),
     halfMoves: Int = 0,
     fullMoves: Int = 1,
-    enPassant: Option[Tile] = None
+    enPassant: Option[Tile] = None,
+    size: Int = 8
     ):
     
     def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalArgumentException("Cannot set the boards contents while a game is active") else ChessState(fen)
 
-    val whiteCastleChain = ChainHandler[Tuple2[Tile, Piece], Castles](List[Tuple2[Tile, Piece] => Option[Castles]]
+    def evaluateMove(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState =
+        if (playing) then applyMovePlaying(move, srcPiece, destPiece) else applyMoveIdle(move, srcPiece, destPiece)
+
+    val checkCastleChain = ChainHandler[Tuple4[Tile, Piece, PieceColor, Castles], Castles](List[Tuple4[Tile, Piece, PieceColor, Castles] => Option[Castles]]
         (
-            ( in => if (color == White) then None else Some(whiteCastle) ),
-            ( in => if (whiteCastle.queenSide ||whiteCastle.kingSide) then None else Some(whiteCastle) ),
+            ( in => if (color == in(2)) then None else Some(in(3)) ),
+            ( in => if (in(3).queenSide || in(3).kingSide) then None else Some(in(3)) ),
             ( in => if (in(1).getType == King) then Some(Castles(false, false)) else None ),
-            ( in => if (in(1).getType == Rook) then None else Some(whiteCastle) ),
-            ( in => if (in(0).file == 1 && in(0).rank == 1) then Some(Castles(whiteCastle.queenSide, false)) else None),
-            ( in => if (in(0).file == 8 && in(0).rank == 1) then Some(Castles(false, whiteCastle.kingSide)) else Some(whiteCastle))
+            ( in => if (in(1).getType == Rook) then None else Some(in(3)) ),
+            ( in => if (in(0).file == 1 && (in(0).rank == 1 || in(0).rank == size)) then Some(Castles(false, in(3).kingSide)) else None),
+            ( in => if (in(0).file == size && (in(0).rank == 1 || in(0).rank == size)) then Some(Castles(in(3).queenSide, false)) else Some(in(3)))
         )
     )
 
-    val blackCastleChain = ChainHandler[Tuple2[Tile, Piece], Castles](List[Tuple2[Tile, Piece] => Option[Castles]]
-        (
-            ( in => if (color == Black) then None else Some(blackCastle) ),
-            ( in => if (blackCastle.queenSide || blackCastle.kingSide) then None else Some(blackCastle) ),
-            ( in => if (in(1).getType == King) then Some(Castles(false, false)) else None ),
-            ( in => if (in(1).getType == Rook) then None else Some(blackCastle) ),
-            ( in => if (in(0).file == 1 && in(0).rank == 8) then Some(Castles(blackCastle.queenSide, false)) else None),
-            ( in => if (in(0).file == 8 && in(0).rank == 8) then Some(Castles(false, blackCastle.kingSide)) else Some(blackCastle))
-        )
-    )
-
-    def applyMove(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    private def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
-            color = if (color == White) then Black else White,
-            whiteCastle = whiteCastleChain.handleRequest((move(0), srcPiece)).get,
-            blackCastle = blackCastleChain.handleRequest((move(0), srcPiece)).get,
+            whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == White then color else PieceColor.invert(color), whiteCastle)).get,
+            blackCastle = checkCastleChain.handleRequest((move(0), srcPiece, if srcPiece.getColor == Black then color else PieceColor.invert(color), blackCastle)).get,
+            enPassant = 
+                if  (srcPiece.getType == Pawn && 
+                    ((move(1).rank - move(0).rank) == 2 || (move(0).rank - move(1).rank == 2)))
+                    then Some(new Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) else None
+        )
+    }
+
+    private def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+        copy(
+            color = PieceColor.invert(color),
+            whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, White, whiteCastle)).get,
+            blackCastle = checkCastleChain.handleRequest((move(0), srcPiece, Black, blackCastle)).get,
             halfMoves = if (srcPiece.getType == Pawn || destPiece.isDefined) then 0 else halfMoves + 1,
             fullMoves = fullMoves + (if (color == PieceColor.Black) then 1 else 0),
             enPassant = 
                 if  (srcPiece.getType == Pawn && 
                     ((move(1).rank - move(0).rank) == 2 || (move(0).rank - move(1).rank == 2)))
-                    then Some(Tile(move(1).file, (if (move(1).rank == 5) then 6 else 3))) else None
+                    then Some(new Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) else None
         )
     }
 
@@ -86,7 +90,11 @@ object ChessState:
     def apply(fen: String): ChessState = {
         var cutFen = fen.dropWhile(c => !c.equals(' ')).drop(1)
 
-        val col: PieceColor = if (cutFen(0) == 'w') then White else Black
+        val col: PieceColor = if (cutFen(0).toLower == 'w') 
+            then White 
+            else if (cutFen(0).toLower == 'b') 
+                then Black
+                else throw new IllegalArgumentException
         cutFen = cutFen.drop(2)
 
         val whiteC = 

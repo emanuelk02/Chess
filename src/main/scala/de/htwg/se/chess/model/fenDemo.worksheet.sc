@@ -123,7 +123,7 @@ val tes = chessBoard.contents(2)
 tes.asInstanceOf[Label].text
 
 
-val fenTest = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b b Kkq a2 1 2"
+val fenTest = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b b Qk a2 -1 2"
 
 val cutFen = fenTest.dropWhile(c => !c.equals(' ')).drop(1)
 
@@ -175,5 +175,10 @@ val blackCastleChain = ChainHandler[Tuple3[Tile, Piece, Option[Piece]], Castles]
     )
 )
 
-val result = whiteCastleChain.handleRequest(whiteCastle).get
-val result2 = blackCastleChain.handleRequest(whiteCastle).get
+val result = whiteCastleChain.handleRequest(move(0), srcPiece, destPiece).get
+val result2 = blackCastleChain.handleRequest(move(0), srcPiece, destPiece).get
+
+White.toString
+Black.toString
+
+ChessState("... c Kq - 1 2")

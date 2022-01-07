@@ -42,6 +42,7 @@ class ChainHandlerSpec extends AnyWordSpec {
         "return None, if none of the handlers can handle the request" in {
             val chain = ChainHandler[Int, Double](List(one, two, three))
             chain.handleRequest(0) should be(None)
+            chain.handleRequest(-1) should be(None)
         }
     }
 }

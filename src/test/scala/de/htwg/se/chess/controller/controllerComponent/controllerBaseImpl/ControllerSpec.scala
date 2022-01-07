@@ -35,6 +35,7 @@ class TestObserver extends Reactor {
     case e: ErrorEvent => field = ChessField().fill(e.msg)
     case e: MoveEvent => field = ChessField().replace(e.tile2, "Q")
     case e: ExitEvent => throw new Error("Non-Exitable")
+    case e: GameEnded => field = null
   }
 }
 

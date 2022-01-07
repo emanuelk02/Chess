@@ -19,6 +19,9 @@ enum PieceType:
 enum PieceColor:
   case Black, White
 
+object PieceColor:
+  def invert(color: PieceColor): PieceColor = if color == White then Black else White
+
 enum Piece(color: PieceColor, ptype: PieceType, name: String):
   case W_KING extends Piece(PieceColor.White, PieceType.King, "K")
   case W_QUEEN extends Piece(PieceColor.White, PieceType.Queen, "Q")
