@@ -23,6 +23,6 @@ import model.gameDataComponent.gameDataBaseImpl.ChessField
 class ChessModule extends AbstractModule with ScalaModule {
   def configure(): Unit = {
     bind[GameField].to[ChessField]
-    bind[ControllerInterface].to[controllerBaseImpl.Controller]
+    bind[ControllerInterface].to[Controller]
   }
 }

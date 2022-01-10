@@ -18,16 +18,16 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-import com.google.inject.name.Names
 import com.google.inject.{Guice, Inject}
-import net.codingwell.scalaguice.InjectorExtensions._
 
 import ChessBoard.board
+import PieceType._
 import util.Matrix
+import util.ChainHandler
 
 
-case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState) extends GameField(field) {
-
+case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState, inCheck: Boolean = false) extends GameField(field) {
+  val attackedCheckTiles: List[Tile] = Nil
   override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
   override def replace(tile: Tile, fill: Option[Piece]): ChessField = copy(field.replace(tile.row, tile.col, fill))
@@ -40,6 +40,7 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState
     val piece = field.cell(tile1.row, tile1.col)
     checkMove(tile1, tile2) match {
       case s: Success[Unit] => {
+        // check for check
         copy(
           field
             .replace(tile2.row, tile2.col, piece)
@@ -53,11 +54,55 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState
     }
   }
 
+  override def getLegalMoves(tile: Tile): List[Tile] = {
+    var retList : List[Tile] = Nil
+    if (cell(tile).isDefined)
+      then {
+        val ret = legalMoveChain.handleRequest(tile)
+        if ret.isDefined then retList = ret.get
+      }
+    retList
+  }
+
+  val legalMoveChain = ChainHandler[Tile, List[Tile]] (List[(Tile => Option[List[Tile]])]
+    (
+      ( in => if (cell(in).get.getColor != state.color) then None else Some(Nil) ),
+      ( in => cell(in).get.getType match {
+          case King   =>  kingMoveChain(in)
+          case Queen  =>  queenMoveChain(in)
+          case Rook   =>  rookMoveChain(in)
+          case Bishop =>  bishopMoveChain(in)
+          case Knight =>  knightMoveChain(in)
+          case Pawn   =>  pawnMoveChain(in)
+        }
+      )
+    )
+  )
+  private val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
+    (
+      ( in => if cell(in).isDefined then None else Some(in) ),
+      ( in => if cell(in).get.getColor == state.color then Some(in) else None ),
+      ( in => if attackedCheckTiles.contains(in) then Some(in) else None )
+    )
+  )
+  private val kingMoveList : List[Tuple2[Int, Int]] = List((0,1), (1,0), (1,1), (1, -1), (-1, 1), (-1,0), (0,-1), (-1,-1))
+  private def getRochadeTiles: List[Tile] = Nil //@Todo
+  private def kingMoveChain(in: Tile) : List[Tile] =
+    kingMoveList.filter( x => Try(in - x).isSuccess )
+                .filter( x => tileHandle.handleRequest(in - x).isEmpty )
+                .map( x => in - x )
+                .appendedAll(getRochadeTiles)
+  //private val queenMoveChain
+  //private val rookMoveChain
+  //private val bishopMoveChain
+  //private val knightMoveChain
+  //private val pawnMoveChain
+
   override def loadFromFen(fen: String): ChessField = {
     val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, field.size).toVector
     copy(
       Matrix(
-        Vector.tabulate(field.size) { rank =>  fenList.drop(rank * field.size).take(field.size) }
+        Vector.tabulate(field.size) { rank => fenList.drop(rank * field.size).take(field.size) }
       ),
       state.evaluateFen(fen)
     )
@@ -81,26 +126,7 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState
 
   override def select(tile: Option[Tile]) = copy(field, state.select(tile))
   override def selected: Option[Tile] = state.selected
-  
-  def checkFile(check: Char): String = {
-    if (check.toLower.toInt - 'a'.toInt < 0 || check.toLower.toInt - 'a'.toInt > field.size - 1)
-      then "Tile file is invalid"
-      else ""
-  }
 
-  def checkRank(check: Int): String = {
-    if (check < 1 || check > field.size)
-      then "Tile rank is invalid"
-      else ""
-  }
-  def checkTile(check: String): String = {
-    if (check.length == 2) {
-      checkFile(check(0).toLower) match {
-        case ""        => return checkRank(check(1).toInt - '0'.toInt)
-        case s: String => return s
-      }
-    } else "Invalid format"
-  }
   def checkFen(check: String): String = {
     val splitted = check.split('/')
 

@@ -96,6 +96,15 @@ trait GameField (field: Matrix[Option[Piece]]) {
      * @return          The same field but with the moved piece
      * */
     def move(tile1: Tile, tile2: Tile): GameField
+
+    /**
+     * Returns a list of all tiles the piece in given tile can move to.
+     * Returned tiles are fully legal and respect check.
+     * For empty tiles an empty list is returned.
+     * @param tile      Source tile
+     * @return          List of tiles which are legal to move to
+     */
+    def getLegalMoves(tile: Tile): List[Tile]
     
     /**
      * Loads a board position and game state from the given string.

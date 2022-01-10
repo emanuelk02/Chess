@@ -323,23 +323,6 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "allow to check validity of inputs" in {
-        cf.checkFile('A') should be("")
-        cf.checkFile('B') should be("")
-        cf.checkFile('C') should be("Tile file is invalid")
-
-        cf.checkRank(1) should be("")
-        cf.checkRank(2) should be("")
-        cf.checkRank(3) should be("Tile rank is invalid")
-
-        cf.checkTile("A1") should be("")
-        cf.checkTile("A2") should be("")
-        cf.checkTile("A9") should be("Tile rank is invalid")
-        cf.checkTile("K1") should be("Tile file is invalid")
-        cf.checkTile("K9") should be("Tile file is invalid")
-        cf.checkTile("") should be("Invalid format")
-        cf.checkTile("A") should be("Invalid format")
-        cf.checkTile("1") should be("Invalid format")
-
         cf.checkFen("/") should be("")
         cf.checkFen("2/2") should be("")
         cf.checkFen("kk/QQ") should be("")
