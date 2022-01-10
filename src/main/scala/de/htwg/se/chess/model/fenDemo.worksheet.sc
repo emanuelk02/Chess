@@ -5,6 +5,7 @@ import model.Piece
 import model.Piece._
 import model.gameDataComponent.gameDataBaseImpl._
 import util.Matrix
+import model.Tile
 
 val fen = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
 
@@ -83,7 +84,6 @@ import javax.swing.WindowConstants.EXIT_ON_CLOSE
 import javax.swing.SwingConstants
 
 import controller.controllerComponent.controllerBaseImpl.Controller
-import util.Tile
 
 val ctrl = new Controller()
 
@@ -184,3 +184,22 @@ Black.toString
 val in = ("fen 1B/kQ w KQkq - 0 1").split(" ")
 
 in.drop(1).mkString(" ")
+
+val cf = ChessField()
+val attackedCheckTiles = Nil
+
+val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
+  (
+    ( in => if cf.cell(in).get.getColor == cf.state.color then Some(in) else None ),
+    ( in => if attackedCheckTiles.contains(in) then Some(in) else None )
+  )
+)
+
+import scala.util.Try
+
+val kingMoveList : List[Tuple2[Int, Int]] = List((0,1), (1,0), (1,1), (1, -1), (-1, 1), (-1,0), (0,-1), (-1,-1))
+def kingMoveChain(in: Tile): List[Tile] = 
+    kingMoveList.filter( x => Try(in - x).isSuccess ).filter( x => tileHandle.handleRequest(in - x).isEmpty ).map( x => in - x )
+
+tileHandle.handleRequest(Tile(5,1))
+kingMoveChain(Tile(6, 1))
