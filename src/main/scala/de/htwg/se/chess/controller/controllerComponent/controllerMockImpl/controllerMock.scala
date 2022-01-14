@@ -20,7 +20,8 @@ import model.gameDataComponent.GameField
 import util.Matrix
 
 
-class MockController extends ControllerInterface(GameField()) {
+class MockController extends ControllerInterface {
+  val size = 0
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
 

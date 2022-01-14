@@ -17,6 +17,7 @@ package gameDataBaseImpl
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import scala.util.control.Breaks._
 
 import com.google.inject.{Guice, Inject}
 
@@ -26,7 +27,7 @@ import util.Matrix
 import util.ChainHandler
 
 
-case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState, inCheck: Boolean = false) extends GameField(field) {
+case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, None), state: ChessState = new ChessState, inCheck: Boolean = false) extends GameField(field) {
   val attackedCheckTiles: List[Tile] = Nil
   override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
@@ -64,9 +65,14 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState
     retList
   }
 
+  private def getRochadeTiles(in: Tile): List[Tile] = {
+    Nil
+  }
+
   val legalMoveChain = ChainHandler[Tile, List[Tile]] (List[(Tile => Option[List[Tile]])]
     (
       ( in => if (cell(in).get.getColor != state.color) then None else Some(Nil) ),
+      ( in => if attackedCheckTiles.contains(in) then Some(Nil) else None ),
       ( in => Some( cell(in).get.getType match {
           case King   =>  kingMoveChain(in)
           case Queen  =>  queenMoveChain(in)
@@ -85,18 +91,54 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]], state: ChessState
       ( in => if attackedCheckTiles.contains(in) then Some(in) else None )
     )
   )
-  private val kingMoveList : List[Tuple2[Int, Int]] = List((0,1), (1,0), (1,1), (1, -1), (-1, 1), (-1,0), (0,-1), (-1,-1))
+  private val diagonalMoves : List[Tuple2[Int, Int]] = List((1,1), (1, -1), (-1, 1), (-1,-1))
+  private val straightMoves : List[Tuple2[Int, Int]] = List((0,1), (1,0), (-1,0), (0,-1))
+  private val kingMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
+  private val queenMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
+  private val knightMoveList : List[Tuple2[Int, Int]] = List()
+
   private def getRochadeTiles: List[Tile] = Nil //@Todo
   private def kingMoveChain(in: Tile) : List[Tile] =
     kingMoveList.filter( x => Try(in - x).isSuccess )
                 .filter( x => tileHandle.handleRequest(in - x).isEmpty )
                 .map( x => in - x )
                 .appendedAll(getRochadeTiles)
-  //private val queenMoveChain
-  //private val rookMoveChain
-  //private val bishopMoveChain
-  //private val knightMoveChain
-  //private val pawnMoveChain
+  
+  private def queenMoveChain(in: Tile) : List[Tile] = {
+    val ret = for {
+      i <- 1 to size
+    } yield {
+      queenMoveList.filter( x => Try(in - (x(0)*i, x(1)*i)).isSuccess )
+                  .filter( x => tileHandle.handleRequest(in - (x(0)*i, x(1)*i)).isEmpty )
+                  .map( x => in - (x(0)*i, x(1)*i))
+    }
+    ret.flatMap(x => x).toList
+  }
+
+  private def rookMoveChain(in: Tile) : List[Tile] = {
+    val ret = for {
+      i <- 1 to size
+    } yield {
+      straightMoves.filter( x => Try(in - (x(0)*i, x(1)*i)).isSuccess )
+                  .filter( x => tileHandle.handleRequest(in - (x(0)*i, x(1)*i)).isEmpty )
+                  .map( x => in - (x(0)*i, x(1)*i))
+    }
+    ret.flatMap(x => x).toList
+  }
+
+  private def bishopMoveChain(in: Tile) : List[Tile] = {
+    val ret = for {
+      i <- 1 to size
+    } yield {
+      diagonalMoves.filter( x => Try(in - (x(0)*i, x(1)*i)).isSuccess )
+                  .filter( x => tileHandle.handleRequest(in - (x(0)*i, x(1)*i)).isEmpty )
+                  .map( x => in - (x(0)*i, x(1)*i))
+    }
+    ret.flatMap(x => x).toList
+  }
+
+  private def knightMoveChain(in: Tile) : List[Tile] =
+  private def pawnMoveChain(in: Tile) : List[Tile] =
 
   override def loadFromFen(fen: String): ChessField = {
     val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, field.size).toVector

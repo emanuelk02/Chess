@@ -71,6 +71,8 @@ class TUI(controller: ControllerInterface) extends Reactor {
           controller.executeAndNotify(controller.clear, ())
         case "fen" | "loadfen" =>  //----------------------- FenString
             controller.executeAndNotify(controller.putWithFen, in.drop(1).mkString(" "))
+        case "start" => controller.start
+        case "stop" => controller.stop
         case "z" | "undo" =>
           controller.undo
         case "y" | "redo" =>

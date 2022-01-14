@@ -16,13 +16,21 @@ import net.codingwell.scalaguice.ScalaModule
 
 import controller.controllerComponent.ControllerInterface
 import controller.controllerComponent.controllerBaseImpl.Controller
+import de.htwg.se.chess.controller.controllerComponent.controllerBaseImpl.ChessCommandInvoker
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl.ChessField
 
 
-class ChessModule extends AbstractModule with ScalaModule {
-  def configure(): Unit = {
-    bind[GameField].to[ChessField]
-    bind[ControllerInterface].to[Controller]
-  }
+class ChessModule extends AbstractModule {
+  override def configure(): Unit = {
+    bind(classOf[GameField]).toInstance(ChessField())
+    bind(classOf[ControllerInterface]).toInstance(Controller(
+      new ChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), 
+      new ChessCommandInvoker))
+    }
 }
+
+/*object DefaultModule {
+  given GameField = ChessField()
+  given ControllerInterface = new Controller()
+}*/
