@@ -89,7 +89,7 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
     )
   )
 
-  val rochadeTiles: List[Tile] = state.color match {
+  def rochadeTiles(): List[Tile] = state.color match {
     case White => 
       List().appendedAll( 
               if (state.whiteCastle.kingSide
@@ -145,7 +145,7 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
     kingMoveList.filter( x => Try(in - x).isSuccess )
                 .filter( x => tileHandle.handleRequest(in - x).isDefined )
                 .map( x => in - x )
-                .appendedAll(rochadeTiles)
+                .appendedAll(rochadeTiles())
   
   private def queenMoveChain(in: Tile) : List[Tile] =
     val ret = queenMoveList.map( move =>
@@ -310,7 +310,7 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
                   else { p.get.toString }
       )
       rows = rows + 1
-      row.mkString + (if (rows == size) then "" else "/")
+      row.mkString + (if (count != 0) then count.toString else "") + (if (rows == size) then "" else "/")
     }
     fenRet.mkString
   }
@@ -319,6 +319,5 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
 }
 
 object ChessField {
-  def apply(): ChessField = new ChessField(new Matrix(8, None), new ChessState())
-  def apply(field: Matrix[Option[Piece]]): ChessField = new ChessField(field, ChessState(size = field.size))
+  def apply(field: Matrix[Option[Piece]]) = new ChessField(field, new ChessState(size = field.size), false)
 }

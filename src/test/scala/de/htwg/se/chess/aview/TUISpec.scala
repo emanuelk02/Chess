@@ -34,7 +34,7 @@ class TUISpec extends AnyWordSpec {
         Vector(Some(W_PAWN), Some(W_BISHOP))
       )
     )
-    val cf = ChessField()
+    val cf = ChessField(matr)
     val ctrl = Controller(cf, new ChessCommandInvoker)
     val tui = TUI(ctrl)
     "filled" should {

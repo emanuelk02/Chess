@@ -23,6 +23,7 @@ import model.gameDataComponent.gameDataBaseImpl._
 import model.Tile
 import model.Piece
 import model.Piece._
+import model.PieceColor._
 import util.Matrix
 
 
@@ -74,25 +75,39 @@ class ChessCommandSpec extends AnyWordSpec {
             PutCommand((Tile("A3"), "W_QUEEN"), field)
         }
     }
-    val move = MoveCommand((Tile("A1", size), Tile("A2", size)), field)
+    val mField = 
+        new ChessField()
+            .replace(Tile("A1"), "R")
+            .replace(Tile("A2"), "b")
+            .replace(Tile("B1"), "b")
+            .replace(Tile("B2"), "R")
+    val move = MoveCommand((Tile("A1"), Tile("A2")), mField)
     "A MoveCommand" should {
         "Run the move command on its controller's ChessField and return that" in {
-            move.execute should be(field.move(Tile("A1", size), Tile("A2", size)))
-            move.redo should be(field.move(Tile("A1", size), Tile("A2", size)))
-            move.undo should be(field)
+            move.execute should be(mField.move(Tile("A1"), Tile("A2")))
+            move.redo should be(mField.move(Tile("A1"), Tile("A2")))
+            move.undo should be(mField)
         }
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
-            MoveCommand((Tile("A1"), Tile("H3")), field)
-            MoveCommand((Tile("H3"), Tile("A1")), field)
+            MoveCommand((Tile("A1", 9), Tile("H9", 9)), mField)
+            MoveCommand((Tile("I3", 9), Tile("A1", 9)), mField)
         }
         "be encapsulated in a CheckedMoveCommand if the move needs validation" in {
             val cmc = CheckedMoveCommand(move)
-            //cmc.legalMoves should be List()
-            cmc.errorCmd should be(ErrorCommand("", move.field))
+            cmc.legalMoves should contain allElementsOf Tile("A2") :: Tile("B1") :: Nil
+            cmc.errorCmd should be(ErrorCommand("Illegal Move", move.field))
 
             cmc.execute should be(move.execute)
             cmc.undo should be(move.undo)
             cmc.redo should be(move.redo)
+
+            val cmc2 = CheckedMoveCommand(MoveCommand((Tile("A2"), Tile("A1")), mField))
+            cmc2.legalMoves shouldBe Nil
+            cmc2.errorCmd should be(ErrorCommand("Illegal Move", move.field))
+
+            cmc2.execute should be(cmc2.errorCmd.execute)
+            cmc2.undo should be(cmc2.errorCmd.undo)
+            cmc2.redo should be(cmc2.errorCmd.redo)
         }
     }
     val clear = ClearCommand(field)
