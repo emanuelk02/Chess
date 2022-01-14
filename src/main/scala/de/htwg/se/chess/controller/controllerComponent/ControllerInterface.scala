@@ -133,6 +133,8 @@ trait ControllerInterface extends Publisher{
     def isSelected(tile: Tile): Boolean
     /** Checks if a tile is currently selected @return true if any tile is selected, false if not */
     def hasSelected: Boolean
+    /** Returns all fully legal moves for given tile */
+    def getLegalMoves(tile: Tile): List[Tile]
 }
 
 /**

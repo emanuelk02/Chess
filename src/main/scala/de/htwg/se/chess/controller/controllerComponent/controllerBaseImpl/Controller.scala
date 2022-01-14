@@ -72,4 +72,5 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
   def selected: Option[Tile] = field.selected
   def isSelected(tile: Tile): Boolean = if hasSelected then field.selected.get == tile else false
   def hasSelected: Boolean = field.selected.isDefined
+  def getLegalMoves(tile: Tile): List[Tile] = field.getLegalMoves(tile)
 }

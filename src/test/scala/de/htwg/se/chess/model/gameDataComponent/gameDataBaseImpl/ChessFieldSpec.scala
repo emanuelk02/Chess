@@ -54,14 +54,14 @@ class ChessFieldSpec extends AnyWordSpec {
       val cf = ChessField(matr)
       "return contents from single cells using file: Int, rank: Int or String parameters" in {
         val cf_temp = cf.replace(Tile("A1", cf.size), "B_KING").replace(Tile("B2", cf.size), "B_QUEEN")
-        cf_temp.cell(Tile.withRowCol(1, 0)) should be(Some(B_KING)) // A1
-        cf_temp.cell(Tile.withRowCol(1, 1)) should be(Some(W_BISHOP)) // B1
-        cf_temp.cell(Tile.withRowCol(0, 0)) should be(Some(W_BISHOP)) // A2
-        cf_temp.cell(Tile.withRowCol(0, 1)) should be(Some(B_QUEEN)) // B2
-        cf_temp.cell(Tile("A1", cf.size)) should be(Some(B_KING)) // A1
-        cf_temp.cell(Tile("B1", cf.size)) should be(Some(W_BISHOP)) // B1
-        cf_temp.cell(Tile("a2", cf.size)) should be(Some(W_BISHOP)) // A2
-        cf_temp.cell(Tile("b2", cf.size)) should be(Some(B_QUEEN)) // B2
+        cf_temp.cell(Tile.withRowCol(1, 0)) should be(Some(B_KING))   	// A1
+        cf_temp.cell(Tile.withRowCol(1, 1)) should be(Some(W_BISHOP))   // B1
+        cf_temp.cell(Tile.withRowCol(0, 0)) should be(Some(W_BISHOP))   // A2
+        cf_temp.cell(Tile.withRowCol(0, 1)) should be(Some(B_QUEEN))    // B2
+        cf_temp.cell(Tile("A1", cf.size)) should be(Some(B_KING))
+        cf_temp.cell(Tile("B1", cf.size)) should be(Some(W_BISHOP))
+        cf_temp.cell(Tile("a2", cf.size)) should be(Some(W_BISHOP))
+        cf_temp.cell(Tile("b2", cf.size)) should be(Some(B_QUEEN))
       }
       "not have a diferent sized matrix based on contents" in {
         cf.size should be (2)
@@ -297,7 +297,7 @@ class ChessFieldSpec extends AnyWordSpec {
           )
         )
       }
-      "allow to selected single tiles to indicate that they will be modified" in {
+      "allow to select single tiles to indicate that they will be modified" in {
         cf.selected should be (None)
         
         val tile = Tile("A1", cf.size)
@@ -307,6 +307,9 @@ class ChessFieldSpec extends AnyWordSpec {
             cf.state.select(Some(tile))
           )
         )
+      }
+      "compute legal moves for a given tile" in {
+        // @TODO
       }
       "allow to start and stop the game by changing its state" in {
         cf.start should be(
@@ -337,6 +340,9 @@ class ChessFieldSpec extends AnyWordSpec {
 
         /* Not Implemented yet */
         //cf.checkMove
+      }
+      "have a FEN representation composed of the pieces parts that it stores and its states' part" in {
+        // @TODO
       }
       "have a string representation like specified in ChessBoard" in {
         import gameDataBaseImpl.ChessBoard.board

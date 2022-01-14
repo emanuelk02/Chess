@@ -23,12 +23,17 @@ import com.google.inject.{Guice, Inject}
 
 import ChessBoard.board
 import PieceType._
+import PieceColor._
 import util.Matrix
 import util.ChainHandler
 
 
 case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, None), state: ChessState = new ChessState, inCheck: Boolean = false) extends GameField(field) {
   val attackedCheckTiles: List[Tile] = Nil
+  val rochadeTiles: List[Tile] = state.color match {
+    case White => List().appendedAll( if (state.whiteCastle.kingSide) then List(Tile("G1")) else Nil ).appendedAll( if (state.whiteCastle.queenSide) then List(Tile("C1")) else Nil )
+    case Black => List().appendedAll( if (state.whiteCastle.kingSide) then List(Tile("G8")) else Nil ).appendedAll( if (state.whiteCastle.queenSide) then List(Tile("C8")) else Nil )
+  }
   override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
   override def replace(tile: Tile, fill: Option[Piece]): ChessField = copy(field.replace(tile.row, tile.col, fill))
@@ -65,13 +70,9 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
     retList
   }
 
-  private def getRochadeTiles(in: Tile): List[Tile] = {
-    Nil
-  }
-
   val legalMoveChain = ChainHandler[Tile, List[Tile]] (List[(Tile => Option[List[Tile]])]
     (
-      ( in => if (cell(in).get.getColor != state.color) then None else Some(Nil) ),
+      ( in => if (cell(in).get.getColor != state.color) then Some(Nil) else None ),
       ( in => if attackedCheckTiles.contains(in) then Some(Nil) else None ),
       ( in => Some( cell(in).get.getType match {
           case King   =>  kingMoveChain(in)
@@ -87,22 +88,22 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
   private val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
     (
       ( in => if cell(in).isDefined then None else Some(in) ),
-      ( in => if cell(in).get.getColor == state.color then Some(in) else None ),
-      ( in => if attackedCheckTiles.contains(in) then Some(in) else None )
+      ( in => if cell(in).get.getColor == state.color then Some(in) else None )
     )
   )
   private val diagonalMoves : List[Tuple2[Int, Int]] = List((1,1), (1, -1), (-1, 1), (-1,-1))
   private val straightMoves : List[Tuple2[Int, Int]] = List((0,1), (1,0), (-1,0), (0,-1))
   private val kingMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
   private val queenMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
-  private val knightMoveList : List[Tuple2[Int, Int]] = List()
+  private val knightMoveList : List[Tuple2[Int, Int]] = List((-1,-2), (-2,-1), (-2,1), (-1,2), (1,2), (2,1), (2,-1), (1,-2))
+  private val whitePawnTakeList : List[Tuple2[Int, Int]] = List((1,1), (-1,1))
+  private val blackPawnTakeList : List[Tuple2[Int, Int]] = List((-1,-1), (1,-1))
 
-  private def getRochadeTiles: List[Tile] = Nil //@Todo
   private def kingMoveChain(in: Tile) : List[Tile] =
     kingMoveList.filter( x => Try(in - x).isSuccess )
                 .filter( x => tileHandle.handleRequest(in - x).isEmpty )
                 .map( x => in - x )
-                .appendedAll(getRochadeTiles)
+                .appendedAll(rochadeTiles)
   
   private def queenMoveChain(in: Tile) : List[Tile] = {
     val ret = for {
@@ -138,7 +139,38 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
   }
 
   private def knightMoveChain(in: Tile) : List[Tile] =
+    knightMoveList.filter( x => Try(in - x).isSuccess )
+                .filter( x => tileHandle.handleRequest(in - x).isEmpty )
+                .map( x => in - x )
+  
   private def pawnMoveChain(in: Tile) : List[Tile] =
+    (if (state.color == White) then whitePawnTakeList else blackPawnTakeList)
+                .filter( x => Try(in + x).isSuccess )
+                .map( x => in + x)
+                .filter( x => (cell(x).isDefined && cell(x).get.getColor != state.color) || (state.enPassant.isDefined && state.enPassant.get == x) )
+                .appendedAll( Try(in + (if (state.color == White) then (0,1) else (0,-1))) match {
+                    case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
+                    case f: Failure[Tile] => Nil
+                  } 
+                )
+                .appendedAll(
+                  state.color match {
+                    case White => 
+                      if (in.rank != 2) 
+                        then Nil
+                        else Try(in + (0,2)) match {
+                          case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
+                          case f: Failure[Tile] => Nil
+                        } 
+                    case Black =>
+                      if (in.rank != size - 1) 
+                        then Nil
+                        else Try(in - (0,2)) match {
+                          case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
+                          case f: Failure[Tile] => Nil
+                        }
+                  }
+                )
 
   override def loadFromFen(fen: String): ChessField = {
     val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, field.size).toVector
@@ -196,6 +228,25 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
   }
 
   override def toString: String = board(3, 1, field) + state.toString + "\n"
+
+  override def toFenPart: String = {
+    var rows = 0
+    val fenRet = for i <- field.rows yield {
+      var count = 0
+      val row = i.flatMap( p =>
+          if (p.isEmpty) 
+              then { count = count + 1; "" }
+              else if (count != 0)
+                  then { val s = count.toString + p.get.toString; count = 0; s }
+                  else { p.get.toString }
+      )
+      rows = rows + 1
+      row.mkString + (if (rows == size) then "" else "/")
+    }
+    fenRet.mkString
+  }
+
+  override def toFen: String = toFenPart + " " + state.toFenPart
 }
 
 object ChessField {

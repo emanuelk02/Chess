@@ -128,6 +128,10 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def start: GameField
     /** Stops the game. Returns to free placement and free moves. @return The same field but not in a playing state */
     def stop:  GameField
+    /** Creates the pieces part of the fen string. @return Pieces fen */
+    def toFenPart: String
+    /** Returns the complete FEN for the game. @return Complete FEN */
+    def toFen: String
 }
 
 object GameField {

@@ -203,3 +203,23 @@ def kingMoveChain(in: Tile): List[Tile] =
 
 tileHandle.handleRequest(Tile(5,1))
 kingMoveChain(Tile(6, 1))
+
+var strin = ""
+
+val c = cf.loadFromFen(fenTest)
+var rows = 0
+val fenRet = for i <- c.field.rows yield {
+    var count = 0
+    val row = i.flatMap( p =>
+        if (p.isEmpty) 
+            then { count = count + 1; "" }
+            else if (count != 0)
+                then { val s = count.toString + p.get.toString; count = 0; s }
+                else { p.get.toString }
+    )
+    rows = rows + 1
+    print(rows)
+    row.mkString + (if (rows == cf.size) then "" else "/")
+}
+fenRet.mkString
+fenTest

@@ -71,11 +71,11 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1
         }
     }
 
-    val style = "vipping"
+    val style = "vippng"
 
     def newPicture: ImageIcon = {
         val piece = controller.cell(tile)
-        val imagePath = "src/main/resources/pieces/vipping/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png") 
+        val imagePath = "src/main/resources/pieces/vippng/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png") 
         val image: BufferedImage = 
         Try(ImageIO.read(new File(imagePath))) match {
             case s: Success[BufferedImage] => s.value

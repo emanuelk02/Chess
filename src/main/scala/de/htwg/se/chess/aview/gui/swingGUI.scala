@@ -38,7 +38,7 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
         val fieldsize = controller.size
         var tiles = Array.ofDim[TileLabel](fieldsize, fieldsize)
 
-        val chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
+        def chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
             border = LineBorder(java.awt.Color.BLACK)
             background = java.awt.Color.LIGHT_GRAY
 
@@ -73,14 +73,14 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
         reactions += {
             case e: CommandExecuted => redraw
             case e: MoveEvent => {
-                chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
-                chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
+                //chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
+                //chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
                 contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
             }
             case e: Select =>
                 if e.tile.isDefined 
                     then {
-                        chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).redraw)
+                        //chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).redraw)
                         contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
                     }
                     else redraw
