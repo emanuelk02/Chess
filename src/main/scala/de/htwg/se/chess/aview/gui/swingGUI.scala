@@ -30,6 +30,7 @@ import model.Tile
 
 class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
     def top = new MainFrame {
+        controller.start
         title = "HTWG CHESS"
 
         listenTo(controller)
@@ -38,7 +39,7 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
         val fieldsize = controller.size
         var tiles = Array.ofDim[TileLabel](fieldsize, fieldsize)
 
-        def chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
+        val chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
             border = LineBorder(java.awt.Color.BLACK)
             background = java.awt.Color.LIGHT_GRAY
 
@@ -73,19 +74,22 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
         reactions += {
             case e: CommandExecuted => redraw
             case e: MoveEvent => {
-                //chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
-                //chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
+                chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
+                chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
                 contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
             }
             case e: Select =>
-                if e.tile.isDefined 
+                if e.tile.isDefined
                     then {
-                        //chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).redraw)
+                        chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).highlight)
+                        controller.getLegalMoves(e.tile.get).foreach( tile =>
+                            chessBoard.contents.update((tile.row * 9) + tile.col + 1, tiles(tile.row)(tile.col).highlight)
+                        )
                         contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
                     }
                     else redraw
             case e: ErrorEvent => Dialog.showMessage(this, e.msg)
-            case e: ExitEvent => closeOperation()
+            case e: ExitEvent => close
         }
 
         def redraw = {

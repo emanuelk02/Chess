@@ -50,14 +50,16 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1
             else new Color(251, 215, 196)
     val selectedColor =
         if ((tile.rank % 2 == 1 && tile.file % 2 == 1) || (tile.rank % 2 == 0 && tile.file % 2 == 0)) 
-            then new Color(184, 184, 212)
-            else new Color(230, 230, 255)
-
-    val imgIcon = newPicture
+            then new Color(60, 200, 40)
+            else new Color(80, 220, 60)
+    val highlightColor =
+        if ((tile.rank % 2 == 1 && tile.file % 2 == 1) || (tile.rank % 2 == 0 && tile.file % 2 == 0)) 
+            then new Color(70, 160, 50)
+            else new Color(100, 190, 70)
 
     preferredSize = dim
     background = if controller.isSelected(tile) then selectedColor else tileColor
-    contents += new Label("", imgIcon, Alignment.Center) { preferredSize = dim }
+    contents += new Label("", newPicture, Alignment.Center) { preferredSize = dim }
 
     listenTo(mouse.clicks)
 
@@ -75,19 +77,34 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1
 
     def newPicture: ImageIcon = {
         val piece = controller.cell(tile)
-        val imagePath = "src/main/resources/pieces/vippng/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png") 
-        val image: BufferedImage = 
-        Try(ImageIO.read(new File(imagePath))) match {
-            case s: Success[BufferedImage] => s.value
-            case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
+        if (piece.isDefined) then {
+            val imagePath = "src/main/resources/pieces/vippng/" + (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W" }) + piece.get.toString + ".png"
+            val image: BufferedImage = 
+                Try(ImageIO.read(new File(imagePath))) match {
+                    case s: Success[BufferedImage] => s.value
+                    case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
+                }
+            new ImageIcon(image.getScaledInstance((dim.width * 0.8).toInt, (dim.height * 0.8).toInt, SCALE_SMOOTH))
         }
-        new ImageIcon(image.getScaledInstance((dim.width * 0.8).toInt, (dim.height * 0.8).toInt, SCALE_SMOOTH))
+        else new ImageIcon()
+    }
+
+    def highlight: TileLabel = {
+        contents.clear
+        contents += new Label("", newPicture, Alignment.Center)
+        background = (
+            if ( controller.isSelected(tile) )
+                then selectedColor 
+                else highlightColor
+        )
+        repaint()
+        this
     }
 
     def redraw: TileLabel = {
         contents.clear
         contents += new Label("", newPicture, Alignment.Center)
-        background = if controller.isSelected(tile) then selectedColor else tileColor
+        background = tileColor
         repaint()
         this
     }

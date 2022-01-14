@@ -26,12 +26,12 @@ object starter {
   val controller = injector.getInstance(classOf[ControllerInterface])
   val tui = TUI(controller)
   def runTUI: Unit = tui.run
-  def runSwingGUI = SwingGUI(controller).startup(Array()); tui.run
+  def runSwingGUI = SwingGUI(controller).startup(Array())
 }
 object MainTUI extends App {
     starter.runTUI
 }
-object MainSwingGUI extends JFXApp3 {
-    override def start() =
-      starter.runSwingGUI
+object MainSwingGUI extends App {
+    starter.runSwingGUI
+    starter.runTUI
 }

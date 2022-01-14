@@ -40,7 +40,7 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
     publish(cmd.event)
   }
 
-  def move(args: Tuple2[Tile, Tile]): ChessCommand = new MoveCommand(args, field)
+  def move(args: Tuple2[Tile, Tile]): ChessCommand = if (field.playing) then new CheckedMoveCommand(new MoveCommand(args, field)) else new MoveCommand(args, field)
   def put(args: Tuple2[Tile, String]): ChessCommand = new PutCommand(args, field)
   def clear(args: Unit): ChessCommand = new ClearCommand(field)
   def putWithFen(args: String): ChessCommand = new FenCommand(args, field)

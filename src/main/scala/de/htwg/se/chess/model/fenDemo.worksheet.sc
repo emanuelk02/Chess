@@ -6,6 +6,14 @@ import model.Piece._
 import model.gameDataComponent.gameDataBaseImpl._
 import util.Matrix
 import model.Tile
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+import scala.util.control.Breaks._
+import ChessBoard.board
+import model.PieceType._
+import model.PieceColor._
+import util.ChainHandler
 
 val fen = "/p2p1pNp/n2B/1p1NP2P/6P/3P1Q/P1P1K/q5b"
 
@@ -188,25 +196,9 @@ in.drop(1).mkString(" ")
 val cf = ChessField()
 val attackedCheckTiles = Nil
 
-val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
-  (
-    ( in => if cf.cell(in).get.getColor == cf.state.color then Some(in) else None ),
-    ( in => if attackedCheckTiles.contains(in) then Some(in) else None )
-  )
-)
-
-import scala.util.Try
-
-val kingMoveList : List[Tuple2[Int, Int]] = List((0,1), (1,0), (1,1), (1, -1), (-1, 1), (-1,0), (0,-1), (-1,-1))
-def kingMoveChain(in: Tile): List[Tile] = 
-    kingMoveList.filter( x => Try(in - x).isSuccess ).filter( x => tileHandle.handleRequest(in - x).isEmpty ).map( x => in - x )
-
-tileHandle.handleRequest(Tile(5,1))
-kingMoveChain(Tile(6, 1))
-
 var strin = ""
 
-val c = cf.loadFromFen(fenTest)
+var c = cf.loadFromFen(fenTest)
 var rows = 0
 val fenRet = for i <- c.field.rows yield {
     var count = 0
@@ -223,3 +215,40 @@ val fenRet = for i <- c.field.rows yield {
 }
 fenRet.mkString
 fenTest
+
+
+c = c.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/8/RNBQKBNR w KQkq - 0 1")
+
+private val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
+  (
+    ( in => if c.cell(in).isDefined then None else Some(in) ),
+    ( in => if c.cell(in).get.getColor != c.state.color then Some(in) else None )
+  )
+)
+private val diagonalMoves : List[Tuple2[Int, Int]] = List((1,1), (1, -1), (-1, 1), (-1,-1))
+private val straightMoves : List[Tuple2[Int, Int]] = List((0,1), (1,0), (-1,0), (0,-1))
+private val kingMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
+private val queenMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
+private val knightMoveList : List[Tuple2[Int, Int]] = List((-1,-2), (-2,-1), (-2,1), (-1,2), (1,2), (2,1), (2,-1), (1,-2))
+private val whitePawnTakeList : List[Tuple2[Int, Int]] = List((1,1), (-1,1))
+private val blackPawnTakeList : List[Tuple2[Int, Int]] = List((-1,-1), (1,-1))
+val tile = Tile("D1")
+
+val ret = queenMoveList.map( move =>
+  var prevPiece: Option[Piece] = None
+  for {
+    i <- 1 to c.size
+  } yield {
+    if (prevPiece.isEmpty) {
+      Try(tile - (move(0)*i, move(1)*i)) match {
+        case s: Success[Tile] => {
+            prevPiece = c.cell(s.get)
+            tileHandle.handleRequest(s.get)
+        }
+        case f: Failure[Tile] => None
+      }
+    }
+    else None
+  }
+)
+ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )

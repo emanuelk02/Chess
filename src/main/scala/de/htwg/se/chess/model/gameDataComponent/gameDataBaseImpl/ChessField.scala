@@ -31,8 +31,45 @@ import util.ChainHandler
 case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, None), state: ChessState = new ChessState, inCheck: Boolean = false) extends GameField(field) {
   val attackedCheckTiles: List[Tile] = Nil
   val rochadeTiles: List[Tile] = state.color match {
-    case White => List().appendedAll( if (state.whiteCastle.kingSide) then List(Tile("G1")) else Nil ).appendedAll( if (state.whiteCastle.queenSide) then List(Tile("C1")) else Nil )
-    case Black => List().appendedAll( if (state.whiteCastle.kingSide) then List(Tile("G8")) else Nil ).appendedAll( if (state.whiteCastle.queenSide) then List(Tile("C8")) else Nil )
+    case White => List().appendedAll( 
+                          if (state.whiteCastle.kingSide
+                              && !inCheck
+                              && cell(Tile("F1")).isEmpty
+                              && cell(Tile("G1")).isEmpty
+                              && !attackedCheckTiles.contains(Tile("F1"), Tile("G1"))
+                              ) then List(Tile("G1"))
+                                else Nil
+                          )
+                        .appendedAll(
+                          if (state.whiteCastle.queenSide
+                              && !inCheck
+                              && cell(Tile("D1")).isEmpty
+                              && cell(Tile("C1")).isEmpty
+                              && cell(Tile("B1")).isEmpty
+                              && !attackedCheckTiles.contains(Tile("D1"), Tile("C1"))
+                              ) then List(Tile("C1")) 
+                                else Nil 
+                          )
+
+    case Black => List().appendedAll( 
+                          if (state.whiteCastle.kingSide
+                              && !inCheck
+                              && cell(Tile("F8")).isEmpty
+                              && cell(Tile("G8")).isEmpty
+                              && !attackedCheckTiles.contains(Tile("F8"), Tile("G8"))
+                              ) then List(Tile("G8"))
+                                else Nil
+                          )
+                        .appendedAll(
+                          if (state.whiteCastle.queenSide
+                              && !inCheck
+                              && cell(Tile("D8")).isEmpty
+                              && cell(Tile("C8")).isEmpty
+                              && cell(Tile("B8")).isEmpty
+                              && !attackedCheckTiles.contains(Tile("D8"), Tile("C8"))
+                              ) then List(Tile("C8")) 
+                                else Nil 
+                          )
   }
   override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
@@ -88,59 +125,86 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
   private val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
     (
       ( in => if cell(in).isDefined then None else Some(in) ),
-      ( in => if cell(in).get.getColor == state.color then Some(in) else None )
+      ( in => if cell(in).get.getColor != state.color then Some(in) else None )
     )
   )
-  private val diagonalMoves : List[Tuple2[Int, Int]] = List((1,1), (1, -1), (-1, 1), (-1,-1))
-  private val straightMoves : List[Tuple2[Int, Int]] = List((0,1), (1,0), (-1,0), (0,-1))
-  private val kingMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
-  private val queenMoveList : List[Tuple2[Int, Int]] = diagonalMoves:::straightMoves
-  private val knightMoveList : List[Tuple2[Int, Int]] = List((-1,-2), (-2,-1), (-2,1), (-1,2), (1,2), (2,1), (2,-1), (1,-2))
-  private val whitePawnTakeList : List[Tuple2[Int, Int]] = List((1,1), (-1,1))
-  private val blackPawnTakeList : List[Tuple2[Int, Int]] = List((-1,-1), (1,-1))
+  private val diagonalMoves     : List[Tuple2[Int, Int]] = ( 1, 1) :: ( 1,-1) :: (-1, 1) :: (-1,-1) :: Nil
+  private val straightMoves     : List[Tuple2[Int, Int]] = ( 0, 1) :: ( 1, 0) :: (-1, 0) :: ( 0,-1) :: Nil
+  private val knightMoveList    : List[Tuple2[Int, Int]] = (-1,-2) :: (-2,-1) :: (-2, 1) :: (-1, 2) :: ( 1, 2) :: ( 2, 1) :: ( 2,-1) :: ( 1,-2) :: Nil
+  private val whitePawnTakeList : List[Tuple2[Int, Int]] = ( 1, 1) :: (-1, 1) :: Nil
+  private val blackPawnTakeList : List[Tuple2[Int, Int]] = (-1,-1) :: ( 1,-1) :: Nil
+  private val kingMoveList      : List[Tuple2[Int, Int]] = diagonalMoves ::: straightMoves
+  private val queenMoveList     : List[Tuple2[Int, Int]] = diagonalMoves ::: straightMoves
 
   private def kingMoveChain(in: Tile) : List[Tile] =
     kingMoveList.filter( x => Try(in - x).isSuccess )
-                .filter( x => tileHandle.handleRequest(in - x).isEmpty )
+                .filter( x => tileHandle.handleRequest(in - x).isDefined )
                 .map( x => in - x )
                 .appendedAll(rochadeTiles)
   
   private def queenMoveChain(in: Tile) : List[Tile] = {
-    val ret = for {
-      i <- 1 to size
-    } yield {
-      queenMoveList.filter( x => Try(in - (x(0)*i, x(1)*i)).isSuccess )
-                  .filter( x => tileHandle.handleRequest(in - (x(0)*i, x(1)*i)).isEmpty )
-                  .map( x => in - (x(0)*i, x(1)*i))
-    }
-    ret.flatMap(x => x).toList
+    val ret = queenMoveList.map( move =>
+      var prevPiece: Option[Piece] = None
+      for i <- 1 to size 
+      yield {
+        if (prevPiece.isEmpty) {
+          Try(in - (move(0)*i, move(1)*i)) match {
+            case s: Success[Tile] => {
+                prevPiece = cell(s.get)
+                tileHandle.handleRequest(s.get)
+            }
+            case f: Failure[Tile] => None
+          }
+        }
+        else None
+      }
+    )
+    ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
   }
 
   private def rookMoveChain(in: Tile) : List[Tile] = {
-    val ret = for {
-      i <- 1 to size
-    } yield {
-      straightMoves.filter( x => Try(in - (x(0)*i, x(1)*i)).isSuccess )
-                  .filter( x => tileHandle.handleRequest(in - (x(0)*i, x(1)*i)).isEmpty )
-                  .map( x => in - (x(0)*i, x(1)*i))
-    }
-    ret.flatMap(x => x).toList
+    val ret = straightMoves.map( move =>
+      var prevPiece: Option[Piece] = None
+      for i <- 1 to size 
+      yield {
+        if (prevPiece.isEmpty) {
+          Try(in - (move(0)*i, move(1)*i)) match {
+            case s: Success[Tile] => {
+                prevPiece = cell(s.get)
+                tileHandle.handleRequest(s.get)
+            }
+            case f: Failure[Tile] => None
+          }
+        }
+        else None
+      }
+    )
+    ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
   }
 
   private def bishopMoveChain(in: Tile) : List[Tile] = {
-    val ret = for {
-      i <- 1 to size
-    } yield {
-      diagonalMoves.filter( x => Try(in - (x(0)*i, x(1)*i)).isSuccess )
-                  .filter( x => tileHandle.handleRequest(in - (x(0)*i, x(1)*i)).isEmpty )
-                  .map( x => in - (x(0)*i, x(1)*i))
-    }
-    ret.flatMap(x => x).toList
+    val ret = diagonalMoves.map( move =>
+      var prevPiece: Option[Piece] = None
+      for i <- 1 to size 
+      yield {
+        if (prevPiece.isEmpty) {
+          Try(in - (move(0)*i, move(1)*i)) match {
+            case s: Success[Tile] => {
+                prevPiece = cell(s.get)
+                tileHandle.handleRequest(s.get)
+            }
+            case f: Failure[Tile] => None
+          }
+        }
+        else None
+      }
+    )
+    ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
   }
 
   private def knightMoveChain(in: Tile) : List[Tile] =
     knightMoveList.filter( x => Try(in - x).isSuccess )
-                .filter( x => tileHandle.handleRequest(in - x).isEmpty )
+                .filter( x => tileHandle.handleRequest(in - x).isDefined )
                 .map( x => in - x )
   
   private def pawnMoveChain(in: Tile) : List[Tile] =
@@ -155,15 +219,15 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
                 )
                 .appendedAll(
                   state.color match {
-                    case White => 
-                      if (in.rank != 2) 
+                    case White =>
+                      if (in.rank != 2 || cell(in + (0,1)).isDefined)
                         then Nil
                         else Try(in + (0,2)) match {
                           case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
                           case f: Failure[Tile] => Nil
                         } 
                     case Black =>
-                      if (in.rank != size - 1) 
+                      if (in.rank != size - 1 || cell(in + (0,-1)).isDefined)
                         then Nil
                         else Try(in - (0,2)) match {
                           case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
@@ -200,6 +264,7 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
 
   override def select(tile: Option[Tile]) = copy(field, state.select(tile))
   override def selected: Option[Tile] = state.selected
+  override def playing = state.playing
 
   def checkFen(check: String): String = {
     val splitted = check.split('/')

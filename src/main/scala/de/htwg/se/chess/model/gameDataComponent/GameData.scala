@@ -123,6 +123,8 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def select(tile: Option[Tile]): GameField
     /** Gives the currently selected tile, if there is one. @return Some(Tile) if a tile is selected or None, if not */
     def selected: Option[Tile]
+    /** Describes the game state: playing or idle @return true if the game is active */
+    def playing: Boolean
 
     /** Starts the game. Prohibiting free placement and illegal moves. @return The same field but now in an active playing state */
     def start: GameField

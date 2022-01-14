@@ -44,13 +44,13 @@ case class MoveCommand(args: Tuple2[Tile, Tile], field: GameField) extends Chess
 }
 
 case class CheckedMoveCommand(command: MoveCommand) extends ChessCommand(command.field) {
-    val state: String = ""
-    val errorCmd: ErrorCommand = ErrorCommand(state, command.field)
-    val cmd: ChessCommand = if (state.equals("")) then command else errorCmd
+    val legalMoves = command.field.getLegalMoves(command.args(0))
+    val errorCmd: ErrorCommand = ErrorCommand("Illegal Move", command.field)
+    val cmd: ChessCommand = if (legalMoves.contains(command.args(1))) then command else errorCmd
     override def execute: GameField = cmd.execute
     override def undo: GameField    = cmd.undo
     override def redo: GameField    = cmd.redo
-    override def event = MoveEvent(command.args(0), command.args(1))
+    override def event = cmd.event
 }
 
 case class ClearCommand(field: GameField) extends ChessCommand(field) {
