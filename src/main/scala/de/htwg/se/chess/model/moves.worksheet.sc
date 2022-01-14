@@ -15,7 +15,8 @@ import model.PieceType._
 import model.PieceColor._
 import util.ChainHandler
 
-val c = ChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
+val c = ChessField()
+.loadFromFen("8/8/8/8/8/8/3p4/2R5 b - 0 1")
 
 private val diagonalMoves : List[Tuple2[Int, Int]] = List((1,1), (1, -1), (-1, 1), (-1,-1))
 private val straightMoves : List[Tuple2[Int, Int]] = List((0,1), (1,0), (-1,0), (0,-1))
@@ -27,7 +28,7 @@ private val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
   )
 )
 
-c.getLegalMoves(Tile("B8"))
+c.getLegalMoves(Tile("D2"))
 
 val in = Tile("a1", 2)
     val ret = straightMoves.map( move =>

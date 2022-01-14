@@ -35,6 +35,14 @@ case class Tile(file: Int, rank: Int, size: Int = 8) {
 }
 
 object Tile {
+    implicit def ordering[A <: Tile]: Ordering[A] = new Ordering[A] {
+        override def compare(tile1: A, tile2: A): Int = {
+            val fileDiff = tile1.file - tile2.file
+            if fileDiff == 0
+                then tile1.rank - tile2.rank
+                else fileDiff
+        }
+    }
     def apply(args: List[Char], size: Int): Tile = new Tile(args(0).toLower.toInt - 'a'.toInt + 1, (args(1).toInt - '0'.toInt), size)
     def apply(args: List[Char]): Tile = new Tile(args(0).toLower.toInt - 'a'.toInt + 1, (args(1).toInt - '0'.toInt))
 
