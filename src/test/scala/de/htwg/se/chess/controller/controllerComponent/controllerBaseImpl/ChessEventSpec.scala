@@ -21,6 +21,7 @@ import scala.util.Try
 import scala.swing.event.Event
 
 import model.gameDataComponent.gameDataBaseImpl.ChessField
+import model.gameDataComponent.gameDataBaseImpl.ChessState
 import model.gameDataComponent.GameField
 import model.Tile
 import util.Matrix
@@ -37,9 +38,9 @@ class ChessEventSpec extends AnyWordSpec {
             ctrl.publish(new TestEvent(ctrl.field))
         }
         "deliver information to Observer of the controller" in {
-            obs.field = ChessField(Matrix(Vector()))
+            obs.field = new ChessField()
 
-            obs.field should be(ChessField(Matrix(Vector())))
+            obs.field should be(new ChessField())
             ctrl.publish(new TestEvent(ctrl.field))
             obs.field should be(ctrl.field)
         }

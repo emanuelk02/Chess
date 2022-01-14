@@ -309,7 +309,67 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "compute legal moves for a given tile" in {
-        // @TODO
+        var cf = new ChessField(state = ChessState(true))
+
+        //----------------------------------------------------------------------------------- Startin Position
+        cf = cf.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        for (file <- 1 to 8) {    // Rank 1: white back-rank
+          cf.getLegalMoves(Tile(file, 1)) shouldBe Nil
+        }
+        for (file <- 1 to 8) {    // Rank 2: white pawns
+          cf.getLegalMoves(Tile(file, 2)) shouldBe Tile(file, 3) :: Tile(file, 4) :: Nil
+        }
+        for (file <- 1 to 8) {    // Rank 3: empty
+          cf.getLegalMoves(Tile(file, 3)) shouldBe Nil
+        }
+
+        //...
+
+        for (file <- 1 to 8) {    // Rank 7: black pawns
+          cf.getLegalMoves(Tile(file, 7)) shouldBe Nil //not blacks turn
+        }
+        cf = cf.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
+        for (file <- 1 to 8) {    // Rank 7: black pawns
+          cf.getLegalMoves(Tile(file, 7)) shouldBe Tile(file, 6) :: Tile(file, 5) :: Nil
+        }
+        for (file <- 1 to 8) {    // Rank 8: black back-rank
+          cf.getLegalMoves(Tile(file, 8)) shouldBe Nil
+        }
+
+
+        //-------------------------------------------------------------------------- En-Passant + Pawn Capture
+        // White //
+        cf = cf.loadFromFen("8/8/2n5/pP6/8/qkq5/1P6/8 w KQkq A6 0 1")
+        
+        // En passant
+        cf.getLegalMoves(Tile("B5")) shouldBe Tile("A6") :: Tile("B6") :: Nil
+        // Pawn capture and blocked double pawn progression
+        cf.getLegalMoves(Tile("B2")) shouldBe Tile("A3") :: Tile("C3") :: Nil
+
+        // Black //
+        cf = cf.loadFromFen("8/1p6/QKQ5/8/2Pp4/8/8/8 b KQkq C3 0 1")
+        
+        // En passant
+        cf.getLegalMoves(Tile("D4")) shouldBe Tile("C3") :: Tile("D3") :: Nil
+        // Pawn capture and blocked double pawn progression
+        cf.getLegalMoves(Tile("B7")) shouldBe Tile("A6") :: Tile("C6") :: Nil
+
+
+        //-------------------------------------------------------------------------------------------- Castles
+        // All castles
+        cf = cf.loadFromFen("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1")
+        cf.getLegalMoves(Tile("E1")) shouldBe Tile("C1") :: Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil
+
+        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/8/8 b KQkq - 0 1")
+        cf.getLegalMoves(Tile("E8")) shouldBe Tile("C8") :: Tile("D8") :: Tile("F8") :: Tile("G8") :: Nil
+
+        // No more castles available via state
+        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1")
+        cf.getLegalMoves(Tile("E1")) shouldBe Tile("D1") :: Tile("F1") :: Nil
+
+        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1")
+        cf.getLegalMoves(Tile("E8")) shouldBe Tile("D8") :: Tile("F8") :: Nil
+
       }
       "allow to start and stop the game by changing its state" in {
         cf.start should be(
@@ -342,7 +402,13 @@ class ChessFieldSpec extends AnyWordSpec {
         //cf.checkMove
       }
       "have a FEN representation composed of the pieces parts that it stores and its states' part" in {
-        // @TODO
+        cf.loadFromFen("k1/1B w KQkq - 0 1").toFen should be ("k1/1B w KQkq - 0 1")
+        cf.loadFromFen("/ w KQkq - 0 1").toFen should be ("2/2 w KQkq - 0 1")
+        cf.loadFromFen("1Q/pp w Kk - 0 1").toFen should be ("1Q/pp w Kk - 0 1")
+        cf.loadFromFen("1Q/pp b Kk a3 12 20").toFen should be ("1Q/pp b Kk a3 12 20")
+
+        cf.loadFromFen("1Q/pp w Kk - 0 1").toFenPart should be ("1Q/pp")
+        cf.loadFromFen("1Q/pp w Kk a3 0 12").toFenPart should be ("1Q/pp")
       }
       "have a string representation like specified in ChessBoard" in {
         import gameDataBaseImpl.ChessBoard.board

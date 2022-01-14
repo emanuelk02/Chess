@@ -87,7 +87,7 @@ class ChessCommandSpec extends AnyWordSpec {
         }
         "be encapsulated in a CheckedMoveCommand if the move needs validation" in {
             val cmc = CheckedMoveCommand(move)
-            cmc.state should be("")
+            //cmc.legalMoves should be List()
             cmc.errorCmd should be(ErrorCommand("", move.field))
 
             cmc.execute should be(move.execute)

@@ -30,7 +30,7 @@ class MockControllerSpec extends AnyWordSpec {
   "A MockController" should {
     val ctrl = new MockController()
     "be created calling the explicit Constructor" in {
-      ctrl.size should be(8)
+      ctrl.size should be(0)
     }
     val t1 = Tile("A1")
     val t2 = Tile("A2")

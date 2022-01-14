@@ -34,7 +34,7 @@ class TUISpec extends AnyWordSpec {
         Vector(Some(W_PAWN), Some(W_BISHOP))
       )
     )
-    val cf = ChessField(matr)
+    val cf = ChessField()
     val ctrl = Controller(cf, new ChessCommandInvoker)
     val tui = TUI(ctrl)
     "filled" should {
@@ -57,7 +57,7 @@ class TUISpec extends AnyWordSpec {
       }
       "detect invalid commands" in {
         tui.eval("moveTo A1 B1").isFailure shouldBe true
-        tui.eval("show").isFailure shouldEqual true
+        tui.eval("show").isFailure shouldBe true
       }
       "print information on available commands either singularily or in its entirety" in {
         tui.eval("h") shouldBe Success(())
