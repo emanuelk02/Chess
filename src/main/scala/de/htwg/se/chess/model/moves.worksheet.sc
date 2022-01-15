@@ -48,3 +48,6 @@ val in = Tile("a1", 2)
       }
     )
     ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
+
+
+c.loadFromFen("4k2R/8/PPP5/8/8/8/8/8 w - 0 1")

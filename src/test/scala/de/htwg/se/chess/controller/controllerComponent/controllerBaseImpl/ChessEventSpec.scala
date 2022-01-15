@@ -30,6 +30,11 @@ import util.Matrix
 case class TestEvent(field: GameField) extends Event
 
 class ChessEventSpec extends AnyWordSpec {
+    /**
+     * ChessEvent are mainly paired with ChessCommands
+     * to convey signals to the scala swing Reactor when
+     * executing Commands.
+     * */
     val obs = new TestObserver
     val ctrl = new Controller
     "A ChessEvent" should {

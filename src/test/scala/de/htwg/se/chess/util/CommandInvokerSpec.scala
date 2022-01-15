@@ -19,6 +19,12 @@ import org.scalatest.matchers.should.Matchers._
 class TestCommandInvoker extends CommandInvoker[Int]
 
 class CommandInvokerSpec extends AnyWordSpec {
+    /**
+     * The CommandInvoker uses the Command pattern to control
+     * the undo-redo mechanism.
+     * It stores calles Commands in a stack and pops them off one
+     * after another if you wish to undo them.
+     * */
     "A CommandInvoker" when {
         val ci = new TestCommandInvoker
         "parsed Commands" should {

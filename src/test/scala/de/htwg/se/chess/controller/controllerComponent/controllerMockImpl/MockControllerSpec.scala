@@ -27,6 +27,8 @@ import model.Piece._
 import util.Matrix
 
 class MockControllerSpec extends AnyWordSpec {
+  // This is a simple mock implementation of a Controller to use, when an instance is
+  // needed but you do not intend any functionality for it.
   "A MockController" should {
     val ctrl = new MockController()
     "be created calling the explicit Constructor" in {

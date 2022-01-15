@@ -26,11 +26,18 @@ class ChessFieldSpec extends AnyWordSpec {
   "A ChessField" when {
     "empty" should {
       "be created calling the explicit Constructor" in {
+        // This constructor creates an empty field of size 8.
+        // As this is the standard for Chess.
+
         val cf = ChessField()
         cf.field.size should be(8)
         cf.field.rows.forall(r => r.forall(p => p == None)) should be(true)
       }
       "be instantiated with a full Matrix given as a Vector of Vectors" in {
+        // You may specify the used Matrix directly, although it is
+        // adviced to use FEN, which are easier to use and commonly
+        // accepted by many programs.
+
         val matr = Matrix[Option[Piece]](
           Vector(
             Vector(Some(W_BISHOP), Some(B_QUEEN)),
@@ -53,6 +60,12 @@ class ChessFieldSpec extends AnyWordSpec {
       val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
       val cf = ChessField(matr)
       "return contents from single cells using file: Int, rank: Int or String parameters" in {
+        // This class uses another Data Class named Tile which specifies conversion from
+        // regularly used math-indexing for matrices to the rank / file specification of
+        // Chess, which is used here.
+        // For tests see the corresponding file for Tile.scala:
+        // ..\src\test\scala\de\htwg\se\chess\model\MatrixSpec.scala
+
         val cf_temp = cf.replace(Tile("A1", cf.size), "B_KING").replace(Tile("B2", cf.size), "B_QUEEN")
         cf_temp.cell(Tile.withRowCol(1, 0)) should be(Some(B_KING))   	// A1
         cf_temp.cell(Tile.withRowCol(1, 1)) should be(Some(W_BISHOP))   // B1
@@ -72,11 +85,18 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.fill(None).field.size should be(matr.size)
       }
       "throw an IndexOutOfBoundsException when trying to access fields outside of the matrix" in {
+        // The Exception is thrown by the Matrix when trying to access its Vector with
+        // the given calculated index.
         an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile("C2"))
         an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile("B3"))
         an[IndexOutOfBoundsException] should be thrownBy cf.cell(Tile("Z2", 26))
       }
       "allow to replace single cells at any location by either an Option or String and return the new ChessField" in {
+        // This method simply calls the replace() method of the underlying Matrix
+        // to place the piece into the corresponding tile.
+        // For Tests, see the corresponding file in the util package:
+        // ..\src\test\scala\de\htwg\se\chess\util\MatrixSpec.scala
+        
         cf.replace(Tile.withRowCol(0, 0), Some(B_KING)) should be(
           ChessField(
             Matrix(
@@ -140,6 +160,10 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "allow to be fully filled with a single element specified by an Option or String" in {
+        // This method simply calls the fill() method of the underlying Matrix.
+        // For Tests, see the corresponding file in the util package:
+        // ..\src\test\scala\de\htwg\se\chess\util\MatrixSpec.scala
+
         cf.fill(Some(B_KING)) should be(
           ChessField(
             Matrix(
@@ -172,6 +196,13 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "allow to move contents of one tile into another" in {
+        // This method simply calls the replace() method of the underlying Matrix
+        // to put the contents of the first Tile into the second and then
+        // replace the contents of the first tile with None.
+        //
+        // For Tests, see the corresponding file in the util package:
+        // ..\src\test\scala\de\htwg\se\chess\util\MatrixSpec.scala
+
         val cf = ChessField(matr.replace(1, 0, Some(B_KING)))
         cf.move(Tile("A1", cf.size), Tile("B1", cf.size)) should be(
           ChessField(
@@ -215,6 +246,60 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation" in {
+        /**
+         * The method to use is:
+         *    - loadFromFen(fen: String): ChessField
+         * 
+         * The implementation accepts full FEN strings such as specified in the
+         * Chess Programming Wiki: https://www.chessprogramming.org/Forsyth-Edwards_Notation
+         * 
+         * FEN Strings are composed of two main parts:
+         *  1. The piece constellation
+         *  2. The game state
+         * 
+         * Pieces:
+         *  - Ranks are seperated by '/'
+         * 
+         *  - Description starts with the top left corner (A8)
+         * 
+         *  - For every empty tile simply count up and write the number
+         *    of empty tiles until a piece or the end of the rank
+         * 
+         *  - Pieces are represented by single characters as also
+         *    described in the chess wiki
+         * 
+         * Example:
+         * 
+         *      1Q2k2R/8/PPP4n/...  would correlate to:
+         *      
+         *      +---+---+---+---+---+---+---+---+
+         *      |   | Q |   |   | k |   |   | R |
+         *      +---+---+---+---+---+---+---+---+
+         *      |   |   |   |   |   |   |   |   |
+         *      +---+---+---+---+---+---+---+---+
+         *      | P | P | P |   |   |   |   | n |
+         *      +---+---+---+---+---+---+---+---+
+         *                   ...
+         * 
+         * Game state:
+         *    The second component of the string describes the game state:
+         *
+         *  - First is, which colors turn it is (w for White; b for Black)
+         * 
+         *  - Next is, what castling each color has availabe
+         *    (K for king-side; Q for queen-side -> uppercase means white, lowercase -> black)
+         * 
+         *  - Then is either '-' or a tile which is available for En-Passant (https://www.chessprogramming.org/En_passant)
+         * 
+         *  - Lastly are the number of half-moves and full-moves
+         * 
+         * => Testing for the second part is covered in the Spec for ChessState
+         * */
+
+
+        // To make testing easier, the reading of FEN has been made scaleable 
+        // for any size of ChessField, simply to save cost in writing.
+
         cf.loadFromFen("/ w KQkq - 0 1") should be(
           ChessField(
             Matrix(
@@ -298,6 +383,13 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "allow to select single tiles to indicate that they will be modified" in {
+        // Selection has mainly been added for ease-of-use within the GUI Component:
+        // There you can select a Tile by clicking on it, which can now be stored
+        // in the data structure.
+        // When clicking another tile, you can get the selected tile and call
+        // a move from that to the newly clicked tile.
+        // To support having no tile selected. It is stored internally as Option[Tile].
+
         cf.selected should be (None)
         
         val tile = Tile("A1", cf.size)
@@ -330,6 +422,13 @@ class ChessFieldSpec extends AnyWordSpec {
          * */
 
         // King //
+        /**
+         * The King only moves on tile at the time.
+         * (With the exception of castles which will be covered later on)
+         * The king may move in every direction unless he is in check or
+         * the tile he could move on is attacked.
+         * These cases will also be covered later.
+         * */
         cf = cf.loadFromFen("8/8/8/8/8/5Q2/4K2/8 w - 0 1")
         cf.getLegalMoves(Tile("E2")).sorted shouldBe (
           Tile("D3") :: Tile("E3") :: /* Queen */
@@ -339,6 +438,10 @@ class ChessFieldSpec extends AnyWordSpec {
         ).sorted
 
         // Queen //
+        /**
+         * The Queen moves both diagonally and straight.
+         * Her path ends on enemy pieces or before allied pieces
+         * */
         cf = cf.loadFromFen("8/6r1/8/8/8/3Q2K1/8/8 w - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
                                                     Tile("D8") ::
@@ -367,6 +470,10 @@ class ChessFieldSpec extends AnyWordSpec {
         ).sorted
 
         // Bishop //
+        /**
+         * Bishops move only diagonally.
+         * Their path ends on enemy pieces or before allied pieces.
+         * */
         cf = cf.loadFromFen("8/8/6r1/8/8/3B4/8/8 w - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
           Tile("A6") ::                                                                       Tile("G6") :: // rook
@@ -379,6 +486,12 @@ class ChessFieldSpec extends AnyWordSpec {
         ).sorted
 
         // Knight //
+        /**
+         * Should always move on square diagonally and then one straight.
+         * The knight is the only piece which can jump over other pieces,
+         * meaning that his path can only be blocked by an allied piece occupying
+         * the destination tile.
+         * */
         cf = cf.loadFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
                                       Tile("C5") ::                Tile("E5") ::
@@ -390,6 +503,11 @@ class ChessFieldSpec extends AnyWordSpec {
         ).sorted
 
         // White Pawn //
+        /**
+         * Much like the King, pawns only move one tile at a time
+         * and only towards the other end of the board.
+         * On their first move, pawns are allowed to move two tiles at once.
+         * */
         cf = cf.loadFromFen("8/8/8/8/8/8/4r3/3P4 w - 0 1")
         cf.getLegalMoves(Tile("D1")).sorted shouldBe (
                         Tile("D2") :: Tile("E2") :: // rook
@@ -398,6 +516,10 @@ class ChessFieldSpec extends AnyWordSpec {
         ).sorted
 
         // Black Pawn //
+        /**
+         * Black pawns simply move in the other direction than
+         * the white ones.
+         * */
         cf = cf.loadFromFen("8/8/8/8/8/8/3p4/2R5 b - 0 1")
         cf.getLegalMoves(Tile("D2")).sorted shouldBe (
           // Rook        /* Pawn */
@@ -405,10 +527,11 @@ class ChessFieldSpec extends AnyWordSpec {
           Nil
         ).sorted
 
-        //----------------------------------------------------------------------------------- Startin Position
+        //---------------------------------------------------------------------------------- Starting Position
         cf = cf.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         for (file <- 1 to 8) {    // Rank 1: white back-rank
-          if (file == 2 || file == 7) // Rooks
+          // -> No pieces should be able to move because they are blocked by the pawns
+          if (file == 2 || file == 7) // except for the Knights
             then cf.getLegalMoves(Tile(file, 1)).sorted shouldBe (
               Tile(file - 1, 3) :: Tile(file + 1, 3) :: Nil
             ).sorted
@@ -416,24 +539,30 @@ class ChessFieldSpec extends AnyWordSpec {
         }
         for (file <- 1 to 8) {    // Rank 2: white pawns
           cf.getLegalMoves(Tile(file, 2)).sorted shouldBe (
+            // Can move on square up or do double progression (on first move)
             Tile(file, 3) :: Tile(file, 4) :: Nil
           ).sorted
         }
         for (file <- 1 to 8) {    // Rank 3: empty
+          // Empty tiles should result in no legal moves
           cf.getLegalMoves(Tile(file, 3)) shouldBe Nil
         }
 
-        //...
+        // ...
 
         for (file <- 1 to 8) {    // Rank 7: black pawns
           cf.getLegalMoves(Tile(file, 7)) shouldBe Nil //not blacks turn
         }
         cf = cf.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
         for (file <- 1 to 8) {    // Rank 7: black pawns
-          cf.getLegalMoves(Tile(file, 7)).sorted shouldBe (Tile(file, 6) :: Tile(file, 5) :: Nil).sorted
+          cf.getLegalMoves(Tile(file, 7)).sorted shouldBe (
+            // Can move one square down or do double progression (on first move)
+            Tile(file, 6) :: Tile(file, 5) :: Nil
+          ).sorted
         }
         for (file <- 1 to 8) {    // Rank 8: black back-rank
-          if (file == 2 || file == 7) // Rooks
+          // -> No pieces should be able to move because they are blocked by the pawns
+          if (file == 2 || file == 7) // except for the Knights
             then cf.getLegalMoves(Tile(file, 8)).sorted shouldBe (
               Tile(file - 1, 6) :: Tile(file + 1, 6) :: Nil
             ).sorted
@@ -483,6 +612,14 @@ class ChessFieldSpec extends AnyWordSpec {
 
       }
       "allow to start and stop the game by changing its state" in {
+        // The starting and stopping mechanic was added to allow
+        // a state where the board can be manipulated freely and then
+        // use your own input as starting point for a match.
+
+        // The difference between the two is that in 'started'-state
+        // you are inhibited in your movement and can also only call the
+        // move and stop command.
+
         cf.start should be(
           ChessField(
               cf.field,
@@ -510,6 +647,9 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.checkFen("bbb/k2") should be("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
       }
       "have a FEN representation composed of the pieces parts that it stores and its states' part" in {
+        // The ChessFields FEN uses the underlying toFenPart method of the ChessState
+        // and appends that to its own toFenPart
+
         cf.loadFromFen("k1/1B w KQkq - 0 1").toFen should be ("k1/1B w KQkq - 0 1")
         cf.loadFromFen("/ w KQkq - 0 1").toFen should be ("2/2 w KQkq - 0 1")
         cf.loadFromFen("1Q/pp w Kk - 0 1").toFen should be ("1Q/pp w Kk - 0 1")
@@ -519,6 +659,9 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.loadFromFen("1Q/pp w Kk a3 0 12").toFenPart should be ("1Q/pp")
       }
       "have a string representation like specified in ChessBoard" in {
+        // The String representation of the board is explained in more detail
+        // on our GitHub and in the corresponding test file for ChessBoard.scala
+
         import gameDataBaseImpl.ChessBoard.board
         cf.toString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
       }

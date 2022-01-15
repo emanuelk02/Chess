@@ -25,6 +25,13 @@ import util.Matrix
 
 
 class ChessCommandInvokerSpec extends AnyWordSpec {
+    /**
+     * The ChessCommandInvoker is an extension of the CommandInvoker
+     * which uses the Command pattern to control
+     * the undo-redo mechanism.
+     * It stores calles Commands in a stack and pops them off one
+     * after another if you wish to undo them.
+     * */
     "A ChessCommandInvoker" when {
         "you're not playing" should {
             val field = GameField()
@@ -53,6 +60,9 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
                 inv.undoStep.get should be(fen.undo)
                 inv.redoStep.get should be(fen.redo)
 
+                // ErrorCommands and SelectCommands are not stored on the stack
+                // Since they do not change to content of the field and would result
+                // in no visible change, when undoing/redoing
                 inv.doStep(err) should be(field)
                 inv.undoStep.get should be(fen.undo)
                 inv.redoStep.get should be(fen.redo)

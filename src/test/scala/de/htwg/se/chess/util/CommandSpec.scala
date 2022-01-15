@@ -23,6 +23,10 @@ class TestCommand(in: Int) extends Command[Int] {
 }
 
 class CommandSpec extends AnyWordSpec {
+    /**
+     * Commands are used to provide an undo-redo mechanic.
+     * They store information on executions and allow to undo them.
+     * */
     val cmd1 = new TestCommand(1)
     val cmd5 = new TestCommand(5)
     "A Command" should {

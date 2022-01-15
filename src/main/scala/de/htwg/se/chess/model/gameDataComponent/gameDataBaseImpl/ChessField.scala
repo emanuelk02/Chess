@@ -226,17 +226,15 @@ case class ChessField @Inject() (field: Matrix[Option[Piece]] = new Matrix(8, No
             case White =>
               if (in.rank != 2 || cell(in + (0,1)).isDefined)
                 then Nil
-                else Try(in + (0,2)) match {
-                  case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
-                  case f: Failure[Tile] => Nil
-                } 
+                else if cell(in + (0,2)).isDefined 
+                  then Nil 
+                  else List(in + (0,2))
             case Black =>
               if (in.rank != size - 1 || cell(in + (0,-1)).isDefined)
                 then Nil
-                else Try(in - (0,2)) match {
-                  case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
-                  case f: Failure[Tile] => Nil
-                }
+                else if cell(in - (0,2)).isDefined 
+                  then Nil
+                  else List(in - (0,2))
           }
         )
 

@@ -28,6 +28,19 @@ class ChessStateSpec extends AnyWordSpec {
     "A ChessState" when {
         "created" should {
             "store the default state values of a chess game" in {
+                /**
+                 * The ChessState stores:
+                 *  - If a game is active, which would limit access
+                 * 
+                 *  - Which colors turn it is
+                 * 
+                 *  - Which color has what castling available
+                 *    (see: https://www.chessprogramming.org/Castling for more information)
+                 * 
+                 *  - A halfmove-clock and fullmove-clock
+                 * 
+                 *  - Any possible En-Passant squares (https://www.chessprogramming.org/En_passant)
+                 * */
                 val default = new ChessState
                 default.playing should be (false)
                 default.color should be (White)
@@ -47,6 +60,21 @@ class ChessStateSpec extends AnyWordSpec {
                 state.stop shouldBe state.copy(false)
             }
             "change its behaviour base on wether playing is set or not" in {
+                /**
+                 * The ChessState provides three essential mechanics:
+                 *  - evaluating moves
+                 *  - evaluationg a FEN String
+                 *  - storing the selection of a tile
+                 * 
+                 * The behaviour for the first two changes, depending on the
+                 * playing state.
+                 * If playing is set, the user is prohibited, to change the
+                 * game in any way that would be illegal in regular chess.
+                 * 
+                 * This was added to allow free manipulation of the board, which
+                 * can then be used as a starting point for a match.
+                 * */
+
                 var state = new ChessState()
 
                 //------------------------------------------------- Idle State
@@ -243,9 +271,15 @@ class ChessStateSpec extends AnyWordSpec {
                     )
                 )
 
-                an [IllegalArgumentException] should be thrownBy state.evaluateFen("")
+                an [IllegalStateException] should be thrownBy state.evaluateFen("")
             }
             "be convertible into its part of the FEN representation" in {
+                // The implementation follows the official rules for FEN:
+                //   https://www.chessprogramming.org/Forsyth-Edwards_Notation
+                //
+                // The ChessStates FenPart is needed for a complete FEN String,
+                // when combined with that of the ChessField.
+
                 val state = ChessState()
 
                 state.toFenPart shouldBe "w KQkq - 0 1"
@@ -258,6 +292,9 @@ class ChessStateSpec extends AnyWordSpec {
                 state.copy(fullMoves = 42).toFenPart shouldBe "w KQkq - 0 42"
             }
             "have a string representation containing the playing state variables and its FEN part" in {
+                // The String representation includes the additional values of the Class
+                // to provide a complete description.
+
                 val state = ChessState()
 
                 state.toString shouldBe "idle selected: -\nw KQkq - 0 1"
