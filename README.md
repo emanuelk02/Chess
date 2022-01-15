@@ -14,8 +14,8 @@
 | :------     | :------     |   -----: |   ------: |
   | [Graphical User Interface](src/main/scala/de/htwg/se/chess/aview/gui) | [Graphics](docs/gui) | [swingGui.scala](src/main/scala/de/htwg/se/chess/aview/gui/swingGUI.scala) | |
 | | | [TileLabel.scala](src/main/scala/de/htwg/se/chess/aview/gui/TileLabel.scala) | |
-  | [Textual User Interface](src/main/scala/de/htwg/se/chess/aview) | [Input](docs/tui) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
-| | [Output](docs/tui) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessBoardSpec.scala) |
+  | [Textual User Interface](src/main/scala/de/htwg/se/chess/aview) | [Input](docs/tui/#using-the-tui) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
+| | [Output](docs/tui/#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessBoardSpec.scala) |
 | | | |
    | [Control Structure](src/main/scala/de/htwg/se/chess/controller/controllerComponent) | [Controller](https://en.wikipedia.org/wiki/Model–view–controller) | [Controller.scala](src/main/scala/de/htwg/se/chess/controller/controllerComponent/controllerBaseImpl/Controller.scala) | [ControllerSpec.scala](src/test/scala/de/htwg/se/chess/controller/controllerComponent/controllerBaseImpl/ControllerSpec.scala) |
    | | [Commands](docs/controller/commands/Readme.md) | [ChessCommand.scala](src/main/scala/de/htwg/se/chess/controller/controllerComponent/controllerBaseImpl/ChessCommand.scala) | [ChessCommandSpec.scala](src/test/scala/de/htwg/se/chess/controller/controllerComponent/controllerBaseImpl/ChessCommandSpec.scala) |
