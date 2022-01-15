@@ -20,7 +20,7 @@ We've done **without Tests** as testing the GUI is **too complicated**
   
 ## [Chessboard](https://www.chessprogramming.org/Chessboard)
   
-Our Chessboard is made with with Swings **GridPanel**:
+Our Chessboard is made with Swings **GridPanel**:
  - Each **square** is a _[TileLabel](src/main/scala/de/htwg/se/chess/aview/gui/TileLabel.scala)_ - a custom **Panel** Class we made
  - All of the **_TileLabels_**, plus some panels on the left and bottom for _file and rank indicators_ make up the entire board
   
