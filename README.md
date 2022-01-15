@@ -4,8 +4,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/emanuelk02/Chess/badge.svg)](https://coveralls.io/github/emanuelk02/Chess)
 [![codecov](https://codecov.io/gh/emanuelk02/Chess/branch/main/graph/badge.svg?token=UFUM75SWX4)](https://codecov.io/gh/emanuelk02/Chess)
 
-# [Documentation](https://htmlpreview.github.io/?https://github.com/emanuelk02/Chess/blob/10_Components/target/scala-3.0.2/api/docs/index.html)
-
 ## *README is a work in progress!*
 
 ---
