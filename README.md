@@ -10,7 +10,7 @@
 
 # Table of Contents
 
-| **Content** | **Feature** | **Code** | **Tests** |
+| **Content** | **Feature/Documentation** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
   | [Graphical User Interface](src/main/scala/de/htwg/se/chess/aview/gui) | [Graphics](docs/gui) | [swingGui.scala](src/main/scala/de/htwg/se/chess/aview/gui/swingGUI.scala) | |
 | | | [TileLabel.scala](src/main/scala/de/htwg/se/chess/aview/gui/TileLabel.scala) | |
