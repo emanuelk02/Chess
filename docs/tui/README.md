@@ -1,4 +1,34 @@
-# Using the **TUI**
+<p align="center">
+  
+  <h1 align="center">TUI</h3>
+</p>
+
+---
+
+## [Code](src/main/scala/de/htwg/se/chess/aview/TUI.scala)
+
+The **TUI** accepts _text_ input from the **standard input/main console** in the form of:
+
+```<command> <arguments>```
+
+**[Input](#valid-input)** is split into two phases:
+ 
+- First is the **_read_**, which is done in the **run**-method, which loops
+  in a _tailrecursion_ until an ExitEvent is detected
+ 
+- The read string from input is then **_evaluated_** in the **eval()** which returns either
+  a _Success\[Unit\]_ or _Failure\[Unit\]_, to which the run() **reacts** accordingly.
+  
+**Reactions** include:
+
+ - On **Success** -> Print the _board_ and _state information_ as well as the type of **executed Event**
+ - On **Failure** -> Print an _error message_
+
+**[Output](#board-representation)** is determined by the **_implementation_** chosen for the **GameField** in the **Controller**
+
+---
+
+## Using the **TUI**
 
 The text interface allows for following commands and inputs:
 
@@ -21,26 +51,29 @@ The text interface allows for following commands and inputs:
 
 ## Valid input
 
+#### For Information on **Tiles**, see [chess.com/terms/chessboard](https://www.chess.com/terms/chessboard)
+
+#### For Information on **Pieces**, see [chess.com/terms/chess-pieces](https://www.chess.com/terms/chess-pieces)
+#### For Information on _valid Input_ for **Pieces** see point [Inputs for Pieces](#inputs-for-pieces)
+
 #### Inserting Pieces
 
- 1. destination [tile](#inputs-for-tiles): 
-    consists of its file described by a char ('A' to 'H')
-    and its rank described by an integer (1 to 8)
- 2. desired piece:
-    string describing a valid [piece](#inputs-for-pieces)
+`insert` / `i` / `put` `destination tile` `piece`
+
+ - Places the **piece** at the **destination tile**
+ - If creation of the piece from String _fails_, the tile will be **cleared**
 
 #### Moving Pieces
 
- 1. source [tile](#inputs-for-tiles)
- 2. destination [tile](#inputs-for-tiles)
+`move` / `m` ` source tile`  `destination tile` 
 
- - Grabs the piece at the _source_ and moves it to the _destination_
- - If the game has been started, the move will be validated and only executed if valid
+ - Grabs the piece at the **_source_** and moves it to the **_destination_**
+ - If the game has been **started**, the move will be _validated_ and only executed if **_valid_**
 
 #### Clearing the Board
 
- - If you wish to reset the entire board to an empty state you can do so by using the `clear` command
- - **Note** that, in order to get a correctly initialized starting position you need to use `start` **!!!(Not implemented yet)!!!**
+ - If you wish to _reset_ the **entire** board to an empty state you can do so by using the `clear` command
+ - **Note** that, in order to get a correctly initialized starting position you need to use `fen` with the correct FEN
 
 #### Loading a Board with a FEN String
 
@@ -52,7 +85,7 @@ The text interface allows for following commands and inputs:
 
 ---
 
-## Inputs for Pieces
+## Inputs for [Pieces](https://www.chess.com/terms/chess-pieces)
 
 | **Piece** | **String** | **Alt.** |
 | :-------  | :--------  | :------  |
@@ -69,7 +102,7 @@ The text interface allows for following commands and inputs:
 | White Knight | W_KNIGHT | N |
 | White Pawn | W_PAWN | P |
 
-## Inputs for tiles
+## Inputs for [Tiles](www.chess.com/terms/chessboard)
 
 - Tiles consist of:
  1. a _character_ describing their **file**.
