@@ -35,7 +35,10 @@ lazy val root = project
     "utf-8"),
     
     jacocoExcludes := Seq(
-      "*aview.*"
+      "*aview.*",
+      "*Chess.*",
+      "*GameData.*",
+      "*ControllerInterface.*"
     ),
 
     jacocoCoverallsServiceName := "github-actions",
