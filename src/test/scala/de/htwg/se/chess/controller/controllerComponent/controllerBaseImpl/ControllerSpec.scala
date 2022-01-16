@@ -433,6 +433,12 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field should be (prevField.stop)
         ctrl.isPlaying shouldBe false
       }
+      "provide legal moves for a tile as provided by its GameField implementation" in {
+        val ctrl = new Controller()
+        ctrl.getLegalMoves(Tile("C2")).sorted shouldBe (Tile("C3") :: Tile("C4") :: Nil).sorted
+        ctrl.getLegalMoves(Tile("C2")) shouldBe ctrl.field.getLegalMoves(Tile("C2"))
+        ctrl.getLegalMoves(Tile("B1")) shouldBe ctrl.field.getLegalMoves(Tile("B1"))
+      }
       "use its CommandInvoker to undo and redo commands" in {
         // Undo and Redo is implemented with the command pattern managed
         // by the CommandInvoker.

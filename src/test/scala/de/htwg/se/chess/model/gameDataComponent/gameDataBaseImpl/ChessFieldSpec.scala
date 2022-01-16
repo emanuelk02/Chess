@@ -579,6 +579,9 @@ class ChessFieldSpec extends AnyWordSpec {
         // Pawn capture and blocked double pawn progression
         cf.getLegalMoves(Tile("B2")).sorted shouldBe (Tile("A3") :: Tile("C3") :: Nil).sorted
 
+        cf = cf.loadFromFen("8/8/8/8/1Q6/q1q5/1P6/8 w KQkq A6 0 1")
+        cf.getLegalMoves(Tile("B2")).sorted shouldBe (Tile("A3") :: Tile("B3") :: Tile("C3") :: Nil).sorted
+
         // Black //
         cf = cf.loadFromFen("8/1p6/QKQ5/8/2Pp4/8/8/8 b KQkq C3 0 1")
         
@@ -586,6 +589,9 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.getLegalMoves(Tile("D4")).sorted shouldBe (Tile("C3") :: Tile("D3") :: Nil).sorted
         // Pawn capture and blocked double pawn progression
         cf.getLegalMoves(Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("C6") :: Nil).sorted
+
+        cf = cf.loadFromFen("8/1p6/Q1Q5/1k6/8/8/8/8 b KQkq C3 0 1")
+        cf.getLegalMoves(Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("B6") :: Tile("C6") :: Nil).sorted
 
 
         //-------------------------------------------------------------------------------------------- Castles
@@ -609,6 +615,10 @@ class ChessFieldSpec extends AnyWordSpec {
 
         cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b q - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Tile("C8") :: Nil).sorted
+
+        // Castles blocked by check
+
+        // Castles blocked by passing through attacked tile
 
       }
       "allow to start and stop the game by changing its state" in {
