@@ -59,13 +59,10 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
     publish(new CommandExecuted)
   }
 
-  def exit: Unit = {
-    publish(new ExitEvent)
-  }
+  def exit: Unit = publish(new ExitEvent)
 
-  def fieldToString: String = {
-    field.toString
-  }
+  def fieldToString: String = field.toString
+  def fieldToFen: String = field.toFen
 
   def cell(tile: Tile) = field.cell(tile)
 
@@ -73,4 +70,5 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
   def isSelected(tile: Tile): Boolean = if hasSelected then field.selected.get == tile else false
   def hasSelected: Boolean = field.selected.isDefined
   def getLegalMoves(tile: Tile): List[Tile] = field.getLegalMoves(tile)
+  def isPlaying: Boolean = field.playing
 }

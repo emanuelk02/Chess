@@ -61,10 +61,11 @@ case class ClearCommand(field: GameField) extends ChessCommand(field) {
 }
 
 case class FenCommand(args: String, field: GameField) extends ChessCommand(field) {
-    override def execute: GameField = field.loadFromFen(args)
+    val errorCmd: ErrorCommand = ErrorCommand("Cannot load a FEN while a match is active", field)
+    override def execute: GameField = if (field.playing) then errorCmd.execute else field.loadFromFen(args)
     override def undo: GameField    = prevField
     override def redo: GameField    = execute
-    override def event = new CommandExecuted
+    override def event = if (field.playing) then new ErrorEvent(errorCmd.errorMessage) else new CommandExecuted
 }
 
 case class SelectCommand(args: Option[Tile], field: GameField) extends ChessCommand(field) {

@@ -19,10 +19,21 @@ import scala.io.Source._
 import scala.swing._
 import scala.swing.Swing.LineBorder
 import scala.swing.event._
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
+import java.io.File
+import java.awt.Toolkit
+import java.awt.Image._
+import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
 import javax.swing.Icon
 import javax.swing.WindowConstants.EXIT_ON_CLOSE
 import javax.swing.SwingConstants
+import javax.swing.JMenuItem
+import javax.swing.ImageIcon
+import javax.swing.border.EmptyBorder
 
 import controller.controllerComponent._
 import model.Tile
@@ -30,14 +41,27 @@ import model.Tile
 
 class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
     def top = new MainFrame {
+
+        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        val height = (screenSize.getHeight() / (controller.size + 2)).toInt
+        val dim = new Dimension(height, height)
+        val imagePath = "src/main/resources/logo.png"
+        val img: BufferedImage = Try(ImageIO.read(new File(imagePath))) match {
+                    case s: Success[BufferedImage] => s.value
+                    case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
+                }
+        iconImage = img
         controller.start
-        title = "HTWG CHESS"
+        title = "HTWG CHESS 2021/2022"
+        resizable = false
 
         listenTo(controller)
         peer.setDefaultCloseOperation(EXIT_ON_CLOSE)
 
         val fieldsize = controller.size
         var tiles = Array.ofDim[TileLabel](fieldsize, fieldsize)
+
+        var pieceStyle = "cburnett"
 
         val chessBoard = new GridPanel(fieldsize + 1, fieldsize + 1) {
             border = LineBorder(java.awt.Color.BLACK)
@@ -51,7 +75,7 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                 contents += (col match {
                     case 0 => new Label((fieldsize - row).toString) { preferredSize = new Dimension(30,100) }
                     case _ => {
-                        tiles(row)(col - 1) = new TileLabel(Tile.withRowCol(row, col - 1, fieldsize), controller)
+                        tiles(row)(col - 1) = new TileLabel(Tile.withRowCol(row, col - 1, fieldsize), controller, pieceStyle)
                         tiles(row)(col - 1)
                     }
                 })
@@ -66,6 +90,60 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                     }
                 )
             }
+        }
+
+        menuBar = new MenuBar {
+            contents ++= Seq(
+                new Menu("File") {
+                    contents ++= Seq(
+                        MenuItem("Open"), // @TODO Implement with FileIO
+                        MenuItem("Save"),
+                        MenuItem("Save As"),
+                        MenuItem(Action("Exit")(controller.exit))
+                    )
+                },
+                new Menu("Game") {
+                    contents ++= Seq(
+                        MenuItem(Action("New")( {
+                            controller.stop
+                            controller.executeAndNotify(controller.putWithFen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+                            controller.start
+                            })
+                        ),
+                        new MenuItem("Load Fen") {
+                            action = Action("Load Fen") ( {
+                                controller.executeAndNotify(
+                                        controller.putWithFen,
+                                        (Dialog.showInput[String](
+                                            this, "Enter FEN", "Load Fen", 
+                                            Dialog.Message.Plain, new ImageIcon(img.getScaledInstance(20,20, SCALE_SMOOTH)), 
+                                            Vector(), ""
+                                        )).getOrElse(controller.fieldToFen)
+                                    )
+                            })
+                        },
+                        MenuItem(Action("Free-Mode")({ controller.stop; Dialog.showMessage(this, "Game stopped") })),
+                        MenuItem(Action("Start Match")({ controller.start; Dialog.showMessage(this, "Game started") })),
+                        new Menu("Pieces") {
+                            contents ++= new ButtonGroup(
+                                new RadioButton { action = Action("cburnett")( {pieceStyle = "cburnett"; redraw} ) },
+                                new RadioButton { action = Action("cliparts")( {pieceStyle = "cliparts"; redraw} ) }
+                            ).buttons
+                        }
+                    )
+                },
+                new Menu("About") {
+                    contents += new BorderPanel{
+                        background = java.awt.Color.WHITE
+                        border = EmptyBorder(10, 10, 8, 8)
+                        add(new TextArea("Creators: Emanuel Kupke, Marcel Biselli\n" +
+                          "Software Engineering HTWG Constance 2021/22\n\n" +
+                          "GitHub: https://github.com/emanuelk02/Chess/tree/main\n" +
+                          "\n - Made with Scala 3 and Scala Swing") { editable = false }, 
+                          BorderPanel.Position.Center)
+                    }
+                }
+            )
         }
 
         contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) } 
@@ -92,16 +170,19 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
             case e: ExitEvent => close
         }
 
+        redraw
+
         def redraw = {
-        for {
-                row <- fieldsize - 1 to 0 by -1
-                col <- -1 until fieldsize
-        } {
-            col match {
-                case -1 => 
-                case _ => tiles(row)(col).redraw
+            for {
+                    row <- fieldsize - 1 to 0 by -1
+                    col <- -1 until fieldsize
+            } {
+                col match {
+                    case -1 => 
+                    case _ => tiles(row)(col).source = pieceStyle
+                              tiles(row)(col).redraw
+                }
             }
+            contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
         }
-        contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
     }
-  }

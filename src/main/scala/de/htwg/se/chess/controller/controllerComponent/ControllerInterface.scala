@@ -117,6 +117,8 @@ trait ControllerInterface extends Publisher{
     def exit: Unit
     /** Provides a string representation of the current board. @return String representation of a Chess Board */
     def fieldToString: String
+    /** Returns the FEN representation for the current board. @return full FEN representation */
+    def fieldToFen: String
     /** 
      * Gives the piece stored at given tile.
      * @param tile      Tile you want to get the Piece from
@@ -135,6 +137,8 @@ trait ControllerInterface extends Publisher{
     def hasSelected: Boolean
     /** Returns all fully legal moves for given tile */
     def getLegalMoves(tile: Tile): List[Tile]
+    /** Returns true if the game is active @return game activity state */
+    def isPlaying: Boolean
 }
 
 /**

@@ -29,8 +29,8 @@ class ChessCommandInvoker extends CommandInvoker[GameField] {
 
     val chainInstanceChecker = ChainHandler[Command[GameField], Any](
         List(
-            checkClass(ErrorCommand("", GameField()).getClass) _,
-            checkClass(SelectCommand(None, GameField()).getClass) _
+            checkClass(classOf[ErrorCommand]) _,
+            checkClass(classOf[SelectCommand]) _
         )
     )
 

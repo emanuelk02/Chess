@@ -48,6 +48,7 @@ class MockControllerSpec extends AnyWordSpec {
         ctrl.selected shouldBe None
         ctrl.isSelected(t1) shouldBe false
         ctrl.hasSelected shouldBe false
+        ctrl.isPlaying shouldBe false
     }
     "not change on undo/redo and start/stop and exit" in {
       ctrl.executeAndNotify(ctrl.clear, ())
@@ -59,6 +60,7 @@ class MockControllerSpec extends AnyWordSpec {
     }
     "have an empty string representation" in {
       ctrl.fieldToString shouldBe ""
+      ctrl.fieldToFen shouldBe ""
     }
   }
 }

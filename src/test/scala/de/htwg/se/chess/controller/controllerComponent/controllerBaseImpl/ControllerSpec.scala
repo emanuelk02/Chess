@@ -426,10 +426,12 @@ class ControllerSpec extends AnyWordSpec {
         var prevField = ctrl.field
         ctrl.start
         ctrl.field should be (prevField.start)
+        ctrl.isPlaying shouldBe true
 
         prevField = ctrl.field
         ctrl.stop
         ctrl.field should be (prevField.stop)
+        ctrl.isPlaying shouldBe false
       }
       "use its CommandInvoker to undo and redo commands" in {
         // Undo and Redo is implemented with the command pattern managed
@@ -450,6 +452,13 @@ class ControllerSpec extends AnyWordSpec {
         import model.gameDataComponent.gameDataBaseImpl.ChessBoard.board
         ctrl.fieldToString should be(cf.toString)
         ctrl.fieldToString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
+      }
+      "have a FEN representation" in {
+        ctrl.field = ctrl.field.loadFromFen("1k/B1 w KQkq - 0 1")
+        ctrl.fieldToFen shouldBe "1k/B1 w KQkq - 0 1"
+        
+        ctrl.field = ctrl.field.loadFromFen("kQ/rB w Kk a3 12 45")
+        ctrl.fieldToFen shouldBe "kQ/rB w Kk a3 12 45"
       }
     }
   }

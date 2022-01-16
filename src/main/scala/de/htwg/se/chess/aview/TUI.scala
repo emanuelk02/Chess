@@ -28,11 +28,11 @@ class TUI(controller: ControllerInterface) extends Reactor {
   listenTo(controller)
 
   reactions += {
-    case e: CommandExecuted => update
+    case e: CommandExecuted => update; print("Command Executed\n")
     case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
     case e: Select => if (e.tile.isDefined) then print("Selected " + e.tile.get + "\nLegal Moves: " + controller.getLegalMoves(e.tile.get) + "\n")
-    case e: ExitEvent => exitFlag = true
+    case e: ExitEvent => print("Goodbye\n"); exitFlag = true
   }
 
   print(
