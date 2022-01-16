@@ -63,6 +63,8 @@ The text interface allows for following commands and inputs:
  - Places the **piece** at the **destination tile**
  - If creation of the piece from String _fails_, the tile will be **cleared**
 
+![insert-tui](https://media.giphy.com/media/sgP39adynt8jHKxhIh/giphy.gif)
+
 #### Moving Pieces
 
 `move` / `m` ` source tile`  `destination tile` 
@@ -70,18 +72,28 @@ The text interface allows for following commands and inputs:
  - Grabs the piece at the **_source_** and moves it to the **_destination_**
  - If the game has been **started**, the move will be _validated_ and only executed if **_valid_**
 
+![move-tui](https://media.giphy.com/media/aGu6XtXRZLYliNBbO1/giphy.gif)
+
 #### Clearing the Board
+
+`clear`
 
  - If you wish to _reset_ the **entire** board to an empty state you can do so by using the `clear` command
  - **Note** that, in order to get a correctly initialized starting position you need to use `fen` with the correct FEN
 
+![clear-tui](https://media.giphy.com/media/bvaWNiT1NXh7mqsaSo/giphy.gif)
+
 #### Loading a Board with a FEN String
+
+`fen` `FEN String`
 
  - The **Forsyth-Edwards-Notation** allows to code every needed information of a chess position into a single-line string
  - The Program follows the official FEN notation as described in the **[Chess Programming Wiki](https://www.chessprogramming.org/Forsyth-Edwards_Notation)**
  - Additionally: _trailing empty tiles_ in a rank may be omitted:
  - Valid FEN String for the starting position:  `rnbqkbnr/pppppppp/////PPPPPPPP/RNBQKBNR w KQkq - 0 1`
  - See also: our **[Board Representation](#board-representation)**
+
+![fen-tui](https://media.giphy.com/media/Q7ZCmMMalWHRwoEB3E/giphy.gif)
 
 ---
 
@@ -177,9 +189,21 @@ Game runs on console by printing an 8x8 matrix of boxes with letters - represent
 +---+---+---+---+---+---+---+---+
 | R | N | B | Q | K | B | N | R |
 +---+---+---+---+---+---+---+---+
+idle selected: -
+w KQkq - 0 1
 ```
 
 The pieces match the representation in the **[Forsyth-Edwards Notation (FEN)](https://www.chessprogramming.org/Forsyth-Edwards_Notation)**.
+
+**_Game State_** is described by the two lines _below_ the board:
+
+ - **idle / playing** : tells you wether the match is _active_
+ - **selected** : tells you which tile is _selected_ ('-' for **no tile**)
+ - **latter fen part** : contains:
+    - **w / b** : Color to make the _next move_
+    - **KQkq** : Which color has which castles available (k: kingside, q: queenside)
+    - **- / tile** : _En Passant_ target square ('-' if there is **none**)
+    - **0 1** : _halfmove_- and _fullmove_-clock
 
 ---
 
