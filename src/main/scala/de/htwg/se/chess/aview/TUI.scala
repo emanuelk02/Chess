@@ -64,15 +64,15 @@ class TUI(controller: ControllerInterface) extends Reactor {
             printHelp()
         }
         case "i" | "insert" | "put" =>  //----------------------- Insert / Put
-            controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
+          controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
         case "m" | "move" =>  //--------------------------------- Move
-            controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
+          controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
         case "cl" | "clear" =>  //------------------------------- Fill
           controller.executeAndNotify(controller.clear, ())
         case "fen" | "loadfen" =>  //---------------------------- FenString
-            controller.executeAndNotify(controller.putWithFen, in.drop(1).mkString(" "))
+          controller.executeAndNotify(controller.putWithFen, in.drop(1).mkString(" "))
         case "select" =>  //------------------------------------- Select
-            controller.executeAndNotify(controller.select, Try(Tile(in(1))) match { case s: Success[Tile] => Some(s.get) case f: Failure[Tile] => None })
+          controller.executeAndNotify(controller.select, Try(Tile(in(1))) match { case s: Success[Tile] => Some(s.get) case f: Failure[Tile] => None })
         case "start" => controller.start //---------------------- Start
         case "stop" => controller.stop //------------------------ Stop
         case "z" | "undo" => //---------------------------------- Undo

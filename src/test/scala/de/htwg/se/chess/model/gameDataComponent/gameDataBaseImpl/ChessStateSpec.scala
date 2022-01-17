@@ -271,7 +271,7 @@ class ChessStateSpec extends AnyWordSpec {
                     )
                 )
 
-                an [IllegalStateException] should be thrownBy state.evaluateFen("")
+                // state.evaluateFen is same in playing as in idle
             }
             "be convertible into its part of the FEN representation" in {
                 // The implementation follows the official rules for FEN:

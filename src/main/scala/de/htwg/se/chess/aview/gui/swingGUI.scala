@@ -168,6 +168,7 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                     else redraw
             case e: ErrorEvent => Dialog.showMessage(this, e.msg)
             case e: ExitEvent => close
+            case e: GameEnded => if e.color.isDefined then Dialog.showMessage(this, e.color.get.toString + " has won") else Dialog.showMessage(this, "Draw")
         }
 
         redraw

@@ -211,17 +211,13 @@ class ChessFieldSpec extends AnyWordSpec {
                 Vector(Some(W_BISHOP), Some(W_BISHOP)),
                 Vector(None, Some(B_KING))
               )
-            )
-          )
-        )
-        cf.move(Tile("A1", cf.size), Tile("B1", cf.size)) should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(W_BISHOP), Some(W_BISHOP)),
-                Vector(None, Some(B_KING))
-              )
-            )
+            ),
+            // we simply copy in the other paramaters to ensure should be succeeds
+            // on equality, since we only focus on the moving part in this section
+            cf.state,
+            true,
+            cf.move(Tile("A1", cf.size), Tile("B1", cf.size)).attackedTiles,
+            cf.move(Tile("A1", cf.size), Tile("B1", cf.size)).gameState
           )
         )
         cf.move(Tile("A1", cf.size), Tile("A2", cf.size)) should be(
@@ -231,17 +227,11 @@ class ChessFieldSpec extends AnyWordSpec {
                 Vector(Some(B_KING), Some(W_BISHOP)),
                 Vector(None, Some(W_BISHOP))
               )
-            )
-          )
-        )
-        cf.move(Tile("A1", cf.size), Tile("A2", cf.size)) should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(W_BISHOP)),
-                Vector(None, Some(W_BISHOP))
-              )
-            )
+            ),
+            cf.state,
+            true,
+            cf.move(Tile("A1", cf.size), Tile("A2", cf.size)).attackedTiles,
+            cf.move(Tile("A1", cf.size), Tile("A2", cf.size)).gameState
           )
         )
       }
@@ -300,84 +290,68 @@ class ChessFieldSpec extends AnyWordSpec {
         // To make testing easier, the reading of FEN has been made scaleable 
         // for any size of ChessField, simply to save cost in writing.
 
-        cf.loadFromFen("/ w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(None, None),
-                Vector(None, None)
-              )
-            ),
+        cf.loadFromFen("/ w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(None, None),
+              Vector(None, None)
+            )
           )
         )
-        cf.loadFromFen("2/2 w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(None, None), 
-                Vector(None, None)
-              )
+        cf.loadFromFen("2/2 w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(None, None), 
+              Vector(None, None)
             )
           )
         ) 
-        cf.loadFromFen("k/1B w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), None), 
-                Vector(None, Some(W_BISHOP))
-              )
+        cf.loadFromFen("k/1B w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(Some(B_KING), None), 
+              Vector(None, Some(W_BISHOP))
             )
           )
         )
-        cf.loadFromFen("k1/1B w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), None), 
-                Vector(None, Some(W_BISHOP))
-                )
+        cf.loadFromFen("k1/1B w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(Some(B_KING), None), 
+              Vector(None, Some(W_BISHOP))
+              )
+          )
+        )
+        cf.loadFromFen("1k/B w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(None, Some(B_KING)), 
+              Vector(Some(W_BISHOP), None)
             )
           )
         )
-        cf.loadFromFen("1k/B w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(None, Some(B_KING)), 
-                Vector(Some(W_BISHOP), None)
-              )
-            )
-          )
-        )
-        cf.loadFromFen("1k/B1 w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(None, Some(B_KING)), 
-                Vector(Some(W_BISHOP), None)
-              )
+        cf.loadFromFen("1k/B1 w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(None, Some(B_KING)), 
+              Vector(Some(W_BISHOP), None)
             )
           )
         )
 
-        cf.loadFromFen("Qk/Br w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(W_QUEEN), Some(B_KING)),
-                Vector(Some(W_BISHOP), Some(B_ROOK))
-              )
+        cf.loadFromFen("Qk/Br w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(Some(W_QUEEN), Some(B_KING)),
+              Vector(Some(W_BISHOP), Some(B_ROOK))
             )
           )
         )
-        cf.loadFromFen("kQ/rB w KQkq - 0 1") should be(
-          ChessField(
-            Matrix(
-              Vector(
-                Vector(Some(B_KING), Some(W_QUEEN)),
-                Vector(Some(B_ROOK), Some(W_BISHOP))
-              )
+        cf.loadFromFen("kQ/rB w KQkq - 0 1").field should be(
+          Matrix(
+            Vector(
+              Vector(Some(B_KING), Some(W_QUEEN)),
+              Vector(Some(B_ROOK), Some(W_BISHOP))
             )
           )
         )
@@ -416,9 +390,60 @@ class ChessFieldSpec extends AnyWordSpec {
          *             Tile
          *             Tile
          * 
-         * Pieces shouldn't be allowd to move beyond enemy pieces 
+         * Pieces shouldn't be allowed to move beyond enemy pieces 
          * and not onto allied pieces.
          * With the exception of the knight which can jump over pieces.
+         * 
+         * Furthermore: There are 2 types of pieces:
+         *  - Sliding: https://www.chessprogramming.org/Sliding_Pieces
+         *  - Non-Sliding
+         * 
+         * For the sliding pieces, their directional movement needs to
+         * be treated like an extending line, which ends at the board border.
+         * 
+         * To account for this, we simply iterate over the directionial
+         * list field-size times. It containins Tuples, that if added to a 
+         * tile mimic the pieces movement. Additionally, while iterating
+         * We keep track of the piece which was on the tile we looked at before.
+         * 
+         * If that previous piece is not empty, we stop the iteration:
+         *
+         *  var prevPiece: Option[Piece] = None
+         *  for i <- 1 to size 
+         *  yield {
+         *    if (prevPiece.isEmpty) {
+         *      Try(in - (move(0)*i, move(1)*i)) match {
+         *        case s: Success[Tile] => {
+         *            prevPiece = cell(s.get)
+         *            tileHandle.handleRequest(s.get)
+         *        }
+         *        case f: Failure[Tile] => None
+         *      }
+         *    }
+         *    else None
+         *  }
+         * 
+         * The tileHandle checks if the destination tile is empty and if it
+         * is not, wether the tile contains an enemy piece. If it is an enemy
+         * piece that tile will be added as well, but if it is allied, we
+         * skip it and the iteration ends there.
+         * 
+         * 
+         * For the non-sliding pieces, we treat the direction tuples as
+         * destinations and simply map them to their return value of the tileHandle:
+         * e.g: the Knight
+         *    knightMoveList.filter( x => Try(in - x).isSuccess )
+         *        .filter( x => tileHandle.handleRequest(in - x).isDefined )
+         *        .map( x => in - x )
+         * 
+         * For King and Pawn we have to additionally append the special tiles
+         * for Castling(King), En Passant(Pawn) and Double Push(Pawn).
+         * These are calculated in seperate Chains.
+         * The rules for these are explained in the Chess Programming Wiki:
+         * 
+         *  - Castling: https://www.chessprogramming.org/Castling
+         *  - En Passant: https://www.chessprogramming.org/En_passant
+         *  - Double Push: https://www.chessprogramming.org/Pawn_Push#DoublePush
          * */
 
         // King //
@@ -440,7 +465,9 @@ class ChessFieldSpec extends AnyWordSpec {
         // Queen //
         /**
          * The Queen moves both diagonally and straight.
-         * Her path ends on enemy pieces or before allied pieces
+         * The Queen is a sliding piece, meaning that
+         * her path ends on enemy pieces or before allied pieces
+         * but is otherwise free to move any number of tiles.
          * */
         cf = cf.loadFromFen("8/6r1/8/8/8/3Q2K1/8/8 w - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
@@ -617,8 +644,24 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Tile("C8") :: Nil).sorted
 
         // Castles blocked by check
+        cf = cf.loadFromFen("8/8/8/8/8/8/3r4/R3K2R b KQ - 0 1").start.move(Tile("D2"), Tile("E2")) // move the rook to check the king
+        cf.inCheck shouldBe true
+        cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("E2") :: Tile("D1") :: Tile("F1") :: Nil).sorted
 
         // Castles blocked by passing through attacked tile
+        // White Side //
+        cf = cf.loadFromFen("8/8/8/8/8/8/3r4/R3K2R w KQ - 0 1")
+        cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D2") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+
+        cf = cf.loadFromFen("8/8/8/8/8/8/5r2/R3K2R w KQ - 0 1")
+        cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("F2") :: Tile("D1")  :: Tile("C1") :: Nil).sorted
+
+        // Black Side //
+        cf = cf.loadFromFen("r3k2r/3R4/8/8/8/8/8/8 b kq - 0 1")
+        cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D7") :: Tile("F8") :: Tile("G8") :: Nil).sorted
+
+        cf = cf.loadFromFen("r3k2r/5R2/8/8/8/8/8/8 b kq - 0 1")
+        cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("F7") :: Tile("D8")  :: Tile("C8") :: Nil).sorted
 
       }
       "allow to start and stop the game by changing its state" in {

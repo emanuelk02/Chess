@@ -17,6 +17,8 @@ import gameDataBaseImpl.ChessField
 import model.Tile
 import util.Matrix
 
+enum GameState:
+    case CHECKMATE, DRAW, RUNNING
 
 /**
  * A data structure storing all information necessary to
@@ -125,6 +127,10 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def selected: Option[Tile]
     /** Describes the game state: playing or idle @return true if the game is active */
     def playing: Boolean
+    /** Returns the color to make the next move @return color to move */
+    def color: PieceColor
+
+    def gameState: GameState
 
     /** Starts the game. Prohibiting free placement and illegal moves. @return The same field but now in an active playing state */
     def start: GameField
