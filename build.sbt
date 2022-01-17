@@ -33,6 +33,13 @@ lazy val root = project
       JacocoThresholds(),
       Seq(JacocoReportFormats.ScalaHTML, JacocoReportFormats.XML), // note XML formatter
     "utf-8"),
+    
+    jacocoExcludes := Seq(
+      "*aview.*",
+      "*Chess.*",
+      "*GameData.*",
+      "*ControllerInterface.*"
+    ),
 
     jacocoCoverallsServiceName := "github-actions",
     jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),

@@ -1,19 +1,35 @@
-# **Chess**
+<p align="center">
+  
+  <h1 align="center">CHESS</h3>
+</p>
 
-![Build_Status](https://github.com/emanuelk02/Chess/actions/workflows/scala.yml/badge.svg?branch=main)
-[![Coverage Status](https://coveralls.io/repos/github/emanuelk02/Chess/badge.svg)](https://coveralls.io/github/emanuelk02/Chess)
-[![codecov](https://codecov.io/gh/emanuelk02/Chess/branch/main/graph/badge.svg?token=UFUM75SWX4)](https://codecov.io/gh/emanuelk02/Chess)
+<p align="center">
+  <img src="https://github.com/emanuelk02/Chess/actions/workflows/scala.yml/badge.svg?branch=main" /> 
+  <a href="https://coveralls.io/github/emanuelk02/Chess">
+    <img src="https://coveralls.io/repos/github/emanuelk02/Chess/badge.svg" />
+  </a>
+  <a href="https://codecov.io/gh/emanuelk02/Chess">
+    <img src="https://codecov.io/gh/emanuelk02/Chess/branch/main/graph/badge.svg?token=UFUM75SWX4)](https://codecov.io/gh/emanuelk02/Chess" />
+  </a>
+</p>
+  
+### This project was made for the course **_Software Engineering_** at **_HTWG Constance_** in **Winter 2021-2022**
 
-## *README is a work in progress!*
+---
+
+## *README and Documentation is a work in progress!*
+
+### See our **_[Documentation](docs)_** or the **_[Tests](src/test/scala/de/htwg/se/chess)_** for more information on individual **Components**
 
 ---
 
 # Table of Contents
 
-| **Content** | **Feature/Documentation** | **Code** | **Tests** |
+| **Component** | **Feature/Documentation** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
   | [Graphical User Interface](src/main/scala/de/htwg/se/chess/aview/gui) | [Graphics](docs/gui) | [swingGui.scala](src/main/scala/de/htwg/se/chess/aview/gui/swingGUI.scala) | |
 | | | [TileLabel.scala](src/main/scala/de/htwg/se/chess/aview/gui/TileLabel.scala) | |
+| | | |
   | [Textual User Interface](src/main/scala/de/htwg/se/chess/aview) | [Input](docs/tui/#using-the-tui) | [TUI.scala](src/main/scala/de/htwg/se/chess/aview/TUI.scala) | [TUISpec.scala](src/test/scala/de/htwg/se/chess/aview/TUISpec.scala) |
 | | [Output](docs/tui/#board-representation) | [ChessBoard.scala](src/main/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessBoard.scala) | [ChessBoardSpec.scala](src/test/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessBoardSpec.scala) |
 | | | |
