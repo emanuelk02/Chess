@@ -21,8 +21,17 @@ import Piece._
 
 
 class PiecesSpec extends AnyWordSpec {
+  /**
+   * Chess Pieces are implemented by an Enum, which differentiates
+   * Between 6 Types of Pieces and 2 Colors:
+   * */
   "A Piece" should {
     "consist of one of 6 types (King, Queen, Rook, Bishop, Knight, Pawn) and a color (Black, White)" in {
+      // The types of Pieces, how they move and what rules affect them
+      // can be read on the Chess Programming Wiki: https://www.chessprogramming.org/Pieces
+      // In our implementation, Pieces are simply representants in Data
+      // and do not store any behaviour, value or anything of the sort.
+      
       val whites: Array[Piece] = Piece.values.filter(p => p.getColor == White)
       whites.size should be(6)
       whites.map(p => p.getType).toSet shouldBe Set(
@@ -49,6 +58,8 @@ class PiecesSpec extends AnyWordSpec {
       W_KING.getColor should be(White)
       B_KING.getColor should be(Black)
 
+      // Colors are invertable for easier use in checking, if another Piece is
+      // the opposite color of any given piece.
       PieceColor.invert(W_KING.getColor) shouldBe Black
       PieceColor.invert(B_KING.getColor) shouldBe White
     }
@@ -65,6 +76,9 @@ class PiecesSpec extends AnyWordSpec {
       Piece.values.map(p => p.toString).toSet.size should be(12)
     }
     "be created by either passing a String or a Char" in {
+      // Factory methods for Piece return a Option[Piece] to allow
+      // wrong input which results in None
+
       Piece("B_KING") should be(Some(B_KING))
       Piece("W_KING") should be(Some(W_KING))
       Piece("W_QUEEN") should be(Some(W_QUEEN))
@@ -79,6 +93,9 @@ class PiecesSpec extends AnyWordSpec {
       Piece("B_BISHOP") should be(Some(B_BISHOP))
       Piece("B_KNIGHT") should be(Some(B_KNIGHT))
       Piece("B_PAWN") should be(Some(B_PAWN))
+
+      // The one-char representation follows the same rules as used
+      // in the commonly used FEN: https://www.chessprogramming.org/Forsyth-Edwards_Notation
       Piece("b") should be(Some(B_BISHOP))
       Piece("r") should be(Some(B_ROOK))
       Piece("p") should be(Some(B_PAWN))

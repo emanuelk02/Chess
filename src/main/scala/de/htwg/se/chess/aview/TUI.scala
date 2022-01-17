@@ -28,11 +28,11 @@ class TUI(controller: ControllerInterface) extends Reactor {
   listenTo(controller)
 
   reactions += {
-    case e: CommandExecuted => update
+    case e: CommandExecuted => update; print("Command Executed\n")
     case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
-    case e: Select => print("Select " + e.tile)
-    case e: ExitEvent => exitFlag = true
+    case e: Select => if (e.tile.isDefined) then print("Selected " + e.tile.get + "\nLegal Moves: " + controller.getLegalMoves(e.tile.get) + "\n")
+    case e: ExitEvent => print("Goodbye\n"); exitFlag = true
   }
 
   print(
@@ -57,7 +57,7 @@ class TUI(controller: ControllerInterface) extends Reactor {
     {
       val in = inputString.split(" ")
       in(0).toLowerCase match {
-        case "h" | "help" => { //----------------------- Help
+        case "h" | "help" => { //-------------------------------- Help
           if (in.size > 1) then
             printHelp(in(1))
           else
@@ -65,18 +65,22 @@ class TUI(controller: ControllerInterface) extends Reactor {
         }
         case "i" | "insert" | "put" =>  //----------------------- Insert / Put
             controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
-        case "m" | "move" =>  //----------------------- Move
+        case "m" | "move" =>  //--------------------------------- Move
             controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
-        case "cl" | "clear" =>  //----------------------- Fill
+        case "cl" | "clear" =>  //------------------------------- Fill
           controller.executeAndNotify(controller.clear, ())
-        case "fen" | "loadfen" =>  //----------------------- FenString
+        case "fen" | "loadfen" =>  //---------------------------- FenString
             controller.executeAndNotify(controller.putWithFen, in.drop(1).mkString(" "))
-        case "z" | "undo" =>
+        case "select" =>  //------------------------------------- Select
+            controller.executeAndNotify(controller.select, Try(Tile(in(1))) match { case s: Success[Tile] => Some(s.get) case f: Failure[Tile] => None })
+        case "start" => controller.start //---------------------- Start
+        case "stop" => controller.stop //------------------------ Stop
+        case "z" | "undo" => //---------------------------------- Undo
           controller.undo
-        case "y" | "redo" =>
+        case "y" | "redo" => //---------------------------------- Redo
           controller.redo
-        case "exit" | "q" => controller.exit //----------------------- Exit
-        case _ =>       //----------------------- Invalid
+        case "exit" | "q" => controller.exit //------------------ Exit
+        case _ =>       //--------------------------------------- Invalid
           throw new IllegalArgumentException("Unknown Command")
       }
     }
@@ -84,41 +88,43 @@ class TUI(controller: ControllerInterface) extends Reactor {
   }
 
   def printHelp(): Unit = {
-    print(
-    """
-    Usage: <command> [options]
-    Commands:
-    help [command]      show this help message
-                          
-    i / insert / put <tile: "A1"> <piece>
-                        inserts given piece at given tile
-                        valid piece representations are:
-                          - a color: 
-                            W / B
-                          - followed by an underscore and its type:
-                            W/B_KING / QUEEN / ROOK / BISHOP / KNIGHT / PAWN
-                        or
-                          - their representations as in the FEN representation:
-                            uppercase for white / lowercase for black:
-                            King: K/k, Queen: Q/q, Rook: R/r,
-                            Bishop: B/b, Knight: N/n, Pawn: P/p
-                                              
-    m / move <tile1: "A1"> <tile2: "B2">
-                        moves piece at position of tile1 to the position of tile2
-
-    cl / clear          clears entire board
-
-    fen / loadFEN <fen-string>
-                        initializes a chess position from given FEN-String
-                            
-    start               starts the game, prohibiting anything but the move command
+  print(
+  """
+  Usage: <command> [options]
+  Commands:
+  help [command]      show this help message
                         
-    z / undo            reverts the last changes you've done
-    
-    y / redo            redoes the last changes you've undone
+  i / insert / put <tile: "A1"> <piece>
+                      inserts given piece at given tile
+                      valid piece representations are:
+                        - a color: 
+                          W / B
+                        - followed by an underscore and its type:
+                          W/B_KING / QUEEN / ROOK / BISHOP / KNIGHT / PAWN
+                      or
+                        - their representations as in the FEN representation:
+                          uppercase for white / lowercase for black:
+                          King: K/k, Queen: Q/q, Rook: R/r,
+                          Bishop: B/b, Knight: N/n, Pawn: P/p
+                                            
+  m / move <tile1: "A1"> <tile2: "B2">
+                      moves piece at position of tile1 to the position of tile2
 
-    q / exit                quits the program
-    """.stripMargin)
+  cl / clear          clears entire board
+
+  fen / loadFEN <fen-string>
+                      initializes a chess position from given FEN-String
+                          
+  start / stop        starts/stops the game, prohibiting/allowing anything but the move command
+
+  select <tile: "A1"> selects given tile and shows possible moves for it       
+                      
+  z / undo            reverts the last changes you've done
+  
+  y / redo            redoes the last changes you've undone
+
+  q / exit                quits the program
+  """.stripMargin)
   }
 
   def printHelp(cmd: String): Unit = {
@@ -130,6 +136,8 @@ class TUI(controller: ControllerInterface) extends Reactor {
       case "cl" | "clear" => "\nUsage: cl / clear\n"
       case "fen" | "loadfen" =>
           "\nfen / FEN / Fen / loadFEN <fen-string>\nSee 'https://www.chessprogramming.org/Forsyth-Edwards_Notation' for detailed information\non what FEN strings do\n"
+      case "start" | "stop" => "starts/stops the game, prohibiting / allowing anything but the move command"
+      case "select" => "select <tile: \"A1\">\nSelects given tile and shows possible moves for it"
       case _ => "\nUnknown command. See 'help' for more information\n"
     })
   }

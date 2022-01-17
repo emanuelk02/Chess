@@ -21,9 +21,31 @@ import util.Matrix
 
 
 class MatrixSpec extends AnyWordSpec {
+    /**
+     * Matrix follows the common notation for matrices used
+     * in Mathematics:
+     *   The first number describes the row, the second the collumn.
+     *   Numbering starts at the top left with (0,0) and ends
+     *   in the bottom right with (n,n).
+     * 
+     * Implementation is through a Vector of Vectors.
+     * Each vector represents a row and the contents of each inner
+     * Vector are a new collumn.
+     * 
+     * The implementation is immutable, the methods of Matrix only
+     * return a modified copy. Size is not changeable after creation.
+     * */
     "A Matrix" when {
         "empty" should {
             "be created using an Int as a dimension and a generic filling" in {
+                // Matrices can contain any generic value, which needs to be
+                // provided on instantiation.
+
+                // When using this constructor a symmetric matrix is created, which
+                // is the intended use.
+                // Asymmetric matrices are possible but do not protect against
+                // invalid access which would result in a IndexOutOfBoundsException.
+
                 val matr = new Matrix[Option[Piece]](3, None)
                 matr.size should be(3)
                 matr.rows(0).forall(p => p == None) should be(true)
@@ -31,6 +53,8 @@ class MatrixSpec extends AnyWordSpec {
                 matr.rows(2).forall(p => p == None) should be(true)
             }
             "be instantiated with a full Matrix given as a Vector of Vectors" in {
+                // This is a way to create asymmetric matrices
+
                 val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
                 matr.size should be(1)
                 matr.cell(0, 0).get should be(W_PAWN)
@@ -57,6 +81,8 @@ class MatrixSpec extends AnyWordSpec {
                 matr.fill(None).size should be(matr.size)
             }
             "throw an IndexOutOfBoundsException when trying to access fields outside of the matrix" in {
+                // Illegal accesses are not caught and will result in exceptions
+                
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(-1, 1)
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(1, -1)
                 an [IndexOutOfBoundsException] should be thrownBy matr.cell(2, 1)

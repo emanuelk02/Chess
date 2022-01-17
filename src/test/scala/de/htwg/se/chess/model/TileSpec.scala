@@ -24,6 +24,19 @@ class TileSpec extends AnyWordSpec {
             Tile(1, 1, 8) should be(Tile.withRowCol(7, 0))
         }
         "be created using the factory methods" in {
+            // Tile offers factory methods to make construction easier.
+            // You can specify tiles via a list of chars containing the
+            // File char and the rank number, both as Characters.
+            // You may also use a String containg those two.
+            //
+            // Additionaly: If your used ChessBoard has a different size
+            // than the standard of 8x8; you need to specify the
+            // size used for the tile as an Int, as this affects
+            // conversion to regular math-like matrix-indices
+
+            // For more information on the file/tile notation, see our documentation
+            // on GitHub or the Wiki: https://www.chessprogramming.org/Chessboard
+
             Tile(List('A', '1'), 2) should be(Tile(1, 1, 2))
             Tile("B1", 2) should be(Tile(2, 1, 2))
             Tile(List('A','2')) should be(Tile(1, 2, 8))
@@ -35,6 +48,9 @@ class TileSpec extends AnyWordSpec {
             an [AssertionError] should be thrownBy Tile("C2", 2)
         }
         "be manipulatable with + and - operators and comparable with ==" in {
+            // Comparison simply involves the rank and file.
+            // Different size is not taken into account.
+
             val tile1 = Tile(2, 2, 8)
             val tile2 = Tile(2, 2, 3)
 

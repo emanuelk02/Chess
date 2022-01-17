@@ -1,5 +1,10 @@
 ignore:
-  - "**/aview/gui/"
+  - "**/swingGUI.scala"
+  - "**/fxGUI.scala"
+  - "**/TileLabel.scala"
+  - "**/fenDemo.worksheet.sc"
+  - "**/model.worksheet.sc"
+  - "**/TileLabel.scala"
   - "**/Chess.scala"
   - "**/resources/"
 
@@ -7,4 +12,4 @@ coverage:
   status:
     patch:
       default:
-        target: 90%
+        target: 75%

@@ -17,15 +17,20 @@ package controllerBaseImpl
 import scala.swing.Publisher
 import scala.swing.event.Event
 
+import com.google.inject.name.Names
+import com.google.inject.{Guice, Inject}
+import net.codingwell.scalaguice.InjectorExtensions._
+
 import model.gameDataComponent.GameField
 import model.Tile
 import util.Command
 
 
-case class Controller(var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface(field) {
+case class Controller @Inject() (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface {
+  override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   def this() = {
-    this(GameField(), new ChessCommandInvoker)
+    this(Guice.createInjector(new ChessModule).getInstance(classOf[GameField]), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
   }
 
@@ -35,7 +40,7 @@ case class Controller(var field: GameField, val commandHandler: ChessCommandInvo
     publish(cmd.event)
   }
 
-  def move(args: Tuple2[Tile, Tile]): ChessCommand = new MoveCommand(args, field)
+  def move(args: Tuple2[Tile, Tile]): ChessCommand = if (field.playing) then new CheckedMoveCommand(new MoveCommand(args, field)) else new MoveCommand(args, field)
   def put(args: Tuple2[Tile, String]): ChessCommand = new PutCommand(args, field)
   def clear(args: Unit): ChessCommand = new ClearCommand(field)
   def putWithFen(args: String): ChessCommand = new FenCommand(args, field)
@@ -54,17 +59,16 @@ case class Controller(var field: GameField, val commandHandler: ChessCommandInvo
     publish(new CommandExecuted)
   }
 
-  def exit: Unit = {
-    publish(new ExitEvent)
-  }
+  def exit: Unit = publish(new ExitEvent)
 
-  def fieldToString: String = {
-    field.toString
-  }
+  def fieldToString: String = field.toString
+  def fieldToFen: String = field.toFen
 
   def cell(tile: Tile) = field.cell(tile)
 
   def selected: Option[Tile] = field.selected
   def isSelected(tile: Tile): Boolean = if hasSelected then field.selected.get == tile else false
   def hasSelected: Boolean = field.selected.isDefined
+  def getLegalMoves(tile: Tile): List[Tile] = field.getLegalMoves(tile)
+  def isPlaying: Boolean = field.playing
 }

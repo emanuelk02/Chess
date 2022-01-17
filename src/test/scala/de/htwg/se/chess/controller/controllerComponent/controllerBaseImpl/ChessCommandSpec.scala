@@ -23,6 +23,7 @@ import model.gameDataComponent.gameDataBaseImpl._
 import model.Tile
 import model.Piece
 import model.Piece._
+import model.PieceColor._
 import util.Matrix
 
 
@@ -34,6 +35,25 @@ case class TestChessCommand(field: GameField) extends ChessCommand(field) {
 }
 
 class ChessCommandSpec extends AnyWordSpec {
+   /**
+   * ChessCommands are an addition to the Command Pattern, mainly used
+   * to implement an undo-redo mechanism.
+   * Each commands is instantiated with a GameField on which their operation is
+   * executed on.
+   * The Field is immutable and only a copy of the changed field is returned.
+   * 
+   * The standard methods used to put into the higher-order function are:
+   *
+   *  - MoveCommand(Tuple2[Tile, Tile])      Moves contents of the first into the other
+   *  - PutCommand(Tuple2[Tile, String])     Places a Piece created from the string into the tile
+   *  - ClearCommand(Unit)                   Clears the entire board
+   *  - FenCommand(String)                   Loads a position from a FEN String
+   *  - SelectCommand(Option[Tile])          Stores a tile as selected
+   *  - ErrorCommand(String)                 Doesn't change the field but contains an ErrorEvent
+   * 
+   * Each Command is paired with a ChessEvent which is publishable by a Controller on
+   * excecution of the command. Observers of the controller should react to given events.
+   * */
     "A concrete ChessCommand" should {
         val size = 2
         val matr = new Matrix[Option[Piece]](size, Some(W_BISHOP))
@@ -60,6 +80,11 @@ class ChessCommandSpec extends AnyWordSpec {
     val put = PutCommand((Tile("A1", size), "W_KING"), field)
     val put2 = PutCommand((Tile("B1", size), "W_KING"), field)
     "A PutCommand" should {
+        // The PutCommand uses the underlying replace() method of the provided GameField
+        // placing given piece into given tile
+        //
+        // For more information, see the corresponding file in the model package:
+        // ..\src\main\scala\de\htwg\se\chess\model\GameField.scala
         "Run the put command on its controller's ChessField and return that" in {
             put.execute should be(field.replace(Tile("A1", size), "W_KING"))
             put.undo should be(field)
@@ -70,29 +95,66 @@ class ChessCommandSpec extends AnyWordSpec {
             put2.redo should be(field.replace(Tile("B1", size), "W_KING"))
         }
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
+            // Input is not checked on creation and will cause an Exception on
+            // execution of the command
+
             PutCommand((Tile("C1"), "W_QUEEN"), field)
             PutCommand((Tile("A3"), "W_QUEEN"), field)
         }
     }
-    val move = MoveCommand((Tile("A1", size), Tile("A2", size)), field)
+    val mField = 
+        new ChessField()
+            .replace(Tile("A1"), "R")
+            .replace(Tile("A2"), "b")
+            .replace(Tile("B1"), "b")
+            .replace(Tile("B2"), "R")
+    val move = MoveCommand((Tile("A1"), Tile("A2")), mField)
     "A MoveCommand" should {
+        // The MoveCommand uses the underlying move() method of the provided GameField
+        // moving the contents of the first tile into the other.
+        // If the first tile is empty, the field is not modified.
+        //
+        // Note that there are two types of MoveCommands, one of which is the CheckedMoveCommand;
+        // a Decorator for MoveCommand which adds additional consideration of legality
+        // to the move.
+        //
+        // For more information, see the corresponding file in the model package:
+        // ..\src\main\scala\de\htwg\se\chess\model\GameField.scala
         "Run the move command on its controller's ChessField and return that" in {
-            move.execute should be(field.move(Tile("A1", size), Tile("A2", size)))
-            move.redo should be(field.move(Tile("A1", size), Tile("A2", size)))
-            move.undo should be(field)
+            move.execute should be(mField.move(Tile("A1"), Tile("A2")))
+            move.redo should be(mField.move(Tile("A1"), Tile("A2")))
+            move.undo should be(mField)
         }
         "not throw the same IndexOutOfBoundsException as ChessField on wrong input" in {
-            MoveCommand((Tile("A1"), Tile("H3")), field)
-            MoveCommand((Tile("H3"), Tile("A1")), field)
+            // Input is not checked on creation and will cause an Exception on
+            // execution of the command
+            MoveCommand((Tile("A1", 9), Tile("H9", 9)), mField)
+            MoveCommand((Tile("I3", 9), Tile("A1", 9)), mField)
         }
         "be encapsulated in a CheckedMoveCommand if the move needs validation" in {
+            // Validation of the move uses the getLegalMoves(Tile) method of the GameField
+            // This returns a list of Tiles which represent tiles that are legal to move to
+            // from given tile.
+            // The command calls this with its first tile. If the second tile is not in the returned
+            // list, we know that the move is illegal.
+
             val cmc = CheckedMoveCommand(move)
-            cmc.state should be("")
-            cmc.errorCmd should be(ErrorCommand("", move.field))
+            // We use sorted lists to make sure to get every element right and not have to care
+            // about order
+            cmc.legalMoves.sorted shouldBe (Tile("A2") :: Tile("B1") :: Nil).sorted
+            cmc.errorCmd should be(ErrorCommand("Illegal Move", move.field))
 
             cmc.execute should be(move.execute)
             cmc.undo should be(move.undo)
             cmc.redo should be(move.redo)
+
+            val cmc2 = CheckedMoveCommand(MoveCommand((Tile("A2"), Tile("A1")), mField))
+            cmc2.legalMoves shouldBe Nil
+            cmc2.errorCmd should be(ErrorCommand("Illegal Move", move.field))
+
+            cmc2.execute should be(cmc2.errorCmd.execute)
+            cmc2.undo should be(cmc2.errorCmd.undo)
+            cmc2.redo should be(cmc2.errorCmd.redo)
         }
     }
     val clear = ClearCommand(field)

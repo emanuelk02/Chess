@@ -29,11 +29,12 @@ import javax.swing.table._
 import javax.imageio.ImageIO
 
 import controller.controllerComponent._
+import model.Piece
 import model.PieceColor
 import model.Tile
 
 
-class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1, 1) {
+class TileLabel(tile: Tile, controller: ControllerInterface, var source: String) extends GridPanel(1, 1) {
     def selectReaction   = controller.executeAndNotify(controller.select, Some(tile))
     def unselectReaction = controller.executeAndNotify(controller.select, None)
     def moveReaction     = {
@@ -50,14 +51,16 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1
             else new Color(251, 215, 196)
     val selectedColor =
         if ((tile.rank % 2 == 1 && tile.file % 2 == 1) || (tile.rank % 2 == 0 && tile.file % 2 == 0)) 
-            then new Color(184, 184, 212)
-            else new Color(230, 230, 255)
-
-    val imgIcon = newPicture
+            then new Color(60, 200, 40)
+            else new Color(80, 220, 60)
+    val highlightColor =
+        if ((tile.rank % 2 == 1 && tile.file % 2 == 1) || (tile.rank % 2 == 0 && tile.file % 2 == 0)) 
+            then new Color(70, 160, 50)
+            else new Color(100, 190, 70)
 
     preferredSize = dim
     background = if controller.isSelected(tile) then selectedColor else tileColor
-    contents += new Label("", imgIcon, Alignment.Center) { preferredSize = dim }
+    contents += new Label("", newPicture, Alignment.Center) { preferredSize = dim }
 
     listenTo(mouse.clicks)
 
@@ -71,24 +74,59 @@ class TileLabel(tile: Tile, controller: ControllerInterface) extends GridPanel(1
         }
     }
 
-    val style = "vipping"
-
     def newPicture: ImageIcon = {
         val piece = controller.cell(tile)
-        val imagePath = "src/main/resources/pieces/vipping/" + (if (piece.isDefined) then (piece.get.getColor match { case PieceColor.Black => "b" case _ => "W"}) + piece.get.toString + ".png" else "None.png") 
-        val image: BufferedImage = 
-        Try(ImageIO.read(new File(imagePath))) match {
-            case s: Success[BufferedImage] => s.value
-            case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
-        }
-        new ImageIcon(image.getScaledInstance((dim.width * 0.8).toInt, (dim.height * 0.8).toInt, SCALE_SMOOTH))
+        new ImageIcon(ImageLoader.getIcon(piece, source))
+    }
+
+    def highlight: TileLabel = {
+        contents.clear
+        contents += new Label("", newPicture, Alignment.Center)
+        background = (
+            if ( controller.isSelected(tile) )
+                then selectedColor 
+                else highlightColor
+        )
+        repaint()
+        this
     }
 
     def redraw: TileLabel = {
         contents.clear
         contents += new Label("", newPicture, Alignment.Center)
-        background = if controller.isSelected(tile) then selectedColor else tileColor
+        background = tileColor
         repaint()
         this
+    }
+}
+
+object ImageLoader {
+    val pieceStyles: Map[String, Map[Piece, Image]] = Map(
+        "cburnett" -> getPieces("cburnett"),
+        "cliparts" -> getPieces("cliparts")
+    )
+
+    def getPieces(style: String): Map[Piece, Image] = {
+        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        val height = (screenSize.getHeight() / (10)).toInt
+        val dim = new Dimension(height, height)
+        val mb = Map.newBuilder[Piece, Image]
+        for (piece <- Piece.values) {
+            val imagePath = "src/main/resources/pieces/"+style+"/" + (piece.getColor match { case PieceColor.Black => "b" case _ => "W" }) + piece.toString + ".png"
+            val image: BufferedImage =
+                Try(ImageIO.read(new File(imagePath))) match {
+                    case s: Success[BufferedImage] => s.value
+                    case f: Failure[BufferedImage] => new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                }
+            mb.addOne(piece -> image.getScaledInstance((dim.width * 0.8).toInt, (dim.height * 0.8).toInt, SCALE_SMOOTH))
+        }
+        mb.result
+    }
+
+    def getIcon(piece: Option[Piece], style: String): Image = {
+        if (piece.isDefined)
+            then if pieceStyles.get(style).isDefined
+                then return pieceStyles.get(style).get.get(piece.get).get
+        new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
     }
 }

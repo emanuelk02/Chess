@@ -31,8 +31,10 @@ case class ChessState
     enPassant: Option[Tile] = None,
     size: Int = 8
     ):
+
+    def this() = this(false)
     
-    def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalArgumentException("Cannot set the boards contents while a game is active") else ChessState(fen, size)
+    def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalStateException("Cannot set the boards contents while a game is active") else ChessState(fen, size)
 
     val  evaluateMove = if (playing) then applyMovePlaying else applyMoveIdle
 

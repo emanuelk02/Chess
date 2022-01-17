@@ -20,7 +20,8 @@ import model.gameDataComponent.GameField
 import util.Matrix
 
 
-class MockController extends ControllerInterface(GameField()) {
+class MockController extends ControllerInterface {
+  val size = 0
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
 
@@ -40,9 +41,12 @@ class MockController extends ControllerInterface(GameField()) {
   def exit: Unit = { }
 
   def fieldToString: String = ""
+  def fieldToFen: String = ""
 
   def cell(tile: Tile): Option[Piece] = None
   def selected: Option[Tile] = None
   def isSelected(tile: Tile): Boolean = false
   def hasSelected: Boolean = false
+  def getLegalMoves(tile: Tile): List[Tile] = Nil
+  def isPlaying: Boolean = false
 }

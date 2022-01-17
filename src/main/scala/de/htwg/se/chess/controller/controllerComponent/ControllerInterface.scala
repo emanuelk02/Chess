@@ -53,9 +53,9 @@ import util.Command
  * 
  * @param field     Holds all data needed to specify the game and to execute any inputs on
  * */
-trait ControllerInterface(field: GameField) extends Publisher{
+trait ControllerInterface extends Publisher{
     /** Size of the board in rows */
-    val size = field.size
+    def size: Int
 
     /**
      * Calls a given function to receive a Command, which will be executed.
@@ -117,6 +117,8 @@ trait ControllerInterface(field: GameField) extends Publisher{
     def exit: Unit
     /** Provides a string representation of the current board. @return String representation of a Chess Board */
     def fieldToString: String
+    /** Returns the FEN representation for the current board. @return full FEN representation */
+    def fieldToFen: String
     /** 
      * Gives the piece stored at given tile.
      * @param tile      Tile you want to get the Piece from
@@ -133,6 +135,10 @@ trait ControllerInterface(field: GameField) extends Publisher{
     def isSelected(tile: Tile): Boolean
     /** Checks if a tile is currently selected @return true if any tile is selected, false if not */
     def hasSelected: Boolean
+    /** Returns all fully legal moves for given tile */
+    def getLegalMoves(tile: Tile): List[Tile]
+    /** Returns true if the game is active @return game activity state */
+    def isPlaying: Boolean
 }
 
 /**

@@ -48,7 +48,7 @@ import util.Matrix
  * 
  * @param field     Holds all the pieces on the board; None represents an empty tile
  * */
-trait GameField(field: Matrix[Option[Piece]]) {
+trait GameField (field: Matrix[Option[Piece]]) {
     /** Size of the board in rows **/
     val size = field.size
 
@@ -96,6 +96,15 @@ trait GameField(field: Matrix[Option[Piece]]) {
      * @return          The same field but with the moved piece
      * */
     def move(tile1: Tile, tile2: Tile): GameField
+
+    /**
+     * Returns a list of all tiles the piece in given tile can move to.
+     * Returned tiles are fully legal and respect check.
+     * For empty tiles an empty list is returned.
+     * @param tile      Source tile
+     * @return          List of tiles which are legal to move to
+     */
+    def getLegalMoves(tile: Tile): List[Tile]
     
     /**
      * Loads a board position and game state from the given string.
@@ -114,11 +123,17 @@ trait GameField(field: Matrix[Option[Piece]]) {
     def select(tile: Option[Tile]): GameField
     /** Gives the currently selected tile, if there is one. @return Some(Tile) if a tile is selected or None, if not */
     def selected: Option[Tile]
+    /** Describes the game state: playing or idle @return true if the game is active */
+    def playing: Boolean
 
     /** Starts the game. Prohibiting free placement and illegal moves. @return The same field but now in an active playing state */
     def start: GameField
     /** Stops the game. Returns to free placement and free moves. @return The same field but not in a playing state */
     def stop:  GameField
+    /** Creates the pieces part of the fen string. @return Pieces fen */
+    def toFenPart: String
+    /** Returns the complete FEN for the game. @return Complete FEN */
+    def toFen: String
 }
 
 object GameField {

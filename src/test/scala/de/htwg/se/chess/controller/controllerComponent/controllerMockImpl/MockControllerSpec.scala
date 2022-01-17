@@ -27,10 +27,12 @@ import model.Piece._
 import util.Matrix
 
 class MockControllerSpec extends AnyWordSpec {
+  // This is a simple mock implementation of a Controller to use, when an instance is
+  // needed but you do not intend any functionality for it.
   "A MockController" should {
     val ctrl = new MockController()
     "be created calling the explicit Constructor" in {
-      ctrl.size should be(8)
+      ctrl.size should be(0)
     }
     val t1 = Tile("A1")
     val t2 = Tile("A2")
@@ -46,6 +48,8 @@ class MockControllerSpec extends AnyWordSpec {
         ctrl.selected shouldBe None
         ctrl.isSelected(t1) shouldBe false
         ctrl.hasSelected shouldBe false
+        ctrl.isPlaying shouldBe false
+        ctrl.getLegalMoves(Tile("A1")) shouldBe Nil
     }
     "not change on undo/redo and start/stop and exit" in {
       ctrl.executeAndNotify(ctrl.clear, ())
@@ -57,6 +61,7 @@ class MockControllerSpec extends AnyWordSpec {
     }
     "have an empty string representation" in {
       ctrl.fieldToString shouldBe ""
+      ctrl.fieldToFen shouldBe ""
     }
   }
 }

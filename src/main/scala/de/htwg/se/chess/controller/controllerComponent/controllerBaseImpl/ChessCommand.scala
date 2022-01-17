@@ -44,13 +44,13 @@ case class MoveCommand(args: Tuple2[Tile, Tile], field: GameField) extends Chess
 }
 
 case class CheckedMoveCommand(command: MoveCommand) extends ChessCommand(command.field) {
-    val state: String = ""
-    val errorCmd: ErrorCommand = ErrorCommand(state, command.field)
-    val cmd: ChessCommand = if (state.equals("")) then command else errorCmd
+    val legalMoves = command.field.getLegalMoves(command.args(0))
+    val errorCmd: ErrorCommand = ErrorCommand("Illegal Move", command.field)
+    val cmd: ChessCommand = if (legalMoves.contains(command.args(1))) then command else errorCmd
     override def execute: GameField = cmd.execute
     override def undo: GameField    = cmd.undo
     override def redo: GameField    = cmd.redo
-    override def event = MoveEvent(command.args(0), command.args(1))
+    override def event = cmd.event
 }
 
 case class ClearCommand(field: GameField) extends ChessCommand(field) {
@@ -61,10 +61,11 @@ case class ClearCommand(field: GameField) extends ChessCommand(field) {
 }
 
 case class FenCommand(args: String, field: GameField) extends ChessCommand(field) {
-    override def execute: GameField = field.loadFromFen(args)
+    val errorCmd: ErrorCommand = ErrorCommand("Cannot load a FEN while a match is active", field)
+    override def execute: GameField = if (field.playing) then errorCmd.execute else field.loadFromFen(args)
     override def undo: GameField    = prevField
     override def redo: GameField    = execute
-    override def event = new CommandExecuted
+    override def event = if (field.playing) then new ErrorEvent(errorCmd.errorMessage) else new CommandExecuted
 }
 
 case class SelectCommand(args: Option[Tile], field: GameField) extends ChessCommand(field) {
