@@ -51,6 +51,12 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                     case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
                 }
         iconImage = img
+        val winImagePath = "src/main/resources/winlogo.png"
+        val winimg: BufferedImage = Try(ImageIO.read(new File(winImagePath))) match {
+                    case s: Success[BufferedImage] => s.value
+                    case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); new BufferedImage(20,20, BufferedImage.TYPE_INT_ARGB)}
+                }
+        val winicon = winimg.getScaledInstance(100,100, SCALE_SMOOTH)
         controller.start
         title = "HTWG CHESS 2021/2022"
         resizable = false
@@ -104,11 +110,9 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                 },
                 new Menu("Game") {
                     contents ++= Seq(
-                        MenuItem(Action("New")( {
-                            controller.stop
-                            controller.executeAndNotify(controller.putWithFen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-                            controller.start
-                            })
+                        MenuItem(Action("New")(
+                                controller.executeAndNotify(controller.putWithFen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+                            )
                         ),
                         new MenuItem("Load Fen") {
                             action = Action("Load Fen") ( {
@@ -160,15 +164,34 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                 if e.tile.isDefined
                     then {
                         chessBoard.contents.update((e.tile.get.row * 9) + e.tile.get.col + 1, tiles(e.tile.get.row)(e.tile.get.col).highlight)
-                        controller.getLegalMoves(e.tile.get).foreach( tile =>
-                            chessBoard.contents.update((tile.row * 9) + tile.col + 1, tiles(tile.row)(tile.col).highlight)
-                        )
+                        if (controller.isPlaying)
+                            then controller.getLegalMoves(e.tile.get).foreach( tile =>
+                                    chessBoard.contents.update((tile.row * 9) + tile.col + 1, tiles(tile.row)(tile.col).highlight)
+                                )
                         contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
                     }
                     else redraw
             case e: ErrorEvent => Dialog.showMessage(this, e.msg)
             case e: ExitEvent => close
-            case e: GameEnded => if e.color.isDefined then Dialog.showMessage(this, e.color.get.toString + " has won") else Dialog.showMessage(this, "Draw")
+            case e: GameEnded => {
+                val msg = (if e.color.isDefined 
+                            then e.color.get.toString + " has won"
+                            else "Game ended in a Draw")
+                val res = Dialog.showOptions(
+                    this,
+                    msg,
+                    "Game Ended",
+                    Dialog.Options.YesNo,
+                    Dialog.Message.Plain,
+                    ImageIcon(winicon),
+                    List("New Game", "Stay on board"),
+                    0
+                )
+                res match {
+                    case Dialog.Result.Yes => controller.executeAndNotify(controller.putWithFen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+                    case Dialog.Result.No  => controller.stop
+                }
+            }
         }
 
         redraw
