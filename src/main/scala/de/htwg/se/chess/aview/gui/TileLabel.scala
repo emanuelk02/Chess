@@ -112,7 +112,8 @@ class TileLabel(tile: Tile, controller: ControllerInterface, var source: String)
 object ImageLoader {
     val pieceStyles: Map[String, Map[Piece, Image]] = Map(
         "cburnett" -> getPieces("cburnett"),
-        "cliparts" -> getPieces("cliparts")
+        "cliparts" -> getPieces("cliparts"),
+        "pixel" -> getPieces("pixel")
     )
 
     def getPieces(style: String): Map[Piece, Image] = {

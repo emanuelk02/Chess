@@ -131,7 +131,8 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                         new Menu("Pieces") {
                             contents ++= new ButtonGroup(
                                 new RadioButton { action = Action("cburnett")( {pieceStyle = "cburnett"; redraw} ) },
-                                new RadioButton { action = Action("cliparts")( {pieceStyle = "cliparts"; redraw} ) }
+                                new RadioButton { action = Action("cliparts")( {pieceStyle = "cliparts"; redraw} ) },
+                                new RadioButton { action = Action("pixel")( {pieceStyle = "pixel"; redraw} ) }
                             ).buttons
                         }
                     )

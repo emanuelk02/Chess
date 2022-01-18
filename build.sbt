@@ -4,7 +4,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "Chess",
-    version := "0.11.1",
+    version := "1.0.1",
 
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq("com.novocode" % "junit-interface" % "0.11" % "test",
