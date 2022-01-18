@@ -18,10 +18,9 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import model.Piece._
+import model.PieceColor._
 import model.Tile
 import util.Matrix
-import model.PieceColor._
-
 
 
 class ChessFieldSpec extends AnyWordSpec {
@@ -237,10 +236,17 @@ class ChessFieldSpec extends AnyWordSpec {
           )
         )
       
-        val cf2 = ChessField().loadFromFen("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1").move(Tile("E1"),Tile("G1"))
+        // Move rook with king, when castling
+        var cf2 = ChessField().loadFromFen("k7/8/8/8/8/8/8/R3K2R w KQkq - 0 1").move(Tile("E1"),Tile("G1"))
+        cf2 should be (ChessField().loadFromFen("k7/8/8/8/8/8/8/R4RK1 b kq - 1 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
 
-         cf2 should be (ChessField().loadFromFen("8/8/8/8/8/8/PPPPPPPP/R4RK1 b kq - 1 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        // Remove pawn on En Passant
+        cf2 = ChessField().loadFromFen("k7/8/8/pP/8/8/8/8 w KQkq a6 0 1").move(Tile("B5"),Tile("A6"))
+        cf2 should be (ChessField().loadFromFen("k7/8/P7/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
 
+        // Replace Pawn with Queen on promotion
+        cf2 = ChessField().loadFromFen("k7/3P/8/8/8/8/8/8 w KQkq a6 0 1").move(Tile("D7"),Tile("D8"))
+        cf2 should be (ChessField().loadFromFen("k2Q/8/8/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation" in {
         /**

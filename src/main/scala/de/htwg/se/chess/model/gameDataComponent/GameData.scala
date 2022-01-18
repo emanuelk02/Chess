@@ -51,7 +51,7 @@ enum GameState:
  * @param field     Holds all the pieces on the board; None represents an empty tile
  * */
 trait GameField (field: Matrix[Option[Piece]]) {
-    /** Size of the board in rows **/
+    /** Size of the board in rows */
     val size = field.size
 
     /**
