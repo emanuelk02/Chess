@@ -25,6 +25,7 @@ import model.Piece
 import model.Piece._
 import model.PieceColor._
 import util.Matrix
+import model.gameDataComponent.GameState._
 
 
 case class TestChessCommand(field: GameField) extends ChessCommand(field) {
@@ -108,6 +109,20 @@ class ChessCommandSpec extends AnyWordSpec {
             .replace(Tile("A2"), "b")
             .replace(Tile("B1"), "b")
             .replace(Tile("B2"), "R")
+
+    val nField = 
+        new ChessField()
+            .replace(Tile("A6"), "R")
+            .replace(Tile("B7"), "R")
+            .replace(Tile("D8"), "k")
+            .replace(Tile("F1"), "K")
+
+    val dField =
+        new ChessField()
+            .replace(Tile("H8"), "k")
+            .replace(Tile("G1"), "K")   
+            .replace(Tile("G5"), "Q")
+
     val move = MoveCommand((Tile("A1"), Tile("A2")), mField)
     "A MoveCommand" should {
         // The MoveCommand uses the underlying move() method of the provided GameField
@@ -156,6 +171,19 @@ class ChessCommandSpec extends AnyWordSpec {
             cmc2.undo should be(cmc2.errorCmd.undo)
             cmc2.redo should be(cmc2.errorCmd.redo)
         }
+
+        "set the final game state" in {
+            val cmc3 = CheckedMoveCommand(MoveCommand((Tile("A6"), Tile("A8")),nField))
+            
+            cmc3.execute.gameState should be(CHECKMATE)
+            cmc3.undo.gameState should be(RUNNING)
+
+            val cmc4 = CheckedMoveCommand(MoveCommand((Tile("G5"), Tile("G6")), dField))
+
+            //cmc4.execute.gameState should be(DRAW)
+            cmc4.undo.gameState should be(RUNNING)
+        }
+
     }
     val clear = ClearCommand(field)
     "A ClearCommand" should {

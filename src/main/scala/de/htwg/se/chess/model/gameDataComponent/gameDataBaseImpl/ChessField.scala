@@ -134,7 +134,7 @@ case class ChessField @Inject() (
     )
   )
 
-  def doCastle(tile: Tile, matr: Matrix[Option[Piece]]): Matrix[Option[Piece]] = tile.file match {
+  private def doCastle(tile: Tile, matr: Matrix[Option[Piece]]): Matrix[Option[Piece]] = tile.file match {
     case 3 => matr.replace(tile.row, 3, cell(tile - (2,0))).replace(tile.row, 0, None)
     case 7 => matr.replace(tile.row, 5, cell(tile + (1,0))).replace(tile.row, size - 1, None)
   }
@@ -358,13 +358,6 @@ case class ChessField @Inject() (
     res.mkString
   }
 
-  def checkMove(tile1: Tile, tile2: Tile): Try[Unit] = {
-    if (!state.playing)
-      then return Success(())
-      else if (legalMoves.get(tile1).get.contains(tile2))
-        then Success(())
-        else Failure(IllegalArgumentException("Illegal Move"))
-  }
 
   override def toString: String = board(3, 1, field) + state.toString + "\n"
 

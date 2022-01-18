@@ -20,6 +20,8 @@ import org.scalatest.matchers.should.Matchers._
 import model.Piece._
 import model.Tile
 import util.Matrix
+import model.PieceColor._
+
 
 
 class ChessFieldSpec extends AnyWordSpec {
@@ -234,6 +236,11 @@ class ChessFieldSpec extends AnyWordSpec {
             cf.move(Tile("A1", cf.size), Tile("A2", cf.size)).gameState
           )
         )
+      
+        val cf2 = ChessField().loadFromFen("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1").move(Tile("E1"),Tile("G1"))
+
+         cf2 should be (ChessField().loadFromFen("8/8/8/8/8/8/PPPPPPPP/R4RK1 b kq - 1 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation" in {
         /**
