@@ -49,4 +49,12 @@
 
 ---
 
+# General Information
+
+ ### For information on the **rules of Chess**, see: [chessprogramming.org](https://www.chessprogramming.org/Rules_of_Chess)
+ 
+ Our Game only implements **_pseudo legality_**, meaning it follows all the **general rules** of Chess with one _exception_:
+ 
+  - Moves, which leave your **King** in **_check_** are allowed
+  - The **Game** is **_won_** by _capturing_ the **enemy king**
 
