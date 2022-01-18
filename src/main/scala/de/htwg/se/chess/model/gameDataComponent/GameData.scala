@@ -30,6 +30,7 @@ enum GameState:
  * GameField encapsulates some sort of Matrix representing a checker board
  * which contains all pieces of the game, along with any
  * functionality to store the state of the game:
+
      - wether the game is active 
      - wether and if which tile is selected by a controller using the field
      - which color's turn it is 
@@ -38,7 +39,7 @@ enum GameState:
  *
  * It utilizes the Tile class to grant unified access for any higher hierarchy classes.
  * A typical use of the interface would look like this:
-     val field = <Any Implementation of the Interface>
+     val field = [Any Implementation of the Interface]
 
      // puts a black king into tile A1
      field.replace(Tile("A1"), "B_KING"))
@@ -107,6 +108,12 @@ trait GameField (field: Matrix[Option[Piece]]) {
      * @return          List of tiles which are legal to move to
      */
     def getLegalMoves(tile: Tile): List[Tile]
+
+    /**
+     * Gives the tile on which the king of the current color is on.
+     * @return tile of King whith current color or None if there is no King
+     * */
+    def getKingSquare: Option[Tile]
     
     /**
      * Loads a board position and game state from the given string.
@@ -129,6 +136,8 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def playing: Boolean
     /** Returns the color to make the next move @return color to move */
     def color: PieceColor
+    /** Returns wether the current color is in check @return true if current is checked */
+    def inCheck: Boolean
 
     def gameState: GameState
 

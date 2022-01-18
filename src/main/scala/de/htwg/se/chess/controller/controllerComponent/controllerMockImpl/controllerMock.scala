@@ -49,4 +49,6 @@ class MockController extends ControllerInterface {
   def hasSelected: Boolean = false
   def getLegalMoves(tile: Tile): List[Tile] = Nil
   def isPlaying: Boolean = false
+  def getKingSquare: Option[Tile] = None
+  def inCheck: Boolean = false
 }

@@ -455,10 +455,20 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.redo
         ctrl.field should be(ctrl.field.replace(Tile("A1", ctrl.size), "k"))
       }
+      "return information on the field" in {
+        ctrl.field = ctrl.field.loadFromFen("k1/1K b KQkq - 0 1")
+        ctrl.getKingSquare shouldBe Some(Tile("A2", ctrl.size))
+
+        ctrl.field = ctrl.field.loadFromFen("k1/1K w KQkq - 0 1")
+        ctrl.getKingSquare shouldBe Some(Tile("B1", ctrl.size))
+
+        ctrl.isPlaying shouldBe true
+        ctrl.inCheck shouldBe false
+      }
       "have a string representation like specified in ChessBoard" in {
         // This is mainly used by the TUI
 
-        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        ctrl.field = ctrl.field.stop.fill(Some(W_BISHOP))
         import model.gameDataComponent.gameDataBaseImpl.ChessBoard.board
         ctrl.fieldToString should be(cf.toString)
         ctrl.fieldToString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
