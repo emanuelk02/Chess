@@ -137,6 +137,10 @@ trait ControllerInterface extends Publisher{
     def hasSelected: Boolean
     /** Returns all fully legal moves for given tile */
     def getLegalMoves(tile: Tile): List[Tile]
+    /** Returns tile of king with current color to move @return Tile of the king or None if there is none */
+    def getKingSquare:  Option[Tile]
+    /** Returns wether the current color is in check @return true if current is checked */
+    def inCheck: Boolean
     /** Returns true if the game is active @return game activity state */
     def isPlaying: Boolean
 }

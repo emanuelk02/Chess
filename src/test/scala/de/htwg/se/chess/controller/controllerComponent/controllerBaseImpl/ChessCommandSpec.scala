@@ -19,6 +19,7 @@ import org.scalatest.matchers.should.Matchers._
 
 import controllerBaseImpl.ChessCommand
 import model.gameDataComponent.GameField
+import model.gameDataComponent.GameState._
 import model.gameDataComponent.gameDataBaseImpl._
 import model.Tile
 import model.Piece
@@ -108,6 +109,7 @@ class ChessCommandSpec extends AnyWordSpec {
             .replace(Tile("A2"), "b")
             .replace(Tile("B1"), "b")
             .replace(Tile("B2"), "R")
+
     val move = MoveCommand((Tile("A1"), Tile("A2")), mField)
     "A MoveCommand" should {
         // The MoveCommand uses the underlying move() method of the provided GameField
@@ -145,6 +147,8 @@ class ChessCommandSpec extends AnyWordSpec {
             cmc.errorCmd should be(ErrorCommand("Illegal Move", move.field))
 
             cmc.execute should be(move.execute)
+            cmc.event should be(cmc.command.event)
+            cmc.execute.gameState should be(RUNNING)
             cmc.undo should be(move.undo)
             cmc.redo should be(move.redo)
 
@@ -153,9 +157,34 @@ class ChessCommandSpec extends AnyWordSpec {
             cmc2.errorCmd should be(ErrorCommand("Illegal Move", move.field))
 
             cmc2.execute should be(cmc2.errorCmd.execute)
+            cmc2.event should be(cmc2.errorCmd.event)
+            cmc.execute.gameState should be(RUNNING)
             cmc2.undo should be(cmc2.errorCmd.undo)
             cmc2.redo should be(cmc2.errorCmd.redo)
         }
+
+        "set the final game state" in {
+            val nField = 
+                new ChessField()
+                    .replace(Tile("A8"), "R")
+                    .replace(Tile("B7"), "R")
+                    .replace(Tile("D8"), "k")
+                
+            val dField = ChessField().loadFromFen("7k/8/R7/6Q1/8/8/8/8 w  - 0 1")
+
+            val cmc3 = CheckedMoveCommand(MoveCommand((Tile("A8"), Tile("D8")), nField.start)) // captures the King
+            
+            cmc3.event should be(GameEnded(Some(White)))
+            cmc3.execute.gameState should be(CHECKMATE)
+            cmc3.undo.gameState should be(RUNNING)
+
+            val cmc4 = CheckedMoveCommand(MoveCommand((Tile("A6"), Tile("A7")), dField.start)) // no more moves for Black
+
+            cmc4.event should be(GameEnded(None))
+            cmc4.execute.gameState should be(DRAW)
+            cmc4.undo.gameState should be(RUNNING)
+        }
+
     }
     val clear = ClearCommand(field)
     "A ClearCommand" should {

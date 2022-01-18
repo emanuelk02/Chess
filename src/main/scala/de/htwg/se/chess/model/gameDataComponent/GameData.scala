@@ -17,6 +17,8 @@ import gameDataBaseImpl.ChessField
 import model.Tile
 import util.Matrix
 
+enum GameState:
+    case CHECKMATE, DRAW, RUNNING
 
 /**
  * A data structure storing all information necessary to
@@ -28,6 +30,7 @@ import util.Matrix
  * GameField encapsulates some sort of Matrix representing a checker board
  * which contains all pieces of the game, along with any
  * functionality to store the state of the game:
+
      - wether the game is active 
      - wether and if which tile is selected by a controller using the field
      - which color's turn it is 
@@ -36,7 +39,7 @@ import util.Matrix
  *
  * It utilizes the Tile class to grant unified access for any higher hierarchy classes.
  * A typical use of the interface would look like this:
-     val field = <Any Implementation of the Interface>
+     val field = [Any Implementation of the Interface]
 
      // puts a black king into tile A1
      field.replace(Tile("A1"), "B_KING"))
@@ -49,7 +52,7 @@ import util.Matrix
  * @param field     Holds all the pieces on the board; None represents an empty tile
  * */
 trait GameField (field: Matrix[Option[Piece]]) {
-    /** Size of the board in rows **/
+    /** Size of the board in rows */
     val size = field.size
 
     /**
@@ -105,6 +108,12 @@ trait GameField (field: Matrix[Option[Piece]]) {
      * @return          List of tiles which are legal to move to
      */
     def getLegalMoves(tile: Tile): List[Tile]
+
+    /**
+     * Gives the tile on which the king of the current color is on.
+     * @return tile of King whith current color or None if there is no King
+     * */
+    def getKingSquare: Option[Tile]
     
     /**
      * Loads a board position and game state from the given string.
@@ -125,6 +134,12 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def selected: Option[Tile]
     /** Describes the game state: playing or idle @return true if the game is active */
     def playing: Boolean
+    /** Returns the color to make the next move @return color to move */
+    def color: PieceColor
+    /** Returns wether the current color is in check @return true if current is checked */
+    def inCheck: Boolean
+
+    def gameState: GameState
 
     /** Starts the game. Prohibiting free placement and illegal moves. @return The same field but now in an active playing state */
     def start: GameField

@@ -29,10 +29,11 @@ class TUI(controller: ControllerInterface) extends Reactor {
 
   reactions += {
     case e: CommandExecuted => update; print("Command Executed\n")
-    case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n")
+    case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n"); print("king:" + controller.getKingSquare + " check: " + controller.inCheck + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
     case e: Select => if (e.tile.isDefined) then print("Selected " + e.tile.get + "\nLegal Moves: " + controller.getLegalMoves(e.tile.get) + "\n")
     case e: ExitEvent => print("Goodbye\n"); exitFlag = true
+    case e: GameEnded => if e.color.isDefined then print(e.color.get.toString + " won!\n") else print("Draw!\n")
   }
 
   print(
@@ -64,15 +65,15 @@ class TUI(controller: ControllerInterface) extends Reactor {
             printHelp()
         }
         case "i" | "insert" | "put" =>  //----------------------- Insert / Put
-            controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
+          controller.executeAndNotify(controller.put, (Tile(in(1), controller.size), in(2)))
         case "m" | "move" =>  //--------------------------------- Move
-            controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
+          controller.executeAndNotify(controller.move, (Tile(in(1), controller.size), Tile(in(2), controller.size)))
         case "cl" | "clear" =>  //------------------------------- Fill
           controller.executeAndNotify(controller.clear, ())
         case "fen" | "loadfen" =>  //---------------------------- FenString
-            controller.executeAndNotify(controller.putWithFen, in.drop(1).mkString(" "))
+          controller.executeAndNotify(controller.putWithFen, in.drop(1).mkString(" "))
         case "select" =>  //------------------------------------- Select
-            controller.executeAndNotify(controller.select, Try(Tile(in(1))) match { case s: Success[Tile] => Some(s.get) case f: Failure[Tile] => None })
+          controller.executeAndNotify(controller.select, Try(Tile(in(1))) match { case s: Success[Tile] => Some(s.get) case f: Failure[Tile] => None })
         case "start" => controller.start //---------------------- Start
         case "stop" => controller.stop //------------------------ Stop
         case "z" | "undo" => //---------------------------------- Undo

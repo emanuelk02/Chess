@@ -34,9 +34,9 @@ case class ChessState
 
     def this() = this(false)
     
-    def evaluateFen(fen: String): ChessState = if (playing) throw new IllegalStateException("Cannot set the boards contents while a game is active") else ChessState(fen, size)
+    def evaluateFen(fen: String): ChessState = ChessState(fen, size)
 
-    val  evaluateMove = if (playing) then applyMovePlaying else applyMoveIdle
+    val evaluateMove = if (playing) then applyMovePlaying else applyMoveIdle
 
     val checkCastleChain = ChainHandler[Tuple4[Tile, Piece, PieceColor, Castles], Castles](List[Tuple4[Tile, Piece, PieceColor, Castles] => Option[Castles]]
         (
