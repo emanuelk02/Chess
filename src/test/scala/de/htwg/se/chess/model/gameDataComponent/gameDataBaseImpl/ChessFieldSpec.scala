@@ -20,6 +20,7 @@ import org.scalatest.matchers.should.Matchers._
 import model.Piece._
 import model.PieceColor._
 import model.Tile
+import model.gameDataComponent.GameState._
 import util.Matrix
 
 
@@ -723,6 +724,15 @@ class ChessFieldSpec extends AnyWordSpec {
 
         cf.loadFromFen("1Q/pp w Kk - 0 1").toFenPart should be ("1Q/pp")
         cf.loadFromFen("1Q/pp w Kk a3 0 12").toFenPart should be ("1Q/pp")
+      }
+      "return information on its states" in {
+        val cf = ChessField().loadFromFen("k7/8/8/8/8/8/8/K7 w KQkq - 0 1")
+        cf.color shouldBe White
+        cf.playing shouldBe true
+        cf.getKingSquare shouldBe Some(Tile("A1"))
+        cf.selected shouldBe None
+        cf.gameState shouldBe RUNNING
+        cf.inCheck shouldBe false
       }
       "have a string representation like specified in ChessBoard" in {
         // The String representation of the board is explained in more detail

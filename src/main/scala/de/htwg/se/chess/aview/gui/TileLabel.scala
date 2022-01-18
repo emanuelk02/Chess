@@ -57,6 +57,7 @@ class TileLabel(tile: Tile, controller: ControllerInterface, var source: String)
         if ((tile.rank % 2 == 1 && tile.file % 2 == 1) || (tile.rank % 2 == 0 && tile.file % 2 == 0)) 
             then new Color(70, 160, 50)
             else new Color(100, 190, 70)
+    val checkColor = new Color(230, 75, 40)
 
     preferredSize = dim
     background = if controller.isSelected(tile) then selectedColor else tileColor
@@ -87,6 +88,14 @@ class TileLabel(tile: Tile, controller: ControllerInterface, var source: String)
                 then selectedColor 
                 else highlightColor
         )
+        repaint()
+        this
+    }
+
+    def highlightCheck: TileLabel = {
+        contents.clear
+        contents += new Label("", newPicture, Alignment.Center)
+        background = checkColor
         repaint()
         this
     }

@@ -50,6 +50,7 @@ class MockControllerSpec extends AnyWordSpec {
         ctrl.hasSelected shouldBe false
         ctrl.isPlaying shouldBe false
         ctrl.getLegalMoves(Tile("A1")) shouldBe Nil
+        ctrl.getKingSquare shouldBe None
     }
     "not change on undo/redo and start/stop and exit" in {
       ctrl.executeAndNotify(ctrl.clear, ())

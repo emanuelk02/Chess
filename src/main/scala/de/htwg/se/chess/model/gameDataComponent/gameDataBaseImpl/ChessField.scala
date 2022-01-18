@@ -350,6 +350,18 @@ case class ChessField @Inject() (
       case _ => List.fill(size)(None)
     }
   }
+
+  override def getKingSquare: Option[Tile] = {
+    for {
+      file <- 1 to size
+      rank <- 1 to size
+    } {
+      val piece = cell(Tile(file, rank, size))
+      if piece.isDefined && piece.get.getType == King && piece.get.getColor == color
+        then return Some(Tile(file, rank, size))
+    }
+    None
+  }
   
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
   override def stop: ChessField = ChessField(field, state.stop, false, Nil)

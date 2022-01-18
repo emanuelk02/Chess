@@ -158,6 +158,9 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
             case e: MoveEvent => {
                 chessBoard.contents.update((e.tile1.row * 9) + e.tile1.col + 1, tiles(e.tile1.row)(e.tile1.col).redraw)
                 chessBoard.contents.update((e.tile2.row * 9) + e.tile2.col + 1, tiles(e.tile2.row)(e.tile2.col).redraw)
+                val kingTile = controller.getKingSquare
+                if controller.inCheck && kingTile.isDefined
+                    then chessBoard.contents.update((kingTile.get.row * 9) + kingTile.get.col + 1, tiles(kingTile.get.row)(kingTile.get.col).highlightCheck)
                 contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
             }
             case e: Select =>
@@ -207,6 +210,9 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                               tiles(row)(col).redraw
                 }
             }
+            val kingTile = controller.getKingSquare
+                if controller.inCheck && kingTile.isDefined
+                    then chessBoard.contents.update((kingTile.get.row * 9) + kingTile.get.col + 1, tiles(kingTile.get.row)(kingTile.get.col).highlightCheck)
             contents = new BorderPanel { add(chessBoard, BorderPanel.Position.Center) }
         }
     }

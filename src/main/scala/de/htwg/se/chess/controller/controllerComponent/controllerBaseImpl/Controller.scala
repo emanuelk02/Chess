@@ -24,6 +24,7 @@ import net.codingwell.scalaguice.InjectorExtensions._
 import model.gameDataComponent.GameField
 import model.Tile
 import util.Command
+import org.scalactic.Bool
 
 
 case class Controller @Inject() (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface {
@@ -71,4 +72,6 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
   def hasSelected: Boolean = field.selected.isDefined
   def getLegalMoves(tile: Tile): List[Tile] = field.getLegalMoves(tile)
   def isPlaying: Boolean = field.playing
+  def getKingSquare: Option[Tile] = field.getKingSquare
+  def inCheck: Boolean = field.inCheck
 }

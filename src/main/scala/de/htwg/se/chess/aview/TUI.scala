@@ -29,10 +29,11 @@ class TUI(controller: ControllerInterface) extends Reactor {
 
   reactions += {
     case e: CommandExecuted => update; print("Command Executed\n")
-    case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n")
+    case e: MoveEvent => update; print("Move " + e.tile1 + " to " + e.tile2 + "\n"); print("king:" + controller.getKingSquare + " check: " + controller.inCheck + "\n")
     case e: ErrorEvent => updateOnError(e.msg)
     case e: Select => if (e.tile.isDefined) then print("Selected " + e.tile.get + "\nLegal Moves: " + controller.getLegalMoves(e.tile.get) + "\n")
     case e: ExitEvent => print("Goodbye\n"); exitFlag = true
+    case e: GameEnded => if e.color.isDefined then print(e.color.get.toString + " won!\n") else print("Draw!\n")
   }
 
   print(
