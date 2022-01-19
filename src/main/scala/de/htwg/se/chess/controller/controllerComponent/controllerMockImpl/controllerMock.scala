@@ -51,4 +51,6 @@ class MockController extends ControllerInterface {
   def isPlaying: Boolean = false
   def getKingSquare: Option[Tile] = None
   def inCheck: Boolean = false
+  def save = {}
+  def load = {}
 }

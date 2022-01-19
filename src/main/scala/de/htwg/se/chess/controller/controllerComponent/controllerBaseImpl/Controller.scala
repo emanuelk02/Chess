@@ -22,14 +22,16 @@ import com.google.inject.{Guice, Inject}
 import net.codingwell.scalaguice.InjectorExtensions._
 
 import model.gameDataComponent.GameField
+import model.fileIOComponent.FileIOInterface
 import model.Tile
 import util.Command
-import org.scalactic.Bool
 
 
 case class Controller @Inject() (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface {
   override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  val fileIO = FileIOInterface() // something with Guices injector not working here
+  
   def this() = {
     this(Guice.createInjector(new ChessModule).getInstance(classOf[GameField]), new ChessCommandInvoker)
     this.field = field.loadFromFen(startingFen)
@@ -46,6 +48,9 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
   def clear(args: Unit): ChessCommand = new ClearCommand(field)
   def putWithFen(args: String): ChessCommand = new FenCommand(args, field)
   def select(args: Option[Tile]): ChessCommand = new SelectCommand(args, field)
+
+  def save: Unit = fileIO.save(field)
+  def load: Unit = field = fileIO.load
 
   def start: Unit = field = field.start
   def stop: Unit = field = field.stop

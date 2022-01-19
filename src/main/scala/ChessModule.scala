@@ -19,6 +19,8 @@ import controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.se.chess.controller.controllerComponent.controllerBaseImpl.ChessCommandInvoker
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl.ChessField
+import model.fileIOComponent.FileIOInterface
+import model.fileIOComponent._
 
 
 class ChessModule extends AbstractModule {
@@ -27,10 +29,6 @@ class ChessModule extends AbstractModule {
     bind(classOf[ControllerInterface]).toInstance(Controller(
       new ChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), 
       new ChessCommandInvoker))
-    }
+    bind(classOf[FileIOInterface]).to(classOf[fileIoFenXmlImpl.FileIO])
+  }
 }
-
-/*object DefaultModule {
-  given GameField = ChessField()
-  given ControllerInterface = new Controller()
-}*/

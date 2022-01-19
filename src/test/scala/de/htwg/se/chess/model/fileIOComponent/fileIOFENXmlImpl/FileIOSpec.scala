@@ -25,8 +25,9 @@ class FileIOSpec extends AnyWordSpec {
     "A GameField" when {
         "stored with FEN in Xml" should {
             "write its FEN to File as Xml" in {
+                val fileIO = fileIoFenXmlImpl.FileIO()
                 val cf = GameField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
-                val xml = fileIoFenXmlImpl.FileIO.fieldToXml(cf)
+                val xml = fileIO.fieldToXml(cf)
                 (xml \\ "fen").text shouldBe "5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23"
             }
             "load a field through the FEN" in {

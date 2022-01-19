@@ -480,6 +480,17 @@ class ControllerSpec extends AnyWordSpec {
         ctrl.field = ctrl.field.loadFromFen("kQ/rB w Kk a3 12 45")
         ctrl.fieldToFen shouldBe "kQ/rB w Kk a3 12 45"
       }
+      "allow to store its game in a file" in {
+        val ctrl = new Controller()
+        ctrl.field = ctrl.field.loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+        ctrl.save
+
+        ctrl.field = ctrl.field.loadFromFen("8/8/8/8/8/8/8/8 w KQkq - 0 1")
+        
+        ctrl.load
+
+        ctrl.field shouldBe ChessField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+      }
     }
   }
 }

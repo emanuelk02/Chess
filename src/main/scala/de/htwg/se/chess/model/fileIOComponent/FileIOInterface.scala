@@ -21,3 +21,9 @@ trait FileIOInterface {
     def load: GameField
     def save(field: GameField): Unit
 }
+
+object FileIOInterface {
+    def apply(): FileIOInterface = {
+        new fileIoFenXmlImpl.FileIO()
+    }
+}
