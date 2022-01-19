@@ -108,7 +108,7 @@ l.contains(Seq(Tile("D1"), Tile("C1")))
 
 var tile1 = Tile("E1")
 var tile2 = Tile("c1")
-val tempField = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQ a3 10 12")
+/*val tempField = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQ a3 10 12")
 tempField.attackedTiles
 tempField.legalMoves.toList
 
@@ -126,7 +126,7 @@ val temp2 = ChessField(
             tempField.state.evaluateMove((tile1, tile2), tempField.cell(tile1).get, tempField.cell(tile2)).copy(color = tempField.state.color),
             !tempField.attackedTiles.filter( tile => tempField.cell(tile).isDefined && tempField.cell(tile).get.getType == King).isEmpty,
             tempField.legalMoves.flatMap( entry => entry._2).toList.sorted
-          )
+          )*/
 
 tile1 = Tile("B5")
 tile2 = Tile("A6")
@@ -154,38 +154,42 @@ cf.cell(tile1).get.getType == Pawn && (tile2.rank == 0 || tile2.rank == cf.size)
 cf.move(tile1, tile2)
 
 
-val mField = 
-        new ChessField()
-            .replace(Tile("A1"), "R")
-            .replace(Tile("A2"), "b")
-            .replace(Tile("B1"), "b")
-            .replace(Tile("B2"), "R")
-mField.getLegalMoves(Tile("A2"))
 
 
 val nField = 
   new ChessField()
-      .replace(Tile("A8"), "R")
+      .replace(Tile("A7"), "R")
       .replace(Tile("B7"), "R")
-      .replace(Tile("D8"), "k")
+      .replace(Tile("D8"), "k").start
 
-val cmc3 = CheckedMoveCommand(MoveCommand((Tile("A8"), Tile("D8")), nField))
-cmc3.command.field.cell(Tile("D8")).getOrElse(W_QUEEN).getType
-cmc3.command.field.move(Tile("A8"), Tile("D8")).gameState
+val cmc3 = CheckedMoveCommand(MoveCommand((Tile("A7"), Tile("A8")), nField.start)) // captures the King
 
-val dField =
-  new ChessField().loadFromFen("7k/8/R7/6Q1/8/8/8/8 w  - 0 1")
+nField.move(Tile("A7"), Tile("A8")).gameState
 
-tile1 = Tile("A6")
-tile2 = Tile("A7")
+tile1 = Tile("A7")
+tile2 = Tile("A8")
 
-val cmc4 = CheckedMoveCommand(MoveCommand((tile1, tile2), dField.start))
-cmc4.execute.gameState
-
-ChessField(
-        dField.field
-          .replace(tile2.row, tile2.col, piece)
+val tempField = ChessField(
+        nField.field
+          .replace(tile2.row, tile2.col, nField.cell(tile1))
           .replace(tile1.row, tile1.col, None ),
-        dField.state.evaluateMove((tile1, tile2), dField.cell(tile1).get, dField.cell(tile2)).copy(color = PieceColor.invert(dField.color))
+        nField.state.evaluateMove((tile1, tile2), nField.cell(tile1).get, nField.cell(tile2)).copy(color = nField.state.color)
       )
-      .legalMoves.toList
+
+
+MoveCommand((Tile("A7"), Tile("A8")), nField.start).execute.gameState
+
+val newInCheck = !tempField.attackedTiles
+                  .filter(tile => nField.cell(tile).isDefined 
+                             && nField.cell(tile).get.getType == King
+                  ).isEmpty
+
+val ret2 = nField.copy(
+        tempField.field,
+        tempField.state.evaluateMove((tile1, tile2), nField.cell(tile1).get, nField.cell(tile2)),
+        newInCheck,
+        tempField.legalMoves.flatMap( entry => entry._2).toList.sorted
+      )
+      
+ret2.legalMoves.forall( entry => ret2.getLegalMoves(entry(0)).isEmpty )
+

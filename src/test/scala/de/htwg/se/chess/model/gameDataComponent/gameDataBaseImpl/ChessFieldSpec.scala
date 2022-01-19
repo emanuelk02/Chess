@@ -459,9 +459,6 @@ class ChessFieldSpec extends AnyWordSpec {
          *  - En Passant: https://www.chessprogramming.org/En_passant
          *  - Double Push: https://www.chessprogramming.org/Pawn_Push#DoublePush
          * 
-         * Note: Our implementation only supports pseudo-legal moves.
-         *       This means, moves which leave the King in check are allowed;
-         *       The game is won if you capture the enemy king.
          * */
 
         // King //
@@ -487,14 +484,14 @@ class ChessFieldSpec extends AnyWordSpec {
          * her path ends on enemy pieces or before allied pieces
          * but is otherwise free to move any number of tiles.
          * */
-        cf = cf.loadFromFen("8/6r1/8/8/8/3Q2K1/8/8 w - 0 1")
+        cf = cf.loadFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
                                                     Tile("D8") ::
                                                     Tile("D7") ::                                           Tile("H7") :: // rook
           Tile("A6") ::                             Tile("D6") ::                             Tile("G6") ::
                         Tile("B5") ::               Tile("D5") ::               Tile("F5") ::
                                       Tile("C4") :: Tile("D4") :: Tile("E4") ::
-          Tile("A3") :: Tile("B3") :: Tile("C3") ::  /* Queen */  Tile("E3") :: Tile("F3") ::  /* King */    // H7
+          Tile("A3") :: Tile("B3") :: Tile("C3") ::  /* Queen */  Tile("E3") ::  /* King */      // G3       // H3
                                       Tile("C2") :: Tile("D2") :: Tile("E2") ::          
                         Tile("B1") ::               Tile("D1") ::               Tile("F1") ::
           Nil
@@ -635,7 +632,7 @@ class ChessFieldSpec extends AnyWordSpec {
         // Pawn capture and blocked double pawn progression
         cf.getLegalMoves(Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("C6") :: Nil).sorted
 
-        cf = cf.loadFromFen("8/1p6/Q1Q5/1k6/8/8/8/8 b KQkq C3 0 1")
+        cf = cf.loadFromFen("8/1p6/Q1Q5/1n6/8/8/8/8 b KQkq C3 0 1")
         cf.getLegalMoves(Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("B6") :: Tile("C6") :: Nil).sorted
 
 
@@ -717,6 +714,24 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.checkFen("3/3") should be("Invalid string: \"3\" at index 0\nInvalid string: \"3\" at index 1\n")
         cf.checkFen("bbb/k2") should be("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
       }
+      "have a Game State" in {
+        var cf = new ChessField()
+                    .replace(Tile("A7"), "R")
+                    .replace(Tile("B7"), "R")
+                    .replace(Tile("D8"), "k")
+                    .start
+                    .move(Tile("A7"), Tile("A8"))
+        cf.gameState shouldBe CHECKMATE
+
+        cf = cf.loadFromFen("7k/8/R7/6Q1/8/8/8/8 w  - 0 1")
+               .move(Tile("A6"), Tile("A7"))
+        cf.gameState shouldBe DRAW
+
+        cf = cf.loadFromFen("7k/8/R7/8/8/8/8/8 w  - 50 1")
+        cf.move(Tile("A6"), Tile("A7")).gameState shouldBe DRAW
+
+        ChessField().gameState shouldBe RUNNING
+      }
       "have a FEN representation composed of the pieces parts that it stores and its states' part" in {
         // The ChessFields FEN uses the underlying toFenPart method of the ChessState
         // and appends that to its own toFenPart
@@ -729,12 +744,14 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.loadFromFen("1Q/pp w Kk - 0 1").toFenPart should be ("1Q/pp")
         cf.loadFromFen("1Q/pp w Kk a3 0 12").toFenPart should be ("1Q/pp")
       }
-      "return information on its states" in {
+      "return information on its states and allow to set them" in {
         val cf = ChessField().loadFromFen("k7/8/8/8/8/8/8/K7 w KQkq - 0 1")
         cf.color shouldBe White
+        cf.setColor(Black).color shouldBe Black
         cf.playing shouldBe true
         cf.getKingSquare shouldBe Some(Tile("A1"))
         cf.selected shouldBe None
+        cf.select(Some(Tile("A1"))).selected shouldBe Some(Tile("A1"))
         cf.gameState shouldBe RUNNING
         cf.inCheck shouldBe false
       }
