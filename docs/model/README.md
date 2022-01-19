@@ -16,7 +16,7 @@
 
 ---
 
-## [GameData](docs/model/gamedata)
+## [GameData](gamedata)
 
  - The **_GameData_** holds all the information needed to _run_ a **Game of Chess**
  - The main **Interface** to that data is defined by **_[GameField](../../src/main/scala/de/htwg/se/chess/gameDataComponent/GameData.scala)_**
