@@ -59,6 +59,8 @@ class MockControllerSpec extends AnyWordSpec {
       ctrl.undo
       ctrl.redo
       ctrl.exit
+      ctrl.save
+      ctrl.load
     }
     "have an empty string representation" in {
       ctrl.fieldToString shouldBe ""

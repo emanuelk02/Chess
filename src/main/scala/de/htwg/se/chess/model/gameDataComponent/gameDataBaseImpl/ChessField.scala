@@ -79,12 +79,12 @@ case class ChessField @Inject() (
     )
   )
 
-  private val gameStateChain = ChainHandler[Tuple2[Tile, ChessField], GameState] (List[Tuple2[Tile, ChessField] => Option[GameState]]
+  val gameStateChain = ChainHandler[ChessField, GameState] (List[ChessField => Option[GameState]]
     (
       ( in => if playing then None else Some(RUNNING) ),
       ( in => if state.halfMoves < 50 then None else Some(DRAW) ),
-      ( in => if cell(in(0)).getOrElse(W_QUEEN).getType == King then Some(CHECKMATE) else None ),
-      ( in => if in(1).legalMoves.forall( entry => entry(1).isEmpty ) then Some(DRAW) else Some(RUNNING) )
+      ( in => if in.legalMoves.forall( entry => in.getLegalMoves(entry(0)).isEmpty ) then None else Some(RUNNING) ),
+      ( in => if in.inCheck then Some(CHECKMATE) else Some(DRAW) )
     )
   )
 
@@ -112,16 +112,31 @@ case class ChessField @Inject() (
         tempField.legalMoves.flatMap( entry => entry._2).toList.sorted
       )
 
-    val newGameState = 
-      gameStateChain.handleRequest(
-        tile2, 
-        tempField.copy(state = tempField.state.copy(color = PieceColor.invert(color)))
-      ).get
+    val newGameState = gameStateChain.handleRequest(ret).get
 
     ret.copy(gameState = newGameState)
   }
 
-  override def getLegalMoves(tile: Tile): List[Tile] = legalMoves.get(tile).get // defined later
+  override def getLegalMoves(tile: Tile): List[Tile] =
+    legalMoves.get(tile)  // legalMoves defined later
+              .get
+              .filter( 
+                tile2 => 
+                  if getKingSquare.isDefined
+                    then !ChessField(
+                            field
+                              .replace(tile2.row, tile2.col, cell(tile))
+                              .replace(tile.row, tile.col, None ),
+                            state.evaluateMove((tile, tile2), cell(tile).get, cell(tile2))
+                          )
+                          .setColor(color)
+                          .isAttacked(
+                            if (cell(tile).get.getType == King) 
+                              then tile2
+                              else getKingSquare.get
+                          )
+                    else true
+              )
 
   private def computeLegalMoves(tile: Tile): List[Tile] = {
     if (cell(tile).isDefined)
@@ -314,6 +329,33 @@ case class ChessField @Inject() (
           } 
         )
         .appendedAll(doublePawnChain(in))
+  
+  def isAttacked(tile: Tile): Boolean = reverseAttackChain.handleRequest(tile).get
+
+  private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
+    (
+      ( in => if queenMoveChain(in)
+                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Queen)
+                 then None else Some(true)
+      ),
+      ( in => if rookMoveChain(in)
+                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Rook)
+                 then None else Some(true)
+      ),
+      ( in => if bishopMoveChain(in)
+                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Bishop)
+                 then None else Some(true)
+      ),
+      ( in => if knightMoveChain(in)
+                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Knight)
+                 then None else Some(true)
+      ),
+      ( in => if pawnMoveChain(in)
+                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Pawn)
+                 then Some(false) else Some(true)
+      )
+    )
+  )
 
   val legalMoves: Map[Tile, List[Tile]] = {     // Map for all legal moves available from all tiles
     val mbM = Map.newBuilder[Tile, List[Tile]]
@@ -334,7 +376,7 @@ case class ChessField @Inject() (
         Vector.tabulate(field.size) { rank => fenList.drop(rank * field.size).take(field.size) }
       )
     val newState: ChessState = state.evaluateFen(fen)
-    val tmpField = copy( newMatrix, newState.copy( color = PieceColor.invert(newState.color) ) ).start // temp field constructed to get
+    val tmpField = copy( newMatrix, newState ).setColor(PieceColor.invert(newState.color)).start                          // temp field constructed to get
     tmpField.copy( newMatrix, state = tmpField.state.copy(color = newState.color), attackedTiles = tmpField.attackedTiles) // attackedFiles for actual field
   }
   def fenToList(fen: List[Char], size: Int): List[Option[Piece]] = {
@@ -370,6 +412,7 @@ case class ChessField @Inject() (
   override def selected: Option[Tile] = state.selected
   override def playing = state.playing
   override def color = state.color
+  override def setColor(color: PieceColor): ChessField = copy(state = state.copy(color = color))
 
   def checkFen(check: String): String = {
     val splitted = check.split('/')
