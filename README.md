@@ -39,7 +39,7 @@
 | | | |
    | [Model Structure](src/main/scala/de/htwg/se/chess/model) | [Chess Pieces](https://www.chessprogramming.org/Pieces) | [Piece.scala](src/main/scala/de/htwg/se/chess/model/Piece.scala) | [PiecesSpec.scala](src/test/scala/de/htwg/se/chess/model/PiecesSpec.scala) |
    | | [Chessboard](docs/model/gamedata) | [ChessField.scala](src/main/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessField.scala) | [ChessFieldSpec.scala](src/test/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessFieldSpec.scala) |
-   | | [Gamestate](docs/model/gamedata/README.md#chesstate) | [ChessState.scala](src/main/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessState.scala) | [ChessStateSpec.scala](src/test/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessStateSpec.scala) |
+   | | [Gamestate](docs/model/gamedata/#chessstate) | [ChessState.scala](src/main/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessState.scala) | [ChessStateSpec.scala](src/test/scala/de/htwg/se/chess/model/gameDataComponent/gameDataBaseImpl/ChessStateSpec.scala) |
 | | | |
    | [Util Interfaces](src/main/scala/de/htwg/se/chess/util) | [Chain of Responsibility](https://www.tutorialspoint.com/design_pattern/chain_of_responsibility_pattern.htm) |[ChainHandler.scala](src/main/scala/de/htwg/se/chess/util/ChainHandler.scala) | [ChainHandlerSpec.scala](src/test/scala/de/htwg/se/chess/util/ChainHandlerSpec.scala)
    | | [Matrices](https://en.wikipedia.org/wiki/Matrix_(mathematics)) | [Matrix.scala](src/main/scala/de/htwg/se/chess/util/Matrix.scala) | [MatrixSpec.scala](src/test/scala/de/htwg/se/chess/util/MatrixSpec.scala) |
