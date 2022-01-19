@@ -48,6 +48,8 @@ Clicking on one of the other **marked Tiles** moves the piece to that Tile
 
 ![github-pieces](https://user-images.githubusercontent.com/92474958/146582931-bf7e4aa4-ce28-4883-8337-711be60ddfc4.png)
 
+ - Additional credit to User Luca312 from https://opengameart.org/content/pixel-chess-pieces for the pixel pieces
+
 Pieces are _drawn_ onto the board by using **_Labels_** and setting the loaded image as **ImageIcon** as the Icon of the Label.
 
 The labels are then _encapsulated_ in a custom **_TileLabel_** class which resides in a **GridPanel** in the **Main Frame**.

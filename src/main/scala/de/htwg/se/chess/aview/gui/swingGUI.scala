@@ -102,9 +102,9 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
             contents ++= Seq(
                 new Menu("File") {
                     contents ++= Seq(
-                        MenuItem("Open"), // @TODO Implement with FileIO
-                        MenuItem("Save"),
-                        MenuItem("Save As"),
+                        MenuItem(Action("Open")({ controller.load; redraw })),
+                        MenuItem(Action("Save")(controller.save)),
+                        //MenuItem("Save As"),
                         MenuItem(Action("Exit")(controller.exit))
                     )
                 },
@@ -131,7 +131,8 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
                         new Menu("Pieces") {
                             contents ++= new ButtonGroup(
                                 new RadioButton { action = Action("cburnett")( {pieceStyle = "cburnett"; redraw} ) },
-                                new RadioButton { action = Action("cliparts")( {pieceStyle = "cliparts"; redraw} ) }
+                                new RadioButton { action = Action("cliparts")( {pieceStyle = "cliparts"; redraw} ) },
+                                new RadioButton { action = Action("pixel")( {pieceStyle = "pixel"; redraw} ) }
                             ).buttons
                         }
                     )

@@ -136,6 +136,8 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def playing: Boolean
     /** Returns the color to make the next move @return color to move */
     def color: PieceColor
+    /** Sets color to move to given Color @return field with set color to move */
+    def setColor(color: PieceColor): GameField
     /** Returns wether the current color is in check @return true if current is checked */
     def inCheck: Boolean
 

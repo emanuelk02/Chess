@@ -105,6 +105,10 @@ trait ControllerInterface extends Publisher{
      * */
     def select(args: Option[Tile]): CommandInterface
 
+    /** Saves the game to "field.xml" file in the working directory */
+    def save: Unit
+    /** Loads the game from "field.xml" file in the working dircetory */
+    def load: Unit
     /** Starts the game. Prohibiting free placement and illegal moves. */
     def start: Unit
     /** Stops the game. Returns to free placement and free moves. */

@@ -5,6 +5,7 @@
 .game/
 .metals
 .bloop
+*.xml
 metals.sbt
 
 # exlude class and binaries

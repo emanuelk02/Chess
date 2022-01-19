@@ -166,13 +166,13 @@ class ChessCommandSpec extends AnyWordSpec {
         "set the final game state" in {
             val nField = 
                 new ChessField()
-                    .replace(Tile("A8"), "R")
+                    .replace(Tile("A7"), "R")
                     .replace(Tile("B7"), "R")
                     .replace(Tile("D8"), "k")
                 
             val dField = ChessField().loadFromFen("7k/8/R7/6Q1/8/8/8/8 w  - 0 1")
 
-            val cmc3 = CheckedMoveCommand(MoveCommand((Tile("A8"), Tile("D8")), nField.start)) // captures the King
+            val cmc3 = CheckedMoveCommand(MoveCommand((Tile("A7"), Tile("A8")), nField.start))
             
             cmc3.event should be(GameEnded(Some(White)))
             cmc3.execute.gameState should be(CHECKMATE)
