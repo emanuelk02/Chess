@@ -5,20 +5,21 @@
 
 ---
 
-## [Code](src/main/scala/de/htwg/se/chess/model)
+## [Code](../../src/main/scala/de/htwg/se/chess/model)
 
 **_The Model Package_** consists of three **Components**:
 
- - [gameData](src/main/scala/de/htwg/se/chess/model/gameDataComponent)
- - [Tile.scala](src/main/scala/de/htwg/se/chess/model/Tile.scala)
- - [Piece.scala](src/main/scala/de/htwg/se/chess/model/Piece.scala)
+ - [gameData](../../src/main/scala/de/htwg/se/chess/model/gameDataComponent)
+ - [fileIO](../../src/main/scala/de/htwg/se/chess/model/fileIOComponent)
+ - [Tile.scala](../../src/main/scala/de/htwg/se/chess/model/Tile.scala)
+ - [Piece.scala](../../src/main/scala/de/htwg/se/chess/model/Piece.scala)
 
 ---
 
 ## [GameData](docs/model/gamedata)
 
  - The **_GameData_** holds all the information needed to _run_ a **Game of Chess**
- - The main **Interface** to that data is defined by **_[GameField](src/main/scala/de/htwg/se/chess/gameDataComponent/GameData.scala)_**
+ - The main **Interface** to that data is defined by **_[GameField](../../src/main/scala/de/htwg/se/chess/gameDataComponent/GameData.scala)_**
  - **GameField** stores a _[Matrix](src/main/scala/de/htwg/se/chess/util/Matrix.scala)_ of **_Option\[Piece\]_** which stores every **Piece** of the _Board_
 
 ---
@@ -54,7 +55,7 @@ Additionally; for every piece there is a **unique String representation** equal 
 
 ## [Tiles](https://www.chessprogramming.org/Chessboard)
 
-The **_[Tile](src/main/scala/de/htwg/se/chess/model/Tile.scala)_** Class encapsulates _file_, _rank_ and _size_ values, which correspond to those of a **Chessboard**
+The **_[Tile](../../src/main/scala/de/htwg/se/chess/model/Tile.scala)_** Class encapsulates _file_, _rank_ and _size_ values, which correspond to those of a **Chessboard**
 
 Tile provides some functions for _easy conversion_ to **Matrix _rows and collumns_** as well as numeric operations:
 
@@ -72,4 +73,9 @@ Example:
  - The **top left** Tile would be "A8"
  - The tile **right of A8** is "B8"
 
+---
+
+## [FileIO](../../src/main/scala/de/htwg/se/chess/model/fileIOComponent)
+
+FileIO provides functions for **_storing_** _GameFields_ as _.xml_ (and soon for _.json_, but not working yet)
 
