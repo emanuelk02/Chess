@@ -92,18 +92,17 @@ case class ChessField @Inject() (
     val piece = cell(tile1)
     var tempField =  // anticipates change to load inCheck and attackedTiles from
       ChessField(
-        field
-          .replace(tile2.row, tile2.col, piece)
-          .replace(tile1.row, tile1.col, None ),
+        field.replace(tile2.row, tile2.col, piece)
+             .replace(tile1.row, tile1.col, None ),
         state.evaluateMove((tile1, tile2), cell(tile1).get, cell(tile2)).copy(color = state.color)
       )
 
     tempField = specialMoveChain.handleRequest((tile1, tile2, tempField)).getOrElse(tempField)
 
-    val newInCheck = !tempField.attackedTiles
-                               .filter(tile => cell(tile).isDefined 
-                                          && cell(tile).get.getType == King
-                               ).isEmpty
+    val newInCheck = 
+      !tempField.attackedTiles
+        .filter(tile => cell(tile).isDefined && cell(tile).get.getType == King)
+        .isEmpty
 
     val ret = copy(
         tempField.field,
@@ -120,13 +119,12 @@ case class ChessField @Inject() (
   override def getLegalMoves(tile: Tile): List[Tile] =
     legalMoves.get(tile)  // legalMoves defined later
               .get
-              .filter( 
+              .filter(    // Filters out moves, which leave King in Check
                 tile2 => 
                   if getKingSquare.isDefined
                     then !ChessField(
-                            field
-                              .replace(tile2.row, tile2.col, cell(tile))
-                              .replace(tile.row, tile.col, None ),
+                            field.replace(tile2.row, tile2.col, cell(tile))
+                                 .replace(tile.row, tile.col, None ),
                             state.evaluateMove((tile, tile2), cell(tile).get, cell(tile2))
                           )
                           .setColor(color)
@@ -225,7 +223,7 @@ case class ChessField @Inject() (
   private val straightMoves     : List[Tuple2[Int, Int]] = ( 0, 1) :: ( 1, 0) :: (-1, 0) :: ( 0,-1) :: Nil
   private val knightMoveList    : List[Tuple2[Int, Int]] = (-1,-2) :: (-2,-1) :: (-2, 1) :: (-1, 2) :: ( 1, 2) :: ( 2, 1) :: ( 2,-1) :: ( 1,-2) :: Nil
   private val whitePawnTakeList : List[Tuple2[Int, Int]] = ( 1, 1) :: (-1, 1) :: Nil
-  private val blackPawnTakeList : List[Tuple2[Int, Int]] = (-1,-1) :: ( 1,-1) :: Nil
+  private val blackPawnTakeList : List[Tuple2[Int, Int]] = ( 1,-1) :: (-1,-1) :: Nil
   private val kingMoveList      : List[Tuple2[Int, Int]] = diagonalMoves ::: straightMoves
   private val queenMoveList     : List[Tuple2[Int, Int]] = diagonalMoves ::: straightMoves
 
