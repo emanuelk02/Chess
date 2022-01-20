@@ -5,7 +5,7 @@
 
 ---
 
-## [Code](src/main/scala/de/htwg/se/chess/aview/TUI.scala)
+## [Code](../../src/main/scala/de/htwg/se/chess/aview/TUI.scala)
 
 The **TUI** accepts _text_ input from the **standard input/main console** in the form of:
 
