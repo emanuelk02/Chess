@@ -296,7 +296,7 @@ override def fill(filling: String):        ChessField = fill(Piece(filling))
 
  - Moving behaves differently depending on **playing state**, when called from the **controller**:
     - if _not_ playing, you can move **however you like**
-    - if _playing_, moves are _validated_ first by the **[CheckedMoveCommand](https://github.com/emanuelk02/Chess/tree/main/src/main/scala/de/htwg/se/chess/controller/controllerBaseImpl/ChessCommand.scala)**
+    - if _playing_, moves are _validated_ first by the **[CheckedMoveCommand](https://github.com/emanuelk02/Chess/blob/main/src/main/scala/de/htwg/se/chess/controller/controllerComponent/controllerBaseImpl/ChessCommand.scala)**
  - In **ChessField**, _move_ always executes the move
  - _move_ has other effects on the game other than _moving pieces_ if **playing is set**:
     - [Check](#check) is calculated on every move
