@@ -24,6 +24,6 @@ trait FileIOInterface {
 
 object FileIOInterface {
     def apply(): FileIOInterface = {
-        new fileIoFenXmlImpl.FileIO()
+        new fileIoMatrixJsonImpl.FileIO()
     }
 }

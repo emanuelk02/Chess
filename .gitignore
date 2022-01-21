@@ -6,6 +6,7 @@
 .metals
 .bloop
 *.xml
+*.json
 metals.sbt
 
 # exlude class and binaries
