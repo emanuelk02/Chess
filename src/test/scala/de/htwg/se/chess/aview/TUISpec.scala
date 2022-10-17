@@ -1,177 +1,415 @@
+/*                                                                                      *\
+**     _________  ______________________                                                **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
+**  /  /__/  __   /  /___ __\  \__\  \                                                  **
+**  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
+**   \__/                        \__/                                                   **
+**                                                                                      **
+\*                                                                                      */
+
+
 package de.htwg.se.chess
 package aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+
+import scala.util.Success
+import scala.util.Failure
+import scala.util.Try
+
+import controller.controllerComponent.controllerBaseImpl._
+import model.gameDataComponent.gameDataBaseImpl._
 import model.Piece
 import model.Piece._
-import model.Matrix
-import model.ChessField
-import controller.Controller
+import model.Tile
+import util.Matrix
+
 
 class TUISpec extends AnyWordSpec {
-    "A TUI" when {
-        val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
-        val cf = ChessField(matr)
-        val ctrl = Controller(cf)
-        val tui = TUI(ctrl)
-        "created" should {
-            "be created using the explicit constructor" in {
-                val tui2 = new TUI()
-            }
-            "alternatively be instantiated with a Controller storing a full ChessField containing a Matrix given as a Vector of Vectors" in {
-                ctrl.field.field.size should be(1)
-                ctrl.field.field.cell(0, 0).get should be(W_PAWN)
-                ctrl.field.field.cell(0, 1).get should be(B_KING)
-                ctrl.field.cell('A', 1).get should be(W_PAWN)
-                ctrl.field.cell('B', 1).get should be(B_KING)
-            }
-        }
-        /*"ran" should {
-            "detect input from console and display modifications based on it" in {
-                tui.run
-                print("i A1 q")
-                ctrl.field.cell('A', 1).get should be(B_QUEEN)
-            }
-        }*/
-        "filled" should {
-            val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
-            val cf = ChessField(matr)
-            val ctrl = Controller(cf)
-            val tui = TUI(ctrl)
-            "not have a diferent sized ChessField based on contents" in {
-                ctrl.field.field.size should be(2)
-                tui.eval("i A1 B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field.field.size should be(matr.size)
-                tui.eval("i B2 b") shouldBe tui.SUCCESS_VAL
-                ctrl.field.field.size should be(matr.size)
-                tui.eval("f g") shouldBe tui.SUCCESS_VAL
-                ctrl.field.field.size should be(matr.size)
-            }
-            "throw an IndexOutOfBoundsException when trying to access fields outside of the matrix" in {
-                an [IndexOutOfBoundsException] should be thrownBy tui.eval("i B0 b")
-                an [IndexOutOfBoundsException] should be thrownBy tui.eval("i C2 b")
-                an [IndexOutOfBoundsException] should be thrownBy tui.eval("i B3 b")
-                an [IndexOutOfBoundsException] should be thrownBy tui.eval("i Z2 b")
-            }
-            "detect missing arguments" in {
-                tui.eval("") shouldBe tui.ERR_VAL
-                tui.eval("i") shouldBe tui.ERR_VAL
-                tui.eval("i A1") shouldBe tui.ERR_VAL
-                tui.eval("m") shouldBe tui.ERR_VAL
-                tui.eval("m A1") shouldBe tui.ERR_VAL
-                tui.eval("f") shouldBe tui.ERR_VAL
-                tui.eval("rank") shouldBe tui.ERR_VAL
-                tui.eval("rank 1") shouldBe tui.ERR_VAL
-                tui.eval("file") shouldBe tui.ERR_VAL
-                tui.eval("file A") shouldBe tui.ERR_VAL
-                tui.eval("fen") shouldBe tui.ERR_VAL
-            }
-            "detect invalid commands" in {
-                tui.eval("moveTo A1 B1") shouldBe tui.ERR_VAL
-                tui.eval("show") shouldBe tui.ERR_VAL
-            }
-            "print information on available commands either singularily or in its entirety" in {
-                tui.eval("h") shouldBe tui.SUCCESS_VAL
-                tui.eval("help i") shouldBe tui.SUCCESS_VAL
-                tui.eval("H m") shouldBe tui.SUCCESS_VAL
-                tui.eval("HELP rank") shouldBe tui.SUCCESS_VAL
-                tui.eval("helP file") shouldBe tui.SUCCESS_VAL
-                tui.eval("Help fill") shouldBe tui.SUCCESS_VAL
-                tui.eval("h fen") shouldBe tui.SUCCESS_VAL
-                tui.eval("h show") shouldBe tui.SUCCESS_VAL
-            }
-            "allow to replace single cells at any location by String and keep the changes" in {
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("i A1 B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                tui.eval("insert B2 B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(B_KING))))))
+  /**
+   * The Textual User Interface is part af the view component in the
+   * Model-View-Control Architecture.
+   * It uses the underlying Controller to access the data in the model component.
+   * The TUI uses scala-swings Reactor to implement communication between it and the
+   * Controller by using Events.
+   * 
+   * Implemented Commands are - as seen in the "help" call:
+   * 
+   *    help [command]      show this help message
+   *                          
+   *    i / insert / put <tile: "A1"> <piece>
+   *                        inserts given piece at given tile
+   *                        valid piece representations are:
+   *                          - a color: 
+   *                            W / B
+   *                          - followed by an underscore and its type:
+   *                            W/B_KING / QUEEN / ROOK / BISHOP / KNIGHT / PAWN
+   *                        or
+   *                          - their representations as in the FEN representation:
+   *                            uppercase for white / lowercase for black:
+   *                            King: K/k, Queen: Q/q, Rook: R/r,
+   *                            Bishop: B/b, Knight: N/n, Pawn: P/p
+   *                                              
+   *    m / move <tile1: "A1"> <tile2: "B2">
+   *                        moves piece at position of tile1 to the position of tile2
+   *    
+   *    cl / clear          clears entire board
+   *    
+   *    fen / loadFEN <fen-string>
+   *                        initializes a chess position from given FEN-String
+   *                            
+   *    start / stop        starts/stops the game, prohibiting/allowing anything but the move command
+   *    
+   *    select <tile: "A1"> selects given tile and shows possible moves for it       
+   *                        
+   *    z / undo            reverts the last changes you've done
+   *    
+   *    y / redo            redoes the last changes you've undone
+   *    
+   *    q / exit                quits the program
+   * 
+   * Input is split into two phases:
+   * 
+   *  - First is the read, which is done in the run-method, which loops
+   *    in a tailrecursion until an ExitEvent is detected
+   * 
+   *  - The read string from input is then evaluated in the eval() which returns either
+   *    a Success[Unit] or Failure[Unit], to which the run() reacts accordingly.
+   * */
+  "A TUI" when {
+    val matr = Matrix[Option[Piece]](
+      Vector(
+        Vector(Some(W_BISHOP), Some(B_KING)), 
+        Vector(Some(W_PAWN), Some(W_BISHOP))
+      )
+    )
+    val cf = ChessField(matr)
+    val ctrl = Controller(cf, new ChessCommandInvoker)
+    val tui = TUI(ctrl)
+    "filled" should {
+      "not have a diferent sized ChessField based on contents" in {
+        ctrl.size should be(2)
+        tui.eval("i A1 B_KING") shouldBe Success(())
+        ctrl.size should be(matr.size)
+        tui.eval("i B2 b") shouldBe Success(())
+        ctrl.size should be(matr.size)
+        tui.eval("fen 1B/kQ w KQkq - 0 1") shouldBe Success(())
+        ctrl.size should be(matr.size)
+      }
 
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("put A1 k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                tui.eval("INSERT B2 k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(W_BISHOP), Some(B_KING))))))
-            }
-            "allow to be fully fill a board a single element specified and keep the changes" in {
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("f B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
-                tui.eval("i A1 W_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(W_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
+      "detect missing arguments" in {
+        // The eval method returns a Try[Unit] which is a monad automatically
+        // encapsulation Exception, allowing to stay inside the type system and
+        // easily handle exceptions.
 
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("fill k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
-                tui.eval("i A1 K") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(W_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
-            }
-            "allow to fill singe ranks with a specified element and keep the changes" in {
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("rank 1 B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                tui.eval("fillrank 2 B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
+        // The eval does not check for wrong input and simply tries to call
+        // every methods as if it were correct, which will result in an exception.
 
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("RANK 1 k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                tui.eval("fillRANK 2 k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
-            }
-            "allow to fill single files with a specified element and keep the changes" in {
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("file A B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_KING), Some(W_BISHOP))))))
-                tui.eval("fillfile b B_KING") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
+        tui.eval("i").isFailure shouldBe true    // Failure(ArrayIndexOutOfBoundsException)
+        tui.eval("fen").isFailure shouldBe true
+        tui.eval("m").isFailure shouldBe true
+        tui.eval("m A1").isFailure shouldBe true
+        tui.eval("i A1").isFailure shouldBe true
+      }
+      "detect invalid commands" in {
+        // The eval also returns Failure if it does not know the given command.
 
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("FILE a k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_BISHOP)), Vector(Some(B_KING), Some(W_BISHOP))))))
-                tui.eval("fillFILE B k") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(B_KING)), Vector(Some(B_KING), Some(B_KING))))))
-            }
-            "allow to move contents of one tile into another and store the changes" in {
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("i A1 k") shouldBe tui.SUCCESS_VAL
-                tui.eval("m A1 A2") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, Some(W_BISHOP)), Vector(Some(B_KING), Some(W_BISHOP))))))
-                tui.eval("move a2 B2") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, Some(W_BISHOP)), Vector(None, Some(B_KING))))))
+        tui.eval("moveTo A1 B1").isFailure shouldBe true
+        tui.eval("show").isFailure shouldBe true
+      }
+      "print information on available commands either singularily or in its entirety" in {
+        // A help interface is provided to give information on the available commands.
+        // To access this type "help" or "h".
+        // For information on specific commands type "help <command>".
 
-                tui.eval("F B") shouldBe tui.SUCCESS_VAL
-                tui.eval("I A1 k") shouldBe tui.SUCCESS_VAL
-                tui.eval("M A1 b1") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), Some(W_BISHOP))))))
-                tui.eval("MOVE b1 a2") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, None), Vector(Some(B_KING), Some(W_BISHOP))))))
-            }
-            "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
-                tui.eval("f B") shouldBe tui.SUCCESS_VAL
-                tui.eval("fen /") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, None), Vector(None, None)))))
-                tui.eval("FEN 2/2") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, None), Vector(None, None)))))
-                tui.eval("Fen k/1B") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP))))))
-                tui.eval("loadfen k1/1B") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), None), Vector(None, Some(W_BISHOP))))))
-                tui.eval("loadFEN 1k/B") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None)))))
-                tui.eval("loadFen 1k/B1") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(None, Some(B_KING)), Vector(Some(W_BISHOP), None)))))
+        tui.eval("h") shouldBe Success(())
+        tui.eval("help i") shouldBe Success(())
+        tui.eval("H m") shouldBe Success(())
+        tui.eval("HELP rank") shouldBe Success(())
+        tui.eval("helP file") shouldBe Success(())
+        tui.eval("Help fill") shouldBe Success(())
+        tui.eval("h fen") shouldBe Success(())
+        tui.eval("h show") shouldBe Success(())
+      }
+      "allow to replace single cells at any location by String and keep the changes" in {
+        // This method simply calls the put() method of the underlying Controller,
+        // using the higher order function exectueAndNotify
+        // to put the contents of the first Tile into the second and then
+        // replace the contents of the first tile with None.
+        //
+        // Input for tiles is <File-Character>+<Rank-Character>
+        //
+        // Input for pieces is as described in the corresponding files:
+        // ..\src\test\scala\de\htwg\se\chess\model\PiecesSpec.scala
+        //
+        // For Tests, see the corresponding file in the controller package:
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ControllerSpec.scala
 
-                tui.eval("fen Qk/Br") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(W_QUEEN), Some(B_KING)), Vector(Some(W_BISHOP), Some(B_ROOK))))))
-                tui.eval("FEN kQ/rB") shouldBe tui.SUCCESS_VAL
-                ctrl.field should be(ChessField(Matrix(Vector(Vector(Some(B_KING), Some(W_QUEEN)), Vector(Some(B_ROOK), Some(W_BISHOP))))))
-            }
-            "allow to exit the programm by typing \"exit\"" in {
-                tui.eval("exit") shouldBe tui.EXIT_VAL
-                tui.eval("ExIt awdaf") shouldBe tui.EXIT_VAL
-            }
-        }
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("i A1 B_KING") shouldBe Success(())
+        // Adding .stop for simplicity in tests
+        ctrl.field.stop should be(    // ==> This allows to ignore state and move validation
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(Some(B_KING), Some(W_BISHOP))
+              )
+            )
+          )
+        )
+        tui.eval("insert B2 B_KING") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_BISHOP), Some(B_KING)),
+                Vector(Some(B_KING), Some(W_BISHOP))
+              )
+            )
+          )
+        )
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("put A1 k") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_BISHOP), Some(W_BISHOP)),
+                Vector(Some(B_KING), Some(W_BISHOP))
+              )
+            )
+          )
+        )
+        tui.eval("INSERT B2 k") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_BISHOP), Some(B_KING)),
+                Vector(Some(B_KING), Some(W_BISHOP))
+              )
+            )
+          )
+        )
+      }
+      "allow to be fully cleared" in {
+        // This method simply calls the clear() method of the underlying Controller,
+        // using the higher order function exectueAndNotify
+        // to clear the entire board.
+        //
+        // For Tests, see the corresponding file in the controller package:
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ControllerSpec.scala
+
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("cl") shouldBe Success(())
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("clear") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None),
+                Vector(None, None)
+              )
+            )
+          )
+        )
+        tui.eval("i A1 W_KING") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None),
+                Vector(Some(W_KING), None)
+              )
+            )
+          )
+        )
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("clear") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None),
+                Vector(None, None)
+              )
+            )
+          )
+        )
+      }
+      "allow to move contents of one tile into another and store the changes" in {
+        // This method simply calls the move() method of the underlying Controller,
+        // using the higher order function exectueAndNotify
+        // to move contents of one tile into the other.
+        //
+        // For Tests, see the corresponding file in the controller package:
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ControllerSpec.scala
+
+        ctrl.stop
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP)) // We just want to test the replacemont, so we use stop to ignore state etc.
+        tui.eval("i A1 k") shouldBe Success(())
+        tui.eval("m A1 A2") shouldBe Success(())
+
+        tui.eval("move a2 B2") shouldBe Success(())
+
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("I A1 k") shouldBe Success(())
+        tui.eval("M A1 b1") shouldBe Success(())
+
+        tui.eval("MOVE b1 a2") shouldBe Success(())
+      }
+      "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation and store the changes" in {
+        // This method simply calls the putWithFen() method of the underlying Controller,
+        // using the higher order function exectueAndNotify
+        // to load a position using the given FEN String.
+        // The implementation uses the offical notation:
+        // https://www.chessprogramming.org/Forsyth-Edwards_Notation
+        //
+        // For Tests, see the corresponding file in the controller package:
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ControllerSpec.scala
+        
+        ctrl.field = ctrl.field.fill(Some(W_BISHOP))
+        tui.eval("fen / w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None),
+                Vector(None, None)
+              )
+            )
+          )
+        )
+        tui.eval("FEN 2/2 w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, None), 
+                Vector(None, None)
+              )
+            )
+          )
+        )
+        tui.eval("Fen k/1B w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(B_KING), None), 
+                Vector(None, Some(W_BISHOP))
+              )
+            )
+          )
+        )
+        tui.eval("loadfen k1/1B w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(B_KING), None),
+                Vector(None, Some(W_BISHOP))
+              )
+            )
+          )
+        )
+        tui.eval("loadFEN 1k/B w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
+            )
+          )
+        )
+        tui.eval("loadFen 1k/B1 w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(None, Some(B_KING)),
+                Vector(Some(W_BISHOP), None)
+              )
+            )
+          )
+        )
+
+        tui.eval("fen Qk/Br w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_QUEEN), Some(B_KING)),
+                Vector(Some(W_BISHOP), Some(B_ROOK))
+              )
+            )
+          )
+        )
+        tui.eval("FEN kQ/rB w KQkq - 0 1") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(B_KING), Some(W_QUEEN)),
+                Vector(Some(B_ROOK), Some(W_BISHOP))
+              )
+            )
+          )
+        )
+      }
+      "allow to exit the programm by typing \"exit\"" in {
+        // This method sends an ExitEvent to all Observers to end execution
+
+        tui.exitFlag shouldBe false
+        tui.eval("exit") shouldBe Success(())
+        tui.exitFlag shouldBe true
+        tui.eval("ExIt awdaf") shouldBe Success(())
+      }
+      "allow to undo and redo recent changes" in {
+        // This method simply calls the undo() and redo() methods of the underlying Controller.
+        // Undo-Redo is implemented with the Command Pattern and using a Invoker, which stores
+        // Commands on a stack.
+        //
+        // For Tests, see the corresponding files in the controller package:
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ControllerSpec.scala
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ChessCommandSpec.scala
+        // ..\src\test\scala\de\htwg\se\chess\controller\controllerBaseImpl\ChessCommandInvokerSpec.scala
+
+        tui.eval("fen QQ/QQ w KQkq - 0 1") shouldBe Success(())
+        tui.eval("i A1 k") shouldBe Success(())
+
+        tui.eval("undo") shouldBe Success(())
+        // We add .stop to simplify testing
+        ctrl.field.stop should be(  // ==> this ignores state changes etc as it is irrelevant here
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_QUEEN), Some(W_QUEEN)),
+                Vector(Some(W_QUEEN), Some(W_QUEEN))
+              )
+            )
+          )
+        )
+      }
+      "allow to redo undone changes" in {
+        tui.eval("redo") shouldBe Success(())
+        ctrl.field.stop should be(
+          ChessField(
+            Matrix(
+              Vector(
+                Vector(Some(W_QUEEN), Some(W_QUEEN)),
+                Vector(Some(B_KING), Some(W_QUEEN))
+              )
+            )
+          )
+        )
+      }
     }
+  }
 }

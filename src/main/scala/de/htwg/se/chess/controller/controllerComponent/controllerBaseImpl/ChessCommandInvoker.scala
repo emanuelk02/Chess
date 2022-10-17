@@ -10,18 +10,29 @@
 
 
 package de.htwg.se.chess
-package util
+package controller
+package controllerComponent
+package controllerBaseImpl
+
+import model.gameDataComponent.GameField
+import util.CommandInvoker
+import util.Command
+import util.ChainHandler
 
 
-@deprecated
-trait Observer:
-    def update: Unit
-    def updateOnError(message: String): Unit
+class ChessCommandInvoker extends CommandInvoker[GameField] {
+    override def doStep(command: Command[GameField]) = {
+        if chainInstanceChecker.handleRequest(command).isEmpty
+            then undoStack = command::undoStack
+        command.execute
+    }
 
-@deprecated
-trait Observable:
-    var subscribers: Vector[Observer] = Vector()
-    def add(s: Observer): Unit = subscribers = subscribers :+ s
-    def remove(s: Observer): Unit = subscribers = subscribers.filterNot( o => o == s)
-    def notifyObservers: Unit = subscribers.foreach{o => o.update}
-    def notifyOnError(message: String): Unit = subscribers.foreach{o => o.updateOnError(message)}
+    val chainInstanceChecker = ChainHandler[Command[GameField], Any](
+        List(
+            checkClass(classOf[ErrorCommand]) _,
+            checkClass(classOf[SelectCommand]) _
+        )
+    )
+
+    def checkClass(typ: Class[_])(in: Command[GameField]): Option[Command[GameField]] = if in.getClass eq typ then Some(in) else None
+}

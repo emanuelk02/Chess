@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2022 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -10,18 +10,20 @@
 
 
 package de.htwg.se.chess
-package util
+package model
+package fileIOComponent
+
+import gameDataComponent.GameField
 
 
-@deprecated
-trait Observer:
-    def update: Unit
-    def updateOnError(message: String): Unit
+trait FileIOInterface {
 
-@deprecated
-trait Observable:
-    var subscribers: Vector[Observer] = Vector()
-    def add(s: Observer): Unit = subscribers = subscribers :+ s
-    def remove(s: Observer): Unit = subscribers = subscribers.filterNot( o => o == s)
-    def notifyObservers: Unit = subscribers.foreach{o => o.update}
-    def notifyOnError(message: String): Unit = subscribers.foreach{o => o.updateOnError(message)}
+    def load: GameField
+    def save(field: GameField): Unit
+}
+
+object FileIOInterface {
+    def apply(): FileIOInterface = {
+        new fileIoFenXmlImpl.FileIO()
+    }
+}

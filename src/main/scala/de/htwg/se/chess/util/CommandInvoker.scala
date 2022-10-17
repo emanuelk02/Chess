@@ -13,15 +13,34 @@ package de.htwg.se.chess
 package util
 
 
-@deprecated
-trait Observer:
-    def update: Unit
-    def updateOnError(message: String): Unit
+trait CommandInvoker[T] {
+    protected var undoStack: List[Command[T]]= Nil
+    protected var redoStack: List[Command[T]]= Nil
 
-@deprecated
-trait Observable:
-    var subscribers: Vector[Observer] = Vector()
-    def add(s: Observer): Unit = subscribers = subscribers :+ s
-    def remove(s: Observer): Unit = subscribers = subscribers.filterNot( o => o == s)
-    def notifyObservers: Unit = subscribers.foreach{o => o.update}
-    def notifyOnError(message: String): Unit = subscribers.foreach{o => o.updateOnError(message)}
+    def doStep(command: Command[T]): T = {
+        undoStack = command::undoStack
+        command.execute
+    }
+
+    def undoStep: Option[T]  = {
+        undoStack match {
+          case  Nil => None
+          case head::stack => {
+            undoStack = stack
+            redoStack = head::redoStack
+            Some(head.undo)
+          }
+        }
+    }
+
+    def redoStep: Option[T] = {
+        redoStack match {
+            case Nil => None
+            case head::stack => {
+                redoStack = stack
+                undoStack = head::undoStack
+                Some(head.redo)
+            }
+        }
+    }
+}
