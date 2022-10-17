@@ -48,3 +48,8 @@ lazy val root = project
     jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN")
   )
   .enablePlugins(JacocoCoverallsPlugin)
+parallelExecution in Test := false
+assemblyMergeStrategy in assembly := {
+ case PathList("META-INF", _*) => MergeStrategy.discard
+ case _                        => MergeStrategy.first
+}
