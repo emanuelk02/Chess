@@ -13,7 +13,7 @@
   </a>
 </p>
   
-### This project was made for the course **_Software Engineering_** at **_HTWG Constance_** in **Winter 2021-2022**
+### This project was made for the course **_Software Engineering_** at **_HTWG Constance_** in **Winter 2021-2022!**
 
 ---
 
