@@ -17,7 +17,7 @@
 
 ---
 
-## *README and Documentation is a work in progress!*
+## *README and Documentation is a work in progress !*
 
 ### See our **_[Documentation](docs)_** or the **_[Tests](src/test/scala/de/htwg/se/chess)_** for more information on individual **Components**
 
