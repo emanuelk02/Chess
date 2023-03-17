@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2022 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -24,6 +24,10 @@ import model.fileIOComponent.fileIoFenXmlImpl._
 class FileIOSpec extends AnyWordSpec {
     "A GameField" when {
         "stored with FEN in Xml" should {
+            "be the default implementation for the fileIO interface" in {
+                val fileIO = FileIOInterface()
+                fileIO shouldBe a [fileIoFenXmlImpl.FileIO]
+            }
             "write its FEN to File as Xml" in {
                 val fileIO = fileIoFenXmlImpl.FileIO()
                 val cf = GameField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")

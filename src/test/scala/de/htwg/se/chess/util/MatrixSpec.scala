@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -48,6 +48,8 @@ class MatrixSpec extends AnyWordSpec {
 
                 val matr = new Matrix[Option[Piece]](3, None)
                 matr.size should be(3)
+                matr.height should be(3)
+                matr.width should be(3)
                 matr.rows(0).forall(p => p == None) should be(true)
                 matr.rows(1).forall(p => p == None) should be(true)
                 matr.rows(2).forall(p => p == None) should be(true)
@@ -57,6 +59,8 @@ class MatrixSpec extends AnyWordSpec {
 
                 val matr = Matrix[Option[Piece]](Vector(Vector(Some(W_PAWN), Some(B_KING))))
                 matr.size should be(1)
+                matr.height should be(1)
+                matr.width should be(2)
                 matr.cell(0, 0).get should be(W_PAWN)
                 matr.cell(0, 1).get should be(B_KING)
             }
@@ -76,6 +80,8 @@ class MatrixSpec extends AnyWordSpec {
             }
             "not return a diferent size based on contents" in {
                 matr.size should be(2)
+                matr.height should be(2)
+                matr.width should be(2)
                 matr.replace(0, 0, Some(B_KING)).size should be(matr.size)
                 matr.replace(1, 1, Some(B_KING)).size should be(matr.size)
                 matr.fill(None).size should be(matr.size)

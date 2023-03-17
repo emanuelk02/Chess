@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -60,7 +60,7 @@ case class ChessState
 
     def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
         copy(
-            color = PieceColor.invert(color),
+            color = color.invert,
             whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, White, whiteCastle)).get,
             blackCastle = checkCastleChain.handleRequest((move(0), srcPiece, Black, blackCastle)).get,
             halfMoves = if (srcPiece.getType == Pawn || destPiece.isDefined) then 0 else halfMoves + 1,

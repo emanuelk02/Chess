@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -57,11 +57,15 @@ class PiecesSpec extends AnyWordSpec {
     "return its color as part of an Enum PieceColor" in {
       W_KING.getColor should be(White)
       B_KING.getColor should be(Black)
-
+    }
+    "have an invertable color" in {
       // Colors are invertable for easier use in checking, if another Piece is
       // the opposite color of any given piece.
-      PieceColor.invert(W_KING.getColor) shouldBe Black
-      PieceColor.invert(B_KING.getColor) shouldBe White
+      W_KING.getColor.invert shouldBe Black
+      B_KING.getColor.invert shouldBe White
+
+      Black.invert shouldBe White
+      White.invert shouldBe Black
     }
     "return its type as part of an Enum PieceType" in {
       W_KING.getType should be(King)
@@ -71,6 +75,7 @@ class PiecesSpec extends AnyWordSpec {
       W_BISHOP.getType should be(Bishop)
       W_KNIGHT.getType should be(Knight)
       W_PAWN.getType should be(Pawn)
+      B_PAWN.getType should be(Pawn)
     }
     "have a unique String representation" in {
       Piece.values.map(p => p.toString).toSet.size should be(12)
@@ -91,36 +96,41 @@ class PiecesSpec extends AnyWordSpec {
       Piece("B_QUEEN") should be(Some(B_QUEEN))
       Piece("B_ROOK") should be(Some(B_ROOK))
       Piece("B_BISHOP") should be(Some(B_BISHOP))
-      Piece("B_KNIGHT") should be(Some(B_KNIGHT))
+      Piece("b_knight") should be(Some(B_KNIGHT))
       Piece("B_PAWN") should be(Some(B_PAWN))
 
       // The one-char representation follows the same rules as used
       // in the commonly used FEN: https://www.chessprogramming.org/Forsyth-Edwards_Notation
-      Piece("b") should be(Some(B_BISHOP))
-      Piece("r") should be(Some(B_ROOK))
-      Piece("p") should be(Some(B_PAWN))
-      Piece("q") should be(Some(B_QUEEN))
-      Piece("n") should be(Some(B_KNIGHT))
       Piece("k") should be(Some(B_KING))
-      Piece("B") should be(Some(W_BISHOP))
-      Piece("R") should be(Some(W_ROOK))
-      Piece("P") should be(Some(W_PAWN))
-      Piece("Q") should be(Some(W_QUEEN))
-      Piece("N") should be(Some(W_KNIGHT))
+      Piece("q") should be(Some(B_QUEEN))
+      Piece("r") should be(Some(B_ROOK))
+      Piece("b") should be(Some(B_BISHOP))
+      Piece("n") should be(Some(B_KNIGHT))
+      Piece("p") should be(Some(B_PAWN))
       Piece("K") should be(Some(W_KING))
+      Piece("Q") should be(Some(W_QUEEN))
+      Piece("R") should be(Some(W_ROOK))
+      Piece("B") should be(Some(W_BISHOP))
+      Piece("N") should be(Some(W_KNIGHT))
+      Piece("P") should be(Some(W_PAWN))
 
       Piece.values
         .map(p => p.toString)
         .map(p => Piece(p))
         .map(p => p.getOrElse(None)) should be(Piece.values)
 
-      Piece('k') should be(Some(B_KING))
       Piece('K') should be(Some(W_KING))
       Piece('Q') should be(Some(W_QUEEN))
       Piece('R') should be(Some(W_ROOK))
       Piece('B') should be(Some(W_BISHOP))
       Piece('N') should be(Some(W_KNIGHT))
       Piece('P') should be(Some(W_PAWN))
+      Piece('k') should be(Some(B_KING))
+      Piece('q') should be(Some(B_QUEEN))
+      Piece('r') should be(Some(B_ROOK))
+      Piece('b') should be(Some(B_BISHOP))
+      Piece('n') should be(Some(B_KNIGHT))
+      Piece('p') should be(Some(B_PAWN))
       Piece('a') should be(None)
       Piece('W') should be(None)
     }

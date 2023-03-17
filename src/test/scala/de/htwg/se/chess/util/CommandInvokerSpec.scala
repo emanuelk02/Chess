@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -36,10 +36,12 @@ class CommandInvokerSpec extends AnyWordSpec {
                 ci.undoStep should be(Some(10))
                 ci.undoStep should be(Some(5))
                 ci.undoStep should be(None)
+                ci.undoStep should be(None)
             }
             "also allow to redo steps, you've undone" in {
                 ci.redoStep should be(Some(15))
                 ci.redoStep should be(Some(20))
+                ci.redoStep should be(None)
                 ci.redoStep should be(None)
             }
         }

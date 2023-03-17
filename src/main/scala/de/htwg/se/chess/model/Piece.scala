@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -19,8 +19,8 @@ enum PieceType:
 enum PieceColor:
   case Black, White
 
-object PieceColor:
-  def invert(color: PieceColor): PieceColor = if color == White then Black else White
+extension (color: PieceColor)
+    def invert: PieceColor = if color == PieceColor.White then PieceColor.Black else PieceColor.White
 
 enum Piece(color: PieceColor, ptype: PieceType, name: String):
   case W_KING extends Piece(PieceColor.White, PieceType.King, "K")

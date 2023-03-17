@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -373,7 +373,7 @@ case class ChessField @Inject() (
         Vector.tabulate(field.size) { rank => fenList.drop(rank * field.size).take(field.size) }
       )
     val newState: ChessState = state.evaluateFen(fen)
-    val tmpField = copy( newMatrix, newState ).setColor(PieceColor.invert(newState.color)).start                          // temp field constructed to get
+    val tmpField = copy( newMatrix, newState ).setColor(newState.color.invert).start                          // temp field constructed to get
     tmpField.copy( newMatrix, state = tmpField.state.copy(color = newState.color), attackedTiles = tmpField.attackedTiles) // attackedFiles for actual field
   }
   def fenToList(fen: List[Char], size: Int): List[Option[Piece]] = {
