@@ -29,6 +29,6 @@ class ChessModule extends AbstractModule {
     bind(classOf[ControllerInterface]).toInstance(Controller(
       new ChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), 
       new ChessCommandInvoker))
-    bind(classOf[FileIOInterface]).toInstance(fileIoMatrixJsonImpl.FileIO())
+    bind(classOf[FileIOInterface]).toInstance(fileIoFenXmlImpl.FileIO())
   }
 }
