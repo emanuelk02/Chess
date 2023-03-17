@@ -392,15 +392,16 @@ case class ChessField @Inject() (
   }
 
   override def getKingSquare: Option[Tile] = {
+    var kingSq = Option.empty[Tile]
     for {
       file <- 1 to size
       rank <- 1 to size
     } {
       val piece = cell(Tile(file, rank, size))
       if piece.isDefined && piece.get.getType == King && piece.get.getColor == color
-        then return Some(Tile(file, rank, size))
+        then kingSq = Some(Tile(file, rank, size))
     }
-    None
+    return kingSq
   }
   
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
