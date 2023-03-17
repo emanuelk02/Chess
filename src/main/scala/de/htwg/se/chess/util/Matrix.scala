@@ -21,3 +21,5 @@ case class Matrix[T] (rows: Vector[Vector[T]]):
   def cell(row: Int, col: Int): T = rows(row)(col)
   def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
   def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))
+  def height: Int = rows.size
+  def width: Int = rows(0).size

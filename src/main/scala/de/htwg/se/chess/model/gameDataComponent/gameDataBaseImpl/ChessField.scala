@@ -22,7 +22,6 @@ import scala.util.control.Breaks._
 import com.google.inject.{Guice, Inject}
 
 import GameState._
-import ChessBoard.board
 import PieceType._
 import PieceColor._
 import Piece._
@@ -436,7 +435,7 @@ case class ChessField @Inject() (
   }
 
 
-  override def toString: String = board(3, 1, field) + state.toString + "\n"
+  override def toString: String = field.toBoard() + state.toString + "\n"
 
   override def toFenPart: String = {
     var rows = 0

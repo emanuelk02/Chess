@@ -469,9 +469,8 @@ class ControllerSpec extends AnyWordSpec {
         // This is mainly used by the TUI
 
         ctrl.field = ctrl.field.stop.fill(Some(W_BISHOP))
-        import model.gameDataComponent.gameDataBaseImpl.ChessBoard.board
         ctrl.fieldToString should be(cf.toString)
-        ctrl.fieldToString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
+        ctrl.fieldToString should be(cf.field.toBoard() + cf.state.toString + "\n")
       }
       "have a FEN representation" in {
         ctrl.field = ctrl.field.loadFromFen("1k/B1 w KQkq - 0 1")

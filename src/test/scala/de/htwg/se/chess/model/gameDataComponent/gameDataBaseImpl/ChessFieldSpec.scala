@@ -759,8 +759,7 @@ class ChessFieldSpec extends AnyWordSpec {
         // The String representation of the board is explained in more detail
         // on our GitHub and in the corresponding test file for ChessBoard.scala
 
-        import gameDataBaseImpl.ChessBoard.board
-        cf.toString should be(board(3, 1, cf.field) + cf.state.toString + "\n")
+        cf.toString should be(cf.field.toBoard() + cf.state.toString + "\n")
       }
     }
   }
