@@ -37,19 +37,19 @@ def rankTop(width: Int, rankLen: Int) : String =
     (line(width) * rankLen) + corner + eol
 
 extension [T](pieces: Vector[Option[T]])
-            def toRankWall(pieceWidth: Int, width: Int = 1, height: Int = 1) : String =
-                assert(height > 0, "Illegal height")
-                assert(width > 0, "Illegal width")
+    def toRankWall(pieceWidth: Int, width: Int = 1, height: Int = 1) : String =
+        assert(height > 0, "Illegal height")
+        assert(width > 0, "Illegal width")
 
-                ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * (height/2)) +
-                pieces.map( p => wall(width + (pieceWidth - p.getOrElse(" ").toString.length), p)).mkString + side + eol +
-                ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * ((if (height % 2 == 1) height else height - 1)/2))
+        ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * (height/2)) +
+        pieces.map( p => wall(width + (pieceWidth - p.getOrElse(" ").toString.length), p)).mkString + side + eol +
+        ((wall(width + pieceWidth - 1, None) * pieces.size + side + eol) * ((if (height % 2 == 1) height else height - 1)/2))
 
-            def toRank(pieceWidth: Int, width: Int = 1, height: Int = 1) : String =
-                assert(height > 0, "Illegal height")
-                assert(width > 0, "Illegal width")
+    def toRank(pieceWidth: Int, width: Int = 1, height: Int = 1) : String =
+        assert(height > 0, "Illegal height")
+        assert(width > 0, "Illegal width")
 
-                rankTop(width + pieceWidth - 1, pieces.size) + toRankWall(pieceWidth, width, height)
+        rankTop(width + pieceWidth - 1, pieces.size) + toRankWall(pieceWidth, width, height)
 
 extension [T](board: Matrix[Option[T]])
     def toBoard(width: Int = 3, height: Int = 1) : String =
