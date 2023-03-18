@@ -16,7 +16,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 
-class ChainHandlerSpec extends AnyWordSpec {
+class ChainHandlerSpec extends AnyWordSpec:
     /* A ChainHandler is a possible implementation of the Chain-Of-Responsibility Pattern */
     def one(in: Int) = if in > 4 then Some(1.1) else None
     def two(in: Int) = if in > 2 then Some(2.2) else None
@@ -60,4 +60,3 @@ class ChainHandlerSpec extends AnyWordSpec {
             chain.handleRequest(-1) should be(None)
         }
     }
-}

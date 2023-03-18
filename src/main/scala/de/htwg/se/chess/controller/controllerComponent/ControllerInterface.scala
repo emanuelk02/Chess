@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -53,7 +53,7 @@ import util.Command
  * 
  * @param field     Holds all data needed to specify the game and to execute any inputs on
  * */
-trait ControllerInterface extends Publisher{
+trait ControllerInterface extends Publisher:
     /** Size of the board in rows */
     def size: Int
 
@@ -147,16 +147,14 @@ trait ControllerInterface extends Publisher{
     def inCheck: Boolean
     /** Returns true if the game is active @return game activity state */
     def isPlaying: Boolean
-}
 
 /**
  * A subtype of the Command Pattern, executing over a GameField.
  * Additionally contains an Event of type scala.swing.event.Event which is used
  * by controllers to signal the changes the command has caused.
  * */
-trait CommandInterface extends Command[GameField] {
+trait CommandInterface extends Command[GameField]:
     def event: Event
-}
 
 /** Simply signals that anything has changes */
 class CommandExecuted extends Event

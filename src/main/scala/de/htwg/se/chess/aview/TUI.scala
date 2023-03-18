@@ -23,7 +23,7 @@ import controller.controllerComponent._
 import model.Tile
 
 
-class TUI(controller: ControllerInterface) extends Reactor {
+class TUI(controller: ControllerInterface) extends Reactor:
   var exitFlag = false
   listenTo(controller)
 
@@ -43,21 +43,18 @@ class TUI(controller: ControllerInterface) extends Reactor {
   print("\n\n")
 
   @tailrec
-  final def run: Unit = {
+  final def run: Unit =
     val input = readLine(">> ")
 
-    eval(input) match {
+    eval(input) match
       case s: Success[_] =>
       case f: Failure[_] => updateOnError(f.exception.getMessage)
-    }
     if (!exitFlag) run
-  }
 
-  def eval(inputString: String): Try[Unit] = {
-    Try(
-    {
+  def eval(inputString: String): Try[Unit] =
+    Try({
       val in = inputString.split(" ")
-      in(0).toLowerCase match {
+      in(0).toLowerCase match
         case "h" | "help" => { //-------------------------------- Help
           if (in.size > 1) then
             printHelp(in(1))
@@ -82,54 +79,50 @@ class TUI(controller: ControllerInterface) extends Reactor {
           controller.redo
         case "exit" | "q" => controller.exit //------------------ Exit
         case _ =>       //--------------------------------------- Invalid
-          throw new IllegalArgumentException("Unknown Command")
-      }
-    }
-    )
-  }
+          throw IllegalArgumentException("Unknown Command")
+    })
 
-  def printHelp(): Unit = {
-  print(
-  """
-  Usage: <command> [options]
-  Commands:
-  help [command]      show this help message
-                        
-  i / insert / put <tile: "A1"> <piece>
-                      inserts given piece at given tile
-                      valid piece representations are:
-                        - a color: 
-                          W / B
-                        - followed by an underscore and its type:
-                          W/B_KING / QUEEN / ROOK / BISHOP / KNIGHT / PAWN
-                      or
-                        - their representations as in the FEN representation:
-                          uppercase for white / lowercase for black:
-                          King: K/k, Queen: Q/q, Rook: R/r,
-                          Bishop: B/b, Knight: N/n, Pawn: P/p
-                                            
-  m / move <tile1: "A1"> <tile2: "B2">
-                      moves piece at position of tile1 to the position of tile2
-
-  cl / clear          clears entire board
-
-  fen / loadFEN <fen-string>
-                      initializes a chess position from given FEN-String
+  def printHelp(): Unit =
+    print(
+    """
+    Usage: <command> [options]
+    Commands:
+    help [command]      show this help message
                           
-  start / stop        starts/stops the game, prohibiting/allowing anything but the move command
+    i / insert / put <tile: "A1"> <piece>
+                        inserts given piece at given tile
+                        valid piece representations are:
+                          - a color: 
+                            W / B
+                          - followed by an underscore and its type:
+                            W/B_KING / QUEEN / ROOK / BISHOP / KNIGHT / PAWN
+                        or
+                          - their representations as in the FEN representation:
+                            uppercase for white / lowercase for black:
+                            King: K/k, Queen: Q/q, Rook: R/r,
+                            Bishop: B/b, Knight: N/n, Pawn: P/p
+                                              
+    m / move <tile1: "A1"> <tile2: "B2">
+                        moves piece at position of tile1 to the position of tile2
+        
+    cl / clear          clears entire board
+        
+    fen / loadFEN <fen-string>
+                        initializes a chess position from given FEN-String
+                            
+    start / stop        starts/stops the game, prohibiting/allowing anything but the move command
+        
+    select <tile: "A1"> selects given tile and shows possible moves for it       
+                        
+    z / undo            reverts the last changes you've done
+        
+    y / redo            redoes the last changes you've undone
+        
+    q / exit                quits the program
+    """.stripMargin)
 
-  select <tile: "A1"> selects given tile and shows possible moves for it       
-                      
-  z / undo            reverts the last changes you've done
-  
-  y / redo            redoes the last changes you've undone
-
-  q / exit                quits the program
-  """.stripMargin)
-  }
-
-  def printHelp(cmd: String): Unit = {
-    print(cmd.toLowerCase match {
+  def printHelp(cmd: String): Unit =
+    print(cmd.toLowerCase match
       case "i" | "insert" | "put" =>
           "\nUsage: i / insert / put <tile: \"A1\"> <piece>\n\tNote that tile can be any String\n\tconsisting of a character followed by an integer\n\tAnd that you do not have to type the \" \"\n"
       case "m" | "move" =>
@@ -140,9 +133,7 @@ class TUI(controller: ControllerInterface) extends Reactor {
       case "start" | "stop" => "starts/stops the game, prohibiting / allowing anything but the move command"
       case "select" => "select <tile: \"A1\">\nSelects given tile and shows possible moves for it"
       case _ => "\nUnknown command. See 'help' for more information\n"
-    })
-  }
+    )
 
   def update: Unit = print("\n" + controller.fieldToString + "\n")
   def updateOnError(message: String): Unit = print("\n" + message + "\n")
-}

@@ -20,7 +20,7 @@ import PieceType._
 import Piece._
 
 
-class PiecesSpec extends AnyWordSpec {
+class PiecesSpec extends AnyWordSpec:
   /**
    * Chess Pieces are implemented by an Enum, which differentiates
    * Between 6 Types of Pieces and 2 Colors:
@@ -135,4 +135,3 @@ class PiecesSpec extends AnyWordSpec {
       Piece('W') should be(None)
     }
   }
-}

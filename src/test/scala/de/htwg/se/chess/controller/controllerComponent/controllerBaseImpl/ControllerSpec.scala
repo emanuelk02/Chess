@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -27,19 +27,18 @@ import model.Piece._
 import util.Matrix
 
 
-class TestObserver extends Reactor {
+class TestObserver extends Reactor:
   var field = GameField()
   reactions += {
     case e: TestEvent => field = e.field
     case e: CommandExecuted => field = ChessField().fill("W_BISHOP")
     case e: ErrorEvent => field = ChessField().fill(e.msg)
     case e: MoveEvent => field = ChessField().replace(e.tile2, "Q")
-    case e: ExitEvent => throw new Error("Non-Exitable")
+    case e: ExitEvent => throw Error("Non-Exitable")
     case e: GameEnded => field = null
   }
-}
 
-class ControllerSpec extends AnyWordSpec {
+class ControllerSpec extends AnyWordSpec:
   /**
    * The Controller is the heart of the Model-View-Control Architecture.
    * It is used for unified access from the view component to the underlying
@@ -103,7 +102,7 @@ class ControllerSpec extends AnyWordSpec {
             )
           )
         val cf = ChessField(matr)
-        val ctrl = Controller(cf, new ChessCommandInvoker)
+        val ctrl = Controller(cf, ChessCommandInvoker())
         ctrl.field.size should be(1)
         ctrl.cell(Tile.withRowCol(0, 0)).get should be(W_PAWN)
         ctrl.cell(Tile.withRowCol(0, 1)).get should be(B_KING)
@@ -113,7 +112,7 @@ class ControllerSpec extends AnyWordSpec {
     }
     val matr = new Matrix[Option[Piece]](2, Some(W_BISHOP))
     val cf = ChessField(matr)
-    val ctrl = Controller(cf, new ChessCommandInvoker)
+    val ctrl = Controller(cf, ChessCommandInvoker())
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
         ctrl.size should be(2)
@@ -492,4 +491,3 @@ class ControllerSpec extends AnyWordSpec {
       }
     }
   }
-}

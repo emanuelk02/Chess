@@ -16,14 +16,10 @@ package fileIOComponent
 import gameDataComponent.GameField
 
 
-trait FileIOInterface {
-
+trait FileIOInterface:
     def load: GameField
     def save(field: GameField): Unit
-}
 
-object FileIOInterface {
-    def apply(): FileIOInterface = {
-        new fileIoFenXmlImpl.FileIO()
-    }
-}
+object FileIOInterface:
+    def apply(): FileIOInterface =
+        fileIoFenXmlImpl.FileIO()

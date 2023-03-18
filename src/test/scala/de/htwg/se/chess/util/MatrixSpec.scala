@@ -20,7 +20,7 @@ import model.Piece._
 import util.Matrix
 
 
-class MatrixSpec extends AnyWordSpec {
+class MatrixSpec extends AnyWordSpec:
     /**
      * Matrix follows the common notation for matrices used
      * in Mathematics:
@@ -103,4 +103,3 @@ class MatrixSpec extends AnyWordSpec {
             }
         }
     }
-}

@@ -51,7 +51,7 @@ enum GameState:
  * 
  * @param field     Holds all the pieces on the board; None represents an empty tile
  * */
-trait GameField (field: Matrix[Option[Piece]]) {
+trait GameField (field: Matrix[Option[Piece]]):
     /** Size of the board in rows */
     val size = field.size
 
@@ -151,10 +151,7 @@ trait GameField (field: Matrix[Option[Piece]]) {
     def toFenPart: String
     /** Returns the complete FEN for the game. @return Complete FEN */
     def toFen: String
-}
 
-object GameField {
-    def apply(): GameField = {
+object GameField:
+    def apply(): GameField =
         ChessField()
-    }
-}

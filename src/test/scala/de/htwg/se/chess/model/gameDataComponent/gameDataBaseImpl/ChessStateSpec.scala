@@ -24,7 +24,7 @@ import model.Piece._
 import model.Tile
 
 
-class ChessStateSpec extends AnyWordSpec {
+class ChessStateSpec extends AnyWordSpec:
     "A ChessState" when {
         "created" should {
             "store the default state values of a chess game" in {
@@ -41,7 +41,7 @@ class ChessStateSpec extends AnyWordSpec {
                  * 
                  *  - Any possible En-Passant squares (https://www.chessprogramming.org/En_passant)
                  * */
-                val default = new ChessState
+                val default = ChessState()
                 default.playing should be (false)
                 default.color should be (White)
                 default.whiteCastle should be (Castles(true, true))
@@ -53,7 +53,7 @@ class ChessStateSpec extends AnyWordSpec {
         }
         "initialzied" should {
             "change its internal playing state" in {
-                var state = new ChessState()
+                var state = ChessState()
 
                 state.start shouldBe state.copy(true)
 
@@ -75,7 +75,7 @@ class ChessStateSpec extends AnyWordSpec {
                  * can then be used as a starting point for a match.
                  * */
 
-                var state = new ChessState()
+                var state = ChessState()
 
                 //------------------------------------------------- Idle State
                 
@@ -322,4 +322,3 @@ class ChessStateSpec extends AnyWordSpec {
             }
         }
     }
-}

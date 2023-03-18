@@ -20,16 +20,16 @@ import model.gameDataComponent.GameField
 import util.Matrix
 
 
-class MockController extends ControllerInterface {
+class MockController extends ControllerInterface:
   val size = 0
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
 
-  def move(args: Tuple2[Tile, Tile]): CommandInterface = throw new UnsupportedOperationException()
-  def put(args: Tuple2[Tile, String]): CommandInterface = throw new UnsupportedOperationException()
-  def clear(args: Unit): CommandInterface = throw new UnsupportedOperationException()
-  def putWithFen(args: String): CommandInterface = throw new UnsupportedOperationException()
-  def select(tile: Option[Tile]): CommandInterface = throw new UnsupportedOperationException()
+  def move(args: Tuple2[Tile, Tile]): CommandInterface = throw UnsupportedOperationException()
+  def put(args: Tuple2[Tile, String]): CommandInterface = throw UnsupportedOperationException()
+  def clear(args: Unit): CommandInterface = throw UnsupportedOperationException()
+  def putWithFen(args: String): CommandInterface = throw UnsupportedOperationException()
+  def select(tile: Option[Tile]): CommandInterface = throw UnsupportedOperationException()
 
   def start: Unit = { }
   def stop: Unit = { }
@@ -53,4 +53,3 @@ class MockController extends ControllerInterface {
   def inCheck: Boolean = false
   def save = {}
   def load = {}
-}

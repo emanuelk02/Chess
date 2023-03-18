@@ -86,7 +86,7 @@ class TUISpec extends AnyWordSpec {
       )
     )
     val cf = ChessField(matr)
-    val ctrl = Controller(cf, new ChessCommandInvoker)
+    val ctrl = Controller(cf, ChessCommandInvoker())
     val tui = TUI(ctrl)
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
@@ -98,7 +98,6 @@ class TUISpec extends AnyWordSpec {
         tui.eval("fen 1B/kQ w KQkq - 0 1") shouldBe Success(())
         ctrl.size should be(matr.size)
       }
-
       "detect missing arguments" in {
         // The eval method returns a Try[Unit] which is a monad automatically
         // encapsulation Exception, allowing to stay inside the type system and

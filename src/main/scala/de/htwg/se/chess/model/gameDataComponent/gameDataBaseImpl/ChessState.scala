@@ -49,16 +49,15 @@ case class ChessState
         )
     )
 
-    def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    def applyMoveIdle(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState =
         copy(
             enPassant = 
                 if  (srcPiece.getType == Pawn && 
                     ((move(1).rank - move(0).rank) == 2 || (move(0).rank - move(1).rank == 2)))
-                    then Some(new Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) else None
+                    then Some(Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) else None
         )
-    }
 
-    def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState = {
+    def applyMovePlaying(move: Tuple2[Tile, Tile], srcPiece: Piece, destPiece: Option[Piece]): ChessState =
         copy(
             color = color.invert,
             whiteCastle = checkCastleChain.handleRequest((move(0), srcPiece, White, whiteCastle)).get,
@@ -68,10 +67,9 @@ case class ChessState
             enPassant = 
                 if  (srcPiece.getType == Pawn && 
                     ((move(1).rank - move(0).rank) == 2 || (move(0).rank - move(1).rank == 2)))
-                    then Some(new Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) 
+                    then Some(Tile(move(1).file, (if (move(1).rank == 4) then 3 else 6), size)) 
                     else None
         )
-    }
 
     def start: ChessState = copy(true)
     def stop: ChessState = copy(false)
@@ -84,8 +82,8 @@ case class ChessState
         (if (enPassant.isEmpty) then "-" else enPassant.get.toString.toLowerCase) + " " +
         halfMoves.toString + " " + fullMoves.toString
     
-    override def toString: String = {
-        val strB = new java.lang.StringBuilder
+    override def toString: String =
+        val strB = java.lang.StringBuilder()
 
         strB.append(if (playing) then "playing" else "idle")
             .append(" selected: ")
@@ -102,18 +100,17 @@ case class ChessState
             .append(fullMoves.toString)
 
         strB.toString
-    }
 
 
 object ChessState:
-    def apply(fen: String, size: Int): ChessState = {
+    def apply(fen: String, size: Int): ChessState =
         var cutFen = fen.dropWhile(c => !c.equals(' ')).drop(1)
 
         val col: PieceColor = if (cutFen(0).toLower == 'w') 
             then White 
             else if (cutFen(0).toLower == 'b') 
                 then Black
-                else throw new IllegalArgumentException
+                else throw IllegalArgumentException()
         cutFen = cutFen.drop(2)
 
         val whiteC = 
@@ -138,7 +135,6 @@ object ChessState:
         val fullM = cutFen.toInt
 
         ChessState(false, None, col, whiteC, blackC, halfM, fullM, enP, size)
-    }
 
 case class Castles(queenSide: Boolean = true, kingSide: Boolean = true):
     override def toString(): String = (if (kingSide) then "k" else "") + (if (queenSide) then "q" else "")

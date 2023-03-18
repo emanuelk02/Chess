@@ -23,12 +23,10 @@ import model.fileIOComponent.FileIOInterface
 import model.fileIOComponent._
 
 
-class ChessModule extends AbstractModule {
-  override def configure(): Unit = {
+class ChessModule extends AbstractModule:
+  override def configure(): Unit =
     bind(classOf[GameField]).toInstance(ChessField())
     bind(classOf[ControllerInterface]).toInstance(Controller(
-      new ChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), 
-      new ChessCommandInvoker))
+      ChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), 
+      ChessCommandInvoker()))
     bind(classOf[FileIOInterface]).toInstance(fileIoFenXmlImpl.FileIO())
-  }
-}

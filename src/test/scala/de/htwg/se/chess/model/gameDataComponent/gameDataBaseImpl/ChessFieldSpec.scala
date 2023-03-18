@@ -24,7 +24,7 @@ import model.gameDataComponent.GameState._
 import util.Matrix
 
 
-class ChessFieldSpec extends AnyWordSpec {
+class ChessFieldSpec extends AnyWordSpec:
   "A ChessField" when {
     "empty" should {
       "be created calling the explicit Constructor" in {
@@ -389,7 +389,7 @@ class ChessFieldSpec extends AnyWordSpec {
         )
       }
       "compute legal moves for a given tile" in {
-        var cf = new ChessField()
+        var cf = ChessField()
 
         //---------------------------------------------------------------------------------- Individual Pieces
 
@@ -715,7 +715,7 @@ class ChessFieldSpec extends AnyWordSpec {
         cf.checkFen("bbb/k2") should be("Invalid string: \"bbb\" at index 0\nInvalid string: \"k2\" at index 1\n")
       }
       "have a Game State" in {
-        var cf = new ChessField()
+        var cf = ChessField()
                     .replace(Tile("A7"), "R")
                     .replace(Tile("B7"), "R")
                     .replace(Tile("D8"), "k")
@@ -763,4 +763,3 @@ class ChessFieldSpec extends AnyWordSpec {
       }
     }
   }
-}

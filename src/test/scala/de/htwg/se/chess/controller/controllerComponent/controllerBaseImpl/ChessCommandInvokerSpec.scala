@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -35,7 +35,7 @@ class ChessCommandInvokerSpec extends AnyWordSpec {
     "A ChessCommandInvoker" when {
         "you're not playing" should {
             val field = GameField()
-            val inv = new ChessCommandInvoker
+            val inv = ChessCommandInvoker()
 
             val put = PutCommand((Tile("A1"), "k"), field)
             val move = MoveCommand((Tile("A1"), Tile("A2")), field)

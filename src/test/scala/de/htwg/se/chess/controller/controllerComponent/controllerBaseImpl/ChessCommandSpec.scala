@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -28,14 +28,13 @@ import model.PieceColor._
 import util.Matrix
 
 
-case class TestChessCommand(field: GameField) extends ChessCommand(field) {
+case class TestChessCommand(field: GameField) extends ChessCommand(field):
     override def execute: GameField = field.fill(None)
     override def undo: GameField = field
     override def redo: GameField = execute
-    override def event = new TestEvent(field)
-}
+    override def event = TestEvent(field)
 
-class ChessCommandSpec extends AnyWordSpec {
+class ChessCommandSpec extends AnyWordSpec:
    /**
    * ChessCommands are an addition to the Command Pattern, mainly used
    * to implement an undo-redo mechanism.
@@ -71,7 +70,7 @@ class ChessCommandSpec extends AnyWordSpec {
             cm.redo should be(field.fill(None))
         }
         "contain an event which can be published by a controller" in {
-            cm.event should be(new TestEvent(cm.field))
+            cm.event should be(TestEvent(cm.field))
         }
     }
     val size = 2
@@ -104,7 +103,7 @@ class ChessCommandSpec extends AnyWordSpec {
         }
     }
     val mField = 
-        new ChessField()
+        ChessField()
             .replace(Tile("A1"), "R")
             .replace(Tile("A2"), "b")
             .replace(Tile("B1"), "b")
@@ -165,7 +164,7 @@ class ChessCommandSpec extends AnyWordSpec {
 
         "set the final game state" in {
             val nField = 
-                new ChessField()
+                ChessField()
                     .replace(Tile("A7"), "R")
                     .replace(Tile("B7"), "R")
                     .replace(Tile("D8"), "k")
@@ -218,12 +217,12 @@ class ChessCommandSpec extends AnyWordSpec {
             sel.execute should be (field.select(Some(tile)))
             sel.undo should be (field)
             sel.redo should be (field.select(Some(tile)))
-            sel.event should be (new Select(Some(tile)))
+            sel.event should be (Select(Some(tile)))
 
             sel2.execute should be (field.select(None))
             sel2.undo should be (field)
             sel2.redo should be (field.select(None))
-            sel2.event should be (new Select(None))
+            sel2.event should be (Select(None))
         }
     }
 
@@ -235,6 +234,3 @@ class ChessCommandSpec extends AnyWordSpec {
             errCmd.undo should be(field)
         }
     }
-       
-}
-

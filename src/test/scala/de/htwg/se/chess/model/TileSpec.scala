@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -16,7 +16,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 
-class TileSpec extends AnyWordSpec {
+class TileSpec extends AnyWordSpec:
     "A Tile" should {
         "be created using Chess file and rank integers and the size of the corresponding ChessField" in {
             // Note that, in Chess ranks count from the white side upwards from 1 to 8
@@ -59,7 +59,7 @@ class TileSpec extends AnyWordSpec {
             tile1 + (2, 2) shouldBe Tile("D4")
             tile1 - (0, 1) shouldBe Tile(2, 1, 8)
             tile1 - (1, 1) shouldBe Tile(1, 1, 8)
-            tile1 - new Tile(1, 1, 3) shouldBe Tile(1, 1, 8)
+            tile1 - Tile(1, 1, 3) shouldBe Tile(1, 1, 8)
 
             an [AssertionError] should be thrownBy tile1 - tile2
             an [AssertionError] should be thrownBy tile2 - (2, 0)
@@ -75,7 +75,7 @@ class TileSpec extends AnyWordSpec {
             tile2.row shouldBe 0 // 2 - 2
         }
         "allow conversions into Chess file and rank characters and to one String" in {
-            val tile1 = new Tile(1, 1, 8)
+            val tile1 = Tile(1, 1, 8)
             tile1.fileChar shouldBe 'A'
             tile1.rankChar shouldBe '1'
             tile1.toString shouldBe "A1"
@@ -86,4 +86,3 @@ class TileSpec extends AnyWordSpec {
             tile2.toString shouldBe "B2"
         }
     }
-}

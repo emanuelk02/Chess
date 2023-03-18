@@ -21,29 +21,24 @@ import scala.xml.{ NodeSeq, PrettyPrinter }
 import gameDataComponent.GameField
 
 
-class FileIO extends FileIOInterface {
-  
-    override def load: GameField = {
+class FileIO extends FileIOInterface:
+    override def load: GameField =
         val file = scala.xml.XML.loadFile("field.xml")
-        var cf = Guice.createInjector(new ChessModule).getInstance(classOf[GameField])
+        var cf = Guice.createInjector(ChessModule()).getInstance(classOf[GameField])
         val fen = (file \\ "fen").text
         cf.loadFromFen(fen)
-    }
 
     override def save(field: GameField): Unit = saveString(field)
 
-    def saveString(field: GameField) = {
+    def saveString(field: GameField) =
         import java.io._
-        val pw = new PrintWriter(new File("field.xml"))
-        val prettyPrinter = new PrettyPrinter(120, 4)
+        val pw = PrintWriter(File("field.xml"))
+        val prettyPrinter = PrettyPrinter(120, 4)
         val xml = prettyPrinter.format(fieldToXml(field))
         pw.write(xml)
         pw.close
-    }
 
-    def fieldToXml(field: GameField) = {
+    def fieldToXml(field: GameField) =
         <field>
             <fen>{field.toFen}</fen>
         </field>
-    }
-}

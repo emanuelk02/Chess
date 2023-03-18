@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -26,11 +26,11 @@ import model.Piece
 import model.Piece._
 import util.Matrix
 
-class MockControllerSpec extends AnyWordSpec {
+class MockControllerSpec extends AnyWordSpec:
   // This is a simple mock implementation of a Controller to use, when an instance is
   // needed but you do not intend any functionality for it.
   "A MockController" should {
-    val ctrl = new MockController()
+    val ctrl = MockController()
     "be created calling the explicit Constructor" in {
       ctrl.size should be(0)
     }
@@ -68,4 +68,3 @@ class MockControllerSpec extends AnyWordSpec {
       ctrl.fieldToFen shouldBe ""
     }
   }
-}

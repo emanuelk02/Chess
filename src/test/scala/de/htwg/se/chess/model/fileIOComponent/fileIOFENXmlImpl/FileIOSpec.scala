@@ -21,7 +21,7 @@ import model.gameDataComponent.GameField
 import model.fileIOComponent.fileIoFenXmlImpl._
 
 
-class FileIOSpec extends AnyWordSpec {
+class FileIOSpec extends AnyWordSpec:
     "A GameField" when {
         "stored with FEN in Xml" should {
             "be the default implementation for the fileIO interface" in {
@@ -46,4 +46,3 @@ class FileIOSpec extends AnyWordSpec {
             }
         }
     }
-}

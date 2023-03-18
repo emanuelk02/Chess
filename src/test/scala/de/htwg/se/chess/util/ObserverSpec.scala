@@ -17,19 +17,18 @@ import org.scalatest.matchers.should.Matchers._
 
 
 class TestObservable extends Observable {}
-class TestObserver(observable: Observable) extends Observer {
+class TestObserver(observable: Observable) extends Observer:
     val observed = observable
     var num = 0
     override def update: Unit = { num = num + 1 }
     override def updateOnError(message: String): Unit = { num = num - 1 }
-}
 
-class ObserverSpec extends AnyWordSpec {
+class ObserverSpec extends AnyWordSpec:
   "An Observer" should {
     "be able to observe Observables and be notified of changes withing his observed object" in {
-      val observable = new TestObservable()
-      val observer1 = new TestObserver(observable)
-      val observer2 = new TestObserver(observable)
+      val observable = TestObservable()
+      val observer1 = TestObserver(observable)
+      val observer2 = TestObserver(observable)
 
       observer1.observed.add(observer1)
       observable.subscribers should contain(observer1)
@@ -50,4 +49,3 @@ class ObserverSpec extends AnyWordSpec {
       observer2.num should be(-1)
     }
   }
-}

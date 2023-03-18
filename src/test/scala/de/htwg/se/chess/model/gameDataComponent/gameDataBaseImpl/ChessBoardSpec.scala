@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -21,7 +21,7 @@ import model.Piece._
 import util.Matrix
 
 
-class ChessBoardSpec extends AnyWordSpec {
+class ChessBoardSpec extends AnyWordSpec:
     "line(color: String, width: Int)" should {
         "produce a String of the form '+---' as a ceiling for tiles" in {
             an [AssertionError] should be thrownBy line(0)
@@ -302,4 +302,3 @@ class ChessBoardSpec extends AnyWordSpec {
             }
         }
     }
-}

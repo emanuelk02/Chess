@@ -18,7 +18,7 @@ import org.scalatest.matchers.should.Matchers._
 
 class TestCommandInvoker extends CommandInvoker[Int]
 
-class CommandInvokerSpec extends AnyWordSpec {
+class CommandInvokerSpec extends AnyWordSpec:
     /**
      * The CommandInvoker uses the Command pattern to control
      * the undo-redo mechanism.
@@ -26,11 +26,11 @@ class CommandInvokerSpec extends AnyWordSpec {
      * after another if you wish to undo them.
      * */
     "A CommandInvoker" when {
-        val ci = new TestCommandInvoker
+        val ci = TestCommandInvoker()
         "parsed Commands" should {
             "execute these Commands" in {
-                ci.doStep(new TestCommand(5)) should be(15)
-                ci.doStep(new TestCommand(10)) should be(20)
+                ci.doStep(TestCommand(5)) should be(15)
+                ci.doStep(TestCommand(10)) should be(20)
             }
             "remember the commands and undo them in correct order returning their given state before execution\n    or return None if nothing can be undone anymore" in {
                 ci.undoStep should be(Some(10))
@@ -46,4 +46,3 @@ class CommandInvokerSpec extends AnyWordSpec {
             }
         }
     }
-}
