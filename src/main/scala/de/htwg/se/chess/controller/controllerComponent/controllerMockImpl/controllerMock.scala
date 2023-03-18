@@ -26,7 +26,7 @@ class MockController extends ControllerInterface:
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit = { }
 
   def move(args: Tuple2[Tile, Tile]): CommandInterface = throw UnsupportedOperationException()
-  def put(args: Tuple2[Tile, String]): CommandInterface = throw UnsupportedOperationException()
+  def put(args: Tuple2[Tile, String | Option[Piece]]): CommandInterface = throw UnsupportedOperationException()
   def clear(args: Unit): CommandInterface = throw UnsupportedOperationException()
   def putWithFen(args: String): CommandInterface = throw UnsupportedOperationException()
   def select(tile: Option[Tile]): CommandInterface = throw UnsupportedOperationException()

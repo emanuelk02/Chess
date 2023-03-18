@@ -24,6 +24,7 @@ import net.codingwell.scalaguice.InjectorExtensions._
 import model.gameDataComponent.GameField
 import model.fileIOComponent.FileIOInterface
 import model.Tile
+import model.Piece
 import util.Command
 
 
@@ -42,7 +43,7 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
     publish(cmd.event)
 
   def move(args: Tuple2[Tile, Tile]): ChessCommand = if (field.playing) then CheckedMoveCommand(MoveCommand(args, field)) else MoveCommand(args, field)
-  def put(args: Tuple2[Tile, String]): ChessCommand = PutCommand(args, field)
+  def put(args: Tuple2[Tile, String | Option[Piece]]): ChessCommand = PutCommand(args, field)
   def clear(args: Unit): ChessCommand = ClearCommand(field)
   def putWithFen(args: String): ChessCommand = FenCommand(args, field)
   def select(args: Option[Tile]): ChessCommand = SelectCommand(args, field)

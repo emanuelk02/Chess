@@ -39,6 +39,7 @@ class MockControllerSpec extends AnyWordSpec:
     "throw exceptions when trying to create modification commands" in {
         an [UnsupportedOperationException] should be thrownBy ctrl.move((t1,t2))
         an [UnsupportedOperationException] should be thrownBy ctrl.put((t1,"Q"))
+        an [UnsupportedOperationException] should be thrownBy ctrl.put((t1,Some(W_QUEEN)))
         an [UnsupportedOperationException] should be thrownBy ctrl.clear(())
         an [UnsupportedOperationException] should be thrownBy ctrl.putWithFen("")
         an [UnsupportedOperationException] should be thrownBy ctrl.select(Some(t1))

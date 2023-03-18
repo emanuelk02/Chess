@@ -27,7 +27,7 @@ trait ChessCommand(field: GameField) extends CommandInterface:
     protected val prevField = field
     def event: Event
 
-case class PutCommand(args: Tuple2[Tile, String], field: GameField) extends ChessCommand(field):
+case class PutCommand(args: Tuple2[Tile, String | Option[Piece]], field: GameField) extends ChessCommand(field):
     override def execute: GameField = field.replace(args(0), args(1))
     override def undo: GameField    = prevField
     override def redo: GameField    = execute

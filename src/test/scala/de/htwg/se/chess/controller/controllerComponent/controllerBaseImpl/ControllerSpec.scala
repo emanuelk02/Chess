@@ -116,9 +116,9 @@ class ControllerSpec extends AnyWordSpec:
     "filled" should {
       "not have a diferent sized ChessField based on contents" in {
         ctrl.size should be(2)
-        ctrl.put((Tile("A1", ctrl.size), "B_KING"))
+        ctrl.executeAndNotify(ctrl.put, (Tile("A1", ctrl.size), "B_KING"))
         ctrl.size should be(matr.size)
-        ctrl.put(Tile("B2"), "b")
+        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), Some(B_BISHOP)))
         ctrl.field.size should be(matr.size)
       }
       "allow to replace single cells at any location by String and store the changes" in {
@@ -145,7 +145,7 @@ class ControllerSpec extends AnyWordSpec:
           )
         )
         ctrl.put(Tile("B2", ctrl.size), "B_KING") should be (PutCommand((Tile("B2", ctrl.size), "B_KING"), ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), "B_KING"))
+        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), Some(B_KING)))
         ctrl.field should be(
           ChessField(
             Matrix(
@@ -170,7 +170,7 @@ class ControllerSpec extends AnyWordSpec:
           )
         )
         ctrl.put((Tile("B2", ctrl.size), "k")) should be (PutCommand((Tile("B2", ctrl.size), "k"),ctrl.field))
-        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), "k"))
+        ctrl.executeAndNotify(ctrl.put, (Tile("B2", ctrl.size), Some(B_KING)))
         ctrl.field should be(
           ChessField(
             Matrix(

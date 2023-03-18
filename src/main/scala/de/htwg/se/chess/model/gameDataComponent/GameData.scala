@@ -65,30 +65,17 @@ trait GameField (field: Matrix[Option[Piece]]):
     /**
      * Replaces the piece in field at the given tile with the provided filling.
      * @param tile  Tile to replace the contents of
-     * @param fill  The piece which should replace the current one
+     * @param fill  Either an Option[Piece] or String which should replace the current one
      * @return      The same field but with the newly replaced piece
      * */
-    def replace(tile: Tile, fill: Option[Piece]): GameField
-    /**
-     * Replaces the piece in field at the given tile with the provided filling.
-     * @param tile  Tile to replace the contents of
-     * @param fill  The string of the piece which should replace the current one
-     * @return      The same field but with the newly replaced piece
-     * */
-    def replace(tile: Tile, fill: String):        GameField
+    def replace(tile: Tile, fill: String | Option[Piece]): GameField
 
     /**
      * Entirely fills the field with given piece.
-     * @param filling  The piece which the board should be filled with
+     * @param filling  Either an Option[Piece] or String which the board should be filled with
      * @return         The same field but with the newly filled board
      * */
-    def fill(filling: Option[Piece]): GameField
-    /**
-     * Entirely fills the field with given piece.
-     * @param filling  The string of the piece which the board should be filled with
-     * @return         The same field but with the newly filled board
-     * */
-    def fill(filling: String):        GameField
+    def fill(filling: String | Option[Piece]): GameField
 
     /**
      * Moves contents of one tile inte another tile.

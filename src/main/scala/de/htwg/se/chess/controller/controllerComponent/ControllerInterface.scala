@@ -80,7 +80,7 @@ trait ControllerInterface extends Publisher:
      * @param args      Tuple of a Tile and a String: destination tile and the string representation of a piece
      * @return          CommandInterface placing a piece on the game field
      * */
-    def put(args: Tuple2[Tile, String]): CommandInterface
+    def put(args: Tuple2[Tile, String | Option[Piece]]): CommandInterface
 
     /**
      * Returns a Command which clears the game field.
