@@ -193,3 +193,4 @@ val ret2 = nField.copy(
       
 ret2.legalMoves.forall( entry => ret2.getLegalMoves(entry(0)).isEmpty )
 
+None.toString
