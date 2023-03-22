@@ -27,6 +27,7 @@ import PieceColor._
 import Piece._
 import util.Matrix
 import util.ChainHandler
+import scala.annotation.tailrec
 
 
 case class ChessField @Inject() (
@@ -225,57 +226,30 @@ case class ChessField @Inject() (
   private val kingMoveList      : List[Tuple2[Int, Int]] = diagonalMoves ::: straightMoves
   private val queenMoveList     : List[Tuple2[Int, Int]] = diagonalMoves ::: straightMoves
 
+  private def slidingMoveChain(moves: List[Tuple2[Int, Int]])(start: Tile) : List[Tile] =
+    moves.map{ move => iterateMove(start, move) }
+    .flatMap{ x => x.takeWhile( p => p.isDefined ) }
+    .map{ x => x.get }
+
+  @tailrec
+  private def iterateMove(start: Tile, move: Tuple2[Int, Int], count: Int = 0, list: List[Option[Tile]] = Nil) : List[Option[Tile]] =
+    Try(start - (move(0)*count, move(1)*count)) match
+      case s: Success[Tile] =>
+        cell(s.get) match
+          case Some(_) => list :+ tileHandle.handleRequest(s.get)
+          case None => iterateMove(start, move, count + 1, list :+ tileHandle.handleRequest(s.get))
+      case f: Failure[Tile] => list
+
   private def kingMoveChain(in: Tile) : List[Tile] =
     kingMoveList.filter( x => Try(in - x).isSuccess )
                 .filter( x => tileHandle.handleRequest(in - x).isDefined )
                 .map( x => in - x )
                 .appendedAll(castleTiles)
                 .filter( tile => !attackedTiles.contains(tile) )
-  
-  private def queenMoveChain(in: Tile) : List[Tile] =
-    val ret = queenMoveList.map( move =>
-      var prevPiece: Option[Piece] = None
-      for i <- 1 to size 
-      yield
-        if (prevPiece.isEmpty)
-          Try(in - (move(0)*i, move(1)*i)) match
-            case s: Success[Tile] =>
-                prevPiece = cell(s.get)
-                tileHandle.handleRequest(s.get)
-            case f: Failure[Tile] => None
-        else None
-    )
-    ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
 
-  private def rookMoveChain(in: Tile) : List[Tile] =
-    val ret = straightMoves.map( move =>
-      var prevPiece: Option[Piece] = None
-      for i <- 1 to size 
-      yield
-        if (prevPiece.isEmpty)
-          Try(in - (move(0)*i, move(1)*i)) match
-            case s: Success[Tile] =>
-                prevPiece = cell(s.get)
-                tileHandle.handleRequest(s.get)
-            case f: Failure[Tile] => None
-        else None
-    )
-    ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
-
-  private def bishopMoveChain(in: Tile) : List[Tile] =
-    val ret = diagonalMoves.map( move =>
-      var prevPiece: Option[Piece] = None
-      for i <- 1 to size 
-      yield
-        if (prevPiece.isEmpty)
-          Try(in - (move(0)*i, move(1)*i)) match
-            case s: Success[Tile] =>
-                prevPiece = cell(s.get)
-                tileHandle.handleRequest(s.get)
-            case f: Failure[Tile] => None
-        else None
-    )
-    ret.flatMap( x => x.takeWhile( p => p.isDefined)).map( x => x.get )
+  private def queenMoveChain = slidingMoveChain(queenMoveList) _
+  private def rookMoveChain = slidingMoveChain(straightMoves) _
+  private def bishopMoveChain = slidingMoveChain(diagonalMoves) _
 
   private def knightMoveChain(in: Tile) : List[Tile] =
     knightMoveList.filter( x => Try(in - x).isSuccess )
