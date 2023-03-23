@@ -339,7 +339,9 @@ case class ChessField @Inject() (
   override def toString: String = field.toBoard() + state.toString + "\n"
 
   override def toFenPart: String =
-    field.rows.zipWithIndex.flatMap( (rowVector, row) =>
+    field.rows
+      .zipWithIndex
+      .flatMap( (rowVector, row) =>
       val rowStr = rowVector.foldLeft("", 0) { (prev, piece) =>
           if (piece.isEmpty) then
             (prev(0), prev(1) + 1)
