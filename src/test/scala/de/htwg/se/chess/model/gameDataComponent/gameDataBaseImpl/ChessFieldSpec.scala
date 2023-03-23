@@ -217,7 +217,7 @@ class ChessFieldSpec extends AnyWordSpec:
             // we simply copy in the other paramaters to ensure should be succeeds
             // on equality, since we only focus on the moving part in this section
             cf.state,
-            true,
+            false,
             cf.move(Tile("A1", cf.size), Tile("B1", cf.size)).attackedTiles,
             cf.move(Tile("A1", cf.size), Tile("B1", cf.size)).gameState
           )
@@ -231,23 +231,23 @@ class ChessFieldSpec extends AnyWordSpec:
               )
             ),
             cf.state,
-            true,
+            false,
             cf.move(Tile("A1", cf.size), Tile("A2", cf.size)).attackedTiles,
             cf.move(Tile("A1", cf.size), Tile("A2", cf.size)).gameState
           )
         )
       
         // Move rook with king, when castling
-        var cf2 = ChessField().loadFromFen("k7/8/8/8/8/8/8/R3K2R w KQkq - 0 1").move(Tile("E1"),Tile("G1"))
-        cf2 should be (ChessField().loadFromFen("k7/8/8/8/8/8/8/R4RK1 b kq - 1 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        var cf2 = ChessField.fromFen("k7/8/8/8/8/8/8/R3K2R w KQkq - 0 1").move(Tile("E1"),Tile("G1"))
+        cf2 should be (ChessField.fromFen("k7/8/8/8/8/8/8/R4RK1 b kq - 1 1"))
 
         // Remove pawn on En Passant
-        cf2 = ChessField().loadFromFen("k7/8/8/pP/8/8/8/8 w KQkq a6 0 1").move(Tile("B5"),Tile("A6"))
-        cf2 should be (ChessField().loadFromFen("k7/8/P7/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        cf2 = ChessField.fromFen("k7/8/8/pP/8/8/8/8 w KQkq a6 0 1").move(Tile("B5"),Tile("A6"))
+        cf2 should be (ChessField.fromFen("k7/8/P7/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
 
         // Replace Pawn with Queen on promotion
-        cf2 = ChessField().loadFromFen("k7/3P/8/8/8/8/8/8 w KQkq a6 0 1").move(Tile("D7"),Tile("D8"))
-        cf2 should be (ChessField().loadFromFen("k2Q/8/8/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        cf2 = ChessField.fromFen("k7/3P/8/8/8/8/8/8 w KQkq a6 0 1").move(Tile("D7"),Tile("D8"))
+        cf2 should be (ChessField.fromFen("k2Q/8/8/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
       }
       "allow to load its matrix by specifying contents through Forsyth-Edwards-Notation" in {
         /**
@@ -469,11 +469,11 @@ class ChessFieldSpec extends AnyWordSpec:
          * the tile he could move on is attacked.
          * These cases will also be covered later.
          * */
-        cf = cf.loadFromFen("8/8/8/8/8/5Q2/4K2/8 w - 0 1")
+        cf = cf.loadFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1")
         cf.getLegalMoves(Tile("E2")).sorted shouldBe (
           Tile("D3") :: Tile("E3") :: /* Queen */
-          Tile("D2") ::  /* King */   Tile("F2") ::
-          Tile("D1") :: Tile("E1") :: Tile("F1") ::
+          Tile("D2") ::  /* King */   Tile("F2") :: /* Bishop */
+          Tile("D1") :: Tile("E1") :: /* Bishop attack */
           Nil
         ).sorted
 

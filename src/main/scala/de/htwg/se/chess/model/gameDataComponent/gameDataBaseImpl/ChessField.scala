@@ -83,7 +83,7 @@ case class ChessField @Inject() (
     )
   )
 
-  val gameStateChain = ChainHandler[ChessField, GameState] (List[ChessField => Option[GameState]]
+  private val gameStateChain = ChainHandler[ChessField, GameState] (List[ChessField => Option[GameState]]
     (
       ( in => if playing then None else Some(RUNNING) ),
       ( in => if state.halfMoves < 50 then None else Some(DRAW) ),
@@ -103,16 +103,16 @@ case class ChessField @Inject() (
 
     tempField = specialMoveChain.handleRequest((tile1, tile2, tempField)).getOrElse(tempField)
 
-    val newInCheck = 
-      !tempField.attackedTiles
-        .filter(tile => cell(tile).isDefined && cell(tile).get.getType == King)
-        .isEmpty
+    val invertedTempField = tempField.setColor(color.invert)
+    val newInCheck = if playing && invertedTempField.getKingSquare.isDefined
+      then invertedTempField.isAttacked(invertedTempField.getKingSquare.get)
+      else false
 
     val ret = copy(
         tempField.field,
         state.evaluateMove((tile1, tile2), cell(tile1).get, cell(tile2)),
         newInCheck,
-        tempField.legalMoves.flatMap( entry => entry._2).toList.sorted
+        tempField.setColor(color).legalMoves.flatMap( entry => entry._2).toList.sorted
       )
 
     val newGameState = gameStateChain.handleRequest(ret).get
@@ -232,11 +232,11 @@ case class ChessField @Inject() (
     .map{ x => x.get }
 
   @tailrec
-  private def iterateMove(start: Tile, move: Tuple2[Int, Int], count: Int = 0, list: List[Option[Tile]] = Nil) : List[Option[Tile]] =
+  private def iterateMove(start: Tile, move: Tuple2[Int, Int], count: Int = 1, list: List[Option[Tile]] = Nil) : List[Option[Tile]] =
     Try(start - (move(0)*count, move(1)*count)) match
       case s: Success[Tile] =>
         cell(s.get) match
-          case Some(_) => list :+ tileHandle.handleRequest(s.get)
+          case Some(_) => list :+ tileHandle.handleRequest(s.get);
           case None => iterateMove(start, move, count + 1, list :+ tileHandle.handleRequest(s.get))
       case f: Failure[Tile] => list
 
@@ -288,7 +288,7 @@ case class ChessField @Inject() (
         )
         .appendedAll(doublePawnChain(in))
   
-  def isAttacked(tile: Tile): Boolean = reverseAttackChain.handleRequest(tile).get
+  def isAttacked(tile: Tile): Boolean = if attackedTiles.contains(tile) then true else reverseAttackChain.handleRequest(tile).get
 
   private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
     (
@@ -325,28 +325,6 @@ case class ChessField @Inject() (
       mbM.addOne(tile -> computeLegalMoves(tile))
     mbM.result
 
-  override def loadFromFen(fen: String): ChessField =
-    val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, field.size).toVector
-    val newMatrix = 
-      Matrix(
-        Vector.tabulate(field.size) { rank => fenList.drop(rank * field.size).take(field.size) }
-      )
-    val newState: ChessState = state.evaluateFen(fen)
-    val tmpField = copy( newMatrix, newState ).setColor(newState.color.invert).start                          // temp field constructed to get
-    tmpField.copy( newMatrix, state = tmpField.state.copy(color = newState.color), attackedTiles = tmpField.attackedTiles) // attackedFiles for actual field
-
-  def fenToList(fen: List[Char], size: Int): List[Option[Piece]] =
-    fen match
-      case '/' :: rest => List.fill(size)(None) ::: fenToList(rest, field.size)
-      case s :: rest =>
-        if s.isDigit then
-          List.fill(s.toInt - '0'.toInt)(None) ::: fenToList(
-            rest,
-            size - (s.toInt - '0'.toInt)
-          )
-        else Piece(s) :: fenToList(rest, size - 1)
-      case _ => List.fill(size)(None)
-
   override def getKingSquare: Option[Tile] =
     var kingSq = Option.empty[Tile]
     for
@@ -359,8 +337,8 @@ case class ChessField @Inject() (
     return kingSq
   
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
-  override def stop: ChessField = ChessField(field, state.stop, false, Nil)
-
+  override def stop: ChessField = ChessField(field, state.stop)
+  override def loadFromFen(fen: String): ChessField = ChessField.fromFen(fen, field.size)
   override def select(tile: Option[Tile]) = copy(field, state.select(tile))
   override def selected: Option[Tile] = state.selected
   override def playing = state.playing
@@ -411,17 +389,46 @@ case class ChessField @Inject() (
 object ChessField:
   def apply(field: Matrix[Option[Piece]]): ChessField =
     val state = ChessState(size = field.size)
-    new ChessField(
-      field, 
-      state, 
-      false, 
-      Nil
+    ChessField(
+      field,
+      state
     )
 
   def apply(field: Matrix[Option[Piece]], state: ChessState): ChessField =
+    val tmpField = new ChessField( field, state ).setColor(state.color.invert)
+    val attackedTiles = tmpField.legalMoves.flatMap( entry => entry._2).toList.sorted
+    val inCheck = tmpField.setColor(state.color).getKingSquare match
+        case Some(kingSq) => attackedTiles.contains(kingSq)
+        case None => false
     new ChessField(
       field,
       state,
-      false,
-      new ChessField(field, state).legalMoves.flatMap( entry => entry._2).toList.sorted
+      inCheck,
+      attackedTiles
     )
+  
+  def fromFen(fen: String, fieldSize: Int = 8): ChessField =
+    val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, fieldSize, fieldSize).toVector
+    val newMatrix = 
+      Matrix(
+        Vector.tabulate(fieldSize) { rank => fenList.drop(rank * fieldSize).take(fieldSize) }
+      )
+    val newState: ChessState = ChessState(size = fieldSize).evaluateFen(fen)
+    val tmpField = ChessField( newMatrix, newState ).start.setColor(newState.color.invert)
+    val newInCheck = tmpField.setColor(newState.color).getKingSquare match
+        case Some(kingSq) => tmpField.setColor(newState.color).isAttacked(kingSq)
+        case None => false
+    tmpField.copy( newMatrix, tmpField.state.copy(color = newState.color), newInCheck, attackedTiles = tmpField.attackedTiles)
+
+  private def fenToList(fen: List[Char], remaining: Int, fieldSize: Int): List[Option[Piece]] =
+    fen match
+      case '/' :: rest => List.fill(remaining)(None) ::: fenToList(rest, fieldSize, fieldSize)
+      case s :: rest =>
+        if s.isDigit then
+          List.fill(s.toInt - '0'.toInt)(None) ::: fenToList(
+            rest,
+            remaining - (s.toInt - '0'.toInt),
+            fieldSize
+          )
+        else Piece(s) :: fenToList(rest, remaining - 1, fieldSize)
+      case _ => List.fill(remaining)(None)

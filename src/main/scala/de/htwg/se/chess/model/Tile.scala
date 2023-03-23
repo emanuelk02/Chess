@@ -25,10 +25,10 @@ case class Tile(file: Int, rank: Int, size: Int = 8):
 
     def ==(x: Tile) = this.file == x.file && this.rank == x.rank
 
-    def +(x: Tuple2[Int, Int]): Tile = copy(file + x._1, rank + x._2)
+    def +(x: Tuple2[Int, Int]): Tile = copy(file + x(0), rank + x(1))
     def +(x: Tile): Tile = copy(file + x.file, rank + x.rank)
 
-    def -(x: Tuple2[Int, Int]): Tile = copy(file - x._1, rank - x._2)
+    def -(x: Tuple2[Int, Int]): Tile = copy(file - x(0), rank - x(1))
     def -(x: Tile): Tile = copy(file - x.file, rank - x.rank)
 
     override def toString: String = fileChar.toString + rank.toString
