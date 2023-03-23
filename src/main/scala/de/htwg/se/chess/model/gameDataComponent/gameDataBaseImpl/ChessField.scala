@@ -17,7 +17,7 @@ package gameDataBaseImpl
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
-import scala.util.control.Breaks._
+import scala.annotation.tailrec
 
 import com.google.inject.{Guice, Inject}
 
@@ -27,7 +27,6 @@ import PieceColor._
 import Piece._
 import util.Matrix
 import util.ChainHandler
-import scala.annotation.tailrec
 
 
 case class ChessField @Inject() (

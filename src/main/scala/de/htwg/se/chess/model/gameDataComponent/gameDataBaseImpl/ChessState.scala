@@ -31,8 +31,6 @@ case class ChessState
     enPassant: Option[Tile] = None,
     size: Int = 8
     ):
-
-    def this() = this(false)
     
     def evaluateFen(fen: String): ChessState = ChessState(fen, size)
 
@@ -71,8 +69,8 @@ case class ChessState
                     else None
         )
 
-    def start: ChessState = copy(true)
-    def stop: ChessState = copy(false)
+    def start: ChessState = copy(playing = true)
+    def stop: ChessState = copy(playing = false)
 
     def select(tile: Option[Tile]): ChessState = copy(selected = tile)
 
@@ -89,15 +87,7 @@ case class ChessState
             .append(" selected: ")
             .append(if (selected.isDefined) then selected.get.toString else "-")
             .append("\n")
-            .append(if (color == PieceColor.White) then "w" else "b")
-            .append(" ")
-            .append(whiteCastle.toString.toUpperCase + blackCastle.toString)
-            .append(" ")
-            .append(if (enPassant.isEmpty) then "-" else enPassant.get.toString.toLowerCase)
-            .append(" ")
-            .append(halfMoves.toString)
-            .append(" ")
-            .append(fullMoves.toString)
+            .append(toFenPart)
 
         strB.toString
 
