@@ -325,65 +325,49 @@ case class ChessField @Inject() (
   override def setColor(color: PieceColor): ChessField = copy(state = state.copy(color = color))
 
   def checkFen(check: String): String =
-    val splitted = check.split('/')
-
-    var count = 0
-    var ind = -1
-
-    val res = for s <- splitted yield
-      count = 0
-      ind = ind + 1
-      if s.isEmpty then count = field.size
-      else
-        s.foreach(c =>
-          if c.isDigit then count = count + c.toLower.toInt - '0'.toInt
-          else count = count + 1
-        )
-      if count > field.size 
-        then "Invalid string: \"" + splitted(ind).mkString + "\" at index " + ind.toString + "\n"
-        else ""
-    res.mkString
+    check.split('/')
+      .zipWithIndex
+      .map( str => str(0).foldLeft(0, false, str(1)) { (prev, c) =>
+        if c.isDigit then (prev(0) + c.toInt - '0'.toInt, false, str(1))
+        else if c.isLetter then (prev(0) + 1, false, str(1))
+        else (prev(0), true, str(1))
+      })
+      .filter( str => str(0) > size || str(1) )
+      .map( x => "Invalid string: \"" + check.split('/')(x(2)).mkString + "\" at index " + x(2).toString + "\n" )
+      .mkString
 
   override def toString: String = field.toBoard() + state.toString + "\n"
 
   override def toFenPart: String =
-    var rows = 0
-    val fenRet = for i <- field.rows yield
-      var count = 0
-      val row = i.flatMap( p =>
-          if (p.isEmpty) then
-            count = count + 1
-            ""
-          else if (count != 0) then 
-            val s = count.toString + p.get.toString; count = 0
-            s
-          else p.get.toString
-      )
-      rows = rows + 1
-      row.mkString + (if (count != 0) then count.toString else "") + (if (rows == size) then "" else "/")
-    fenRet.mkString
+    field.rows.zipWithIndex.flatMap( (rowVector, row) =>
+      val rowStr = rowVector.foldLeft("", 0) { (prev, piece) =>
+          if (piece.isEmpty) then
+            (prev(0), prev(1) + 1)
+          else if (prev(1) != 0) then 
+            (prev(0) + prev(1).toString + piece.get.toString, 0)
+          else (prev(0) + piece.get.toString, 0)
+      }
+      rowStr(0) + (if (rowStr(1) != 0) then rowStr(1).toString else "") + (if (row == size - 1) then "" else "/")
+    ).mkString
 
   override def toFen: String = toFenPart + " " + state.toFenPart
 
 object ChessField:
   def apply(field: Matrix[Option[Piece]]): ChessField =
-    val state = ChessState(size = field.size)
     ChessField(
       field,
-      state
+      ChessState(size = field.size)
     )
 
   def apply(field: Matrix[Option[Piece]], state: ChessState): ChessField =
-    val tmpField = new ChessField( field, state ).setColor(state.color.invert)
-    val attackedTiles = tmpField.legalMoves.flatMap( entry => entry._2).toList.sorted
-    val inCheck = tmpField.setColor(state.color).getKingSquare match
-        case Some(kingSq) => attackedTiles.contains(kingSq)
-        case None => false
+    val tmpField = new ChessField( field, state )
     new ChessField(
       field,
       state,
-      inCheck,
-      attackedTiles
+      tmpField.getKingSquare match
+        case Some(kingSq) => tmpField.isAttacked(kingSq)
+        case None => false,
+      tmpField.setColor(state.color.invert).legalMoves.flatMap( entry => entry._2).toList.sorted
     )
   
   def fromFen(fen: String, fieldSize: Int = 8): ChessField =
