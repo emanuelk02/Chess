@@ -244,6 +244,15 @@ class ChessFieldSpec extends AnyWordSpec:
         // Remove pawn on En Passant
         cf2 = ChessField.fromFen("k7/8/8/pP/8/8/8/8 w KQkq a6 0 1").move(Tile("B5"),Tile("A6"))
         cf2 should be (ChessField.fromFen("k7/8/P7/8/8/8/8/8 b KQkq - 0 1").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        // Should also work when using move to activate the En Passant tile
+        cf2 = ChessField.fromFen("k7/p/8/1P/8/8/8/8 b KQkq - 0 1").move(Tile("A7"), Tile("A5")).move(Tile("B5"),Tile("A6"))
+        cf2 should be (ChessField.fromFen("k7/8/P7/8/8/8/8/8 b KQkq - 0 2").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        // For Black
+        cf2 = ChessField.fromFen("K7/8/8/8/pP/8/8/8 b KQkq b3 0 1").move(Tile("A4"),Tile("B3"))
+        cf2 should be (ChessField.fromFen("K7/8/8/8/8/1p/8/8 w KQkq - 0 2").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
+        // Should also work when using move to activate the En Passant tile
+        cf2 = ChessField.fromFen("K7/8/8/8/p/8/1P/8 w KQkq - 0 1").move(Tile("B2"), Tile("B4")).move(Tile("A4"),Tile("B3"))
+        cf2 should be (ChessField.fromFen("K7/8/8/8/8/1p/8/8 w KQkq - 0 2").copy(attackedTiles = cf2.attackedTiles, inCheck = cf2.inCheck))
 
         // Replace Pawn with Queen on promotion
         cf2 = ChessField.fromFen("k7/3P/8/8/8/8/8/8 w KQkq a6 0 1").move(Tile("D7"),Tile("D8"))

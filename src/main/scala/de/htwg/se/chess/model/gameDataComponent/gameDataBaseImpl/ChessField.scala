@@ -169,7 +169,7 @@ case class ChessField @Inject() (
     case 7 => matr.replace(tile.row, 5, cell(tile + (1,0))).replace(tile.row, size - 1, None)
 
   private def doEnPassant(tile: Tile, matr: Matrix[Option[Piece]]): Matrix[Option[Piece]] = tile.rank match
-    case 4 => matr.replace(tile.row - 1, tile.col, None)
+    case 3 => matr.replace(tile.row - 1, tile.col, None)
     case 6 => matr.replace(tile.row + 1, tile.col, None)
 
   private def doPromotion(tile: Tile, matr: Matrix[Option[Piece]]): Matrix[Option[Piece]] =
