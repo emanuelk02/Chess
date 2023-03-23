@@ -303,27 +303,19 @@ case class ChessField @Inject() (
     )
   )
 
-  val legalMoves: Map[Tile, List[Tile]] =      // Map for all legal moves available from all tiles
-    val mbM = Map.newBuilder[Tile, List[Tile]]
-    for
-      file <- 1 to size
-      rank <- 1 to size
-    do
-      val tile = Tile(file, rank, size)
-      mbM.addOne(tile -> computeLegalMoves(tile))
-    mbM.result
+  val legalMoves: Map[Tile, List[Tile]] =
+    Map from
+      (1 to size)
+      .flatMap( file => (1 to size)
+        .map( rank => Tile(file, rank, size) )
+      ).map(tile => tile -> computeLegalMoves(tile))
 
-  override def getKingSquare: Option[Tile] =
-    var kingSq = Option.empty[Tile]
-    for
-      file <- 1 to size
-      rank <- 1 to size
-    do
-      val piece = cell(Tile(file, rank, size))
-      if piece.isDefined && piece.get.getType == King && piece.get.getColor == color
-        then kingSq = Some(Tile(file, rank, size))
-    return kingSq
-  
+  override val getKingSquare: Option[Tile] =
+    (1 to size)
+    .flatMap( file => (1 to size)
+      .map( rank => Tile(file, rank, size) )
+    ).find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
+
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
   override def stop: ChessField = ChessField(field, state.stop)
   override def loadFromFen(fen: String): ChessField = ChessField.fromFen(fen, field.size)
