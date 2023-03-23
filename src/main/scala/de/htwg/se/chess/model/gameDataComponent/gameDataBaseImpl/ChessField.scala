@@ -288,30 +288,18 @@ case class ChessField @Inject() (
         )
         .appendedAll(doublePawnChain(in))
   
-  def isAttacked(tile: Tile): Boolean = if attackedTiles.contains(tile) then true else reverseAttackChain.handleRequest(tile).get
+  def isAttacked(tile: Tile): Boolean = if attackedTiles.contains(tile) then true else reverseAttackChain.handleRequest(tile).getOrElse(false)
 
+  private def reverseAttackCheck(pieceType: PieceType, chain: Tile => List[Tile])(in: Tile) : Option[Boolean] =
+    if chain(in).forall( tile => cell(tile).getOrElse(W_KING).getType != pieceType)
+        then None else Some(true)
   private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
     (
-      ( in => if queenMoveChain(in)
-                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Queen)
-                 then None else Some(true)
-      ),
-      ( in => if rookMoveChain(in)
-                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Rook)
-                 then None else Some(true)
-      ),
-      ( in => if bishopMoveChain(in)
-                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Bishop)
-                 then None else Some(true)
-      ),
-      ( in => if knightMoveChain(in)
-                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Knight)
-                 then None else Some(true)
-      ),
-      ( in => if pawnMoveChain(in)
-                 .forall( tile => cell(tile).getOrElse(W_KING).getType != Pawn)
-                 then Some(false) else Some(true)
-      )
+      ( reverseAttackCheck(Queen, queenMoveChain) _ ),
+      ( reverseAttackCheck(Rook, rookMoveChain) _ ),
+      ( reverseAttackCheck(Bishop, bishopMoveChain) _ ),
+      ( reverseAttackCheck(Knight, knightMoveChain) _ ),
+      ( reverseAttackCheck(Pawn, pawnMoveChain) _ )
     )
   )
 
