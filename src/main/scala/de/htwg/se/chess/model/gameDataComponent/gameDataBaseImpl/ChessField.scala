@@ -327,13 +327,13 @@ case class ChessField @Inject() (
   def checkFen(check: String): String =
     check.split('/')
       .zipWithIndex
-      .map( str => str(0).foldLeft(0, false, str(1)) { (prev, c) =>
-        if c.isDigit then (prev(0) + c.toInt - '0'.toInt, false, str(1))
-        else if c.isLetter then (prev(0) + 1, false, str(1))
-        else (prev(0), true, str(1))
+      .map( (str, ind) => str.foldLeft(0, false, ind) { (prev, c) =>
+        if c.isDigit then (prev(0) + c.toInt - '0'.toInt, false, ind)
+        else if c.isLetter then (prev(0) + 1, false, ind)
+        else (prev(0), true, ind)
       })
-      .filter( str => str(0) > size || str(1) )
-      .map( x => "Invalid string: \"" + check.split('/')(x(2)).mkString + "\" at index " + x(2).toString + "\n" )
+      .filter( (str, check, _) => str > size || check )
+      .map( (_, _, ind) => "Invalid string: \"" + check.split('/')(ind).mkString + "\" at index " + ind.toString + "\n" )
       .mkString
 
   override def toString: String = field.toBoard() + state.toString + "\n"
@@ -342,14 +342,14 @@ case class ChessField @Inject() (
     field.rows
       .zipWithIndex
       .flatMap( (rowVector, row) =>
-      val rowStr = rowVector.foldLeft("", 0) { (prev, piece) =>
+      val (rowStr, ind) = rowVector.foldLeft("", 0) { (prev, piece) =>
           if (piece.isEmpty) then
             (prev(0), prev(1) + 1)
           else if (prev(1) != 0) then 
             (prev(0) + prev(1).toString + piece.get.toString, 0)
           else (prev(0) + piece.get.toString, 0)
       }
-      rowStr(0) + (if (rowStr(1) != 0) then rowStr(1).toString else "") + (if (row == size - 1) then "" else "/")
+      rowStr + (if (ind != 0) then ind.toString else "") + (if (row == size - 1) then "" else "/")
     ).mkString
 
   override def toFen: String = toFenPart + " " + state.toFenPart
