@@ -23,13 +23,12 @@ case class ChainHandler[I, R](successor: Option[ChainHandler[I, R]])(function: I
 
   def handleRequest(in: I): Option[R] =
     handle(in) match
-      case s: Success[Option[R]] =>
-        if s.get.isDefined
-          then s.get 
-          else if successor.isDefined
-            then successor.get.handleRequest(in) 
-            else None
-      case f: Failure[Option[R]] => if (successor.isDefined) then successor.get.handleRequest(in) else None
+      case Success[Option[R]](s) =>
+        s match
+          case Some(_) => s
+          case None if successor.isDefined => successor.get.handleRequest(in) 
+          case None => None
+      case Failure[Option[R]](f) => if (successor.isDefined) then successor.get.handleRequest(in) else None
 
 object ChainHandler:
   def apply[I, R](list: List[(I) => (Option[R])]): ChainHandler[I, R] =
