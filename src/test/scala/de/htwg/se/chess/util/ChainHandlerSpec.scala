@@ -19,7 +19,7 @@ import org.scalatest.matchers.should.Matchers._
 class ChainHandlerSpec extends AnyWordSpec:
     /* A ChainHandler is a possible implementation of the Chain-Of-Responsibility Pattern */
     def one(in: Int) = if in > 4 then Some(1.1) else None
-    def two(in: Int) = if in > 2 then Some(2.2) else None
+    def two(in: Int) = if in > 2 then Some(2.2) else if in == 1 then throw IllegalArgumentException("") else None
     def three(in: Int) = if in > 0 then Some(3.3) else None
     "A ChainHandler" should {
         "be created given a list of functions taking an input, modifying it and returning Some of that Type or None if a criteria is met" in {
