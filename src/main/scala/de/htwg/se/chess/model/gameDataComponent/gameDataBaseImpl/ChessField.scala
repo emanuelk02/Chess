@@ -52,42 +52,43 @@ case class ChessField @Inject() (
   private val specialMoveChain = ChainHandler[Tuple3[Tile, Tile, ChessField], ChessField] (List[Tuple3[Tile, Tile, ChessField] => Option[ChessField]]
    (
       // in(0): tile1 (source);    in(1): tile2 (dest);    in(2): ChessField
-      ( in => if !playing then Some(in(2)) else None ),
-      ( in => if (cell(in(0)).get.getType == King && castleTiles.contains(in(1))) // Castling
+      ( (src, dest, field) => if !playing then Some(field) else None ),
+      ( (src, dest, field) => if (cell(src).get.getType == King && castleTiles.contains(dest)) // Castling
         then Some(ChessField(
-             doCastle(in(1), in(2).field),
-             state.evaluateMove((in(0), in(1)), cell(in(0)).get, cell(in(1))).copy(color = state.color)
+             doCastle(dest, field.field),
+             state.evaluateMove((src, dest), cell(src).get, cell(dest)).copy(color = state.color)
             ))
         else None
       ),
-      ( in => 
+      ( (src, dest, field) => 
           if state.enPassant.isDefined               // En Passant
-             && cell(in(0)).get.getType == Pawn
-             && state.enPassant.get == in(1)
+             && cell(src).get.getType == Pawn
+             && state.enPassant.get == dest
              then Some(ChessField(
-                doEnPassant(in(1), field)
-                  .replace(in(1).row, in(1).col, cell(in(0)))
-                  .replace(in(0).row, in(0).col, None ),
-                state.evaluateMove((in(0), in(1)), cell(in(0)).get, cell(in(1))).copy(color = state.color)
+                doEnPassant(dest, field.field)
+                  .replace(dest.row, dest.col, cell(src))
+                  .replace(src.row, src.col, None ),
+                state.evaluateMove((src, dest), cell(src).get, cell(dest)).copy(color = state.color)
               ))
              else None
       ),
-      ( in => if cell(in(0)).get.getType == Pawn && (in(1).rank == 1 || in(1).rank == size)   // Pawn Promotion
-        then Some(ChessField(
-              doPromotion(in(1), in(2).field),
-              state.evaluateMove((in(0), in(1)), if color == White then W_QUEEN else B_QUEEN, cell(in(1))).copy(color = state.color)
+      ( (src, dest, field) => 
+        if cell(src).get.getType == Pawn && (dest.rank == 1 || dest.rank == size)   // Pawn Promotion
+            then Some(ChessField(
+              doPromotion(dest, field.field),
+              state.evaluateMove((src, dest), if color == White then W_QUEEN else B_QUEEN, cell(dest)).copy(color = state.color)
             ))
-        else None
+            else None
       )
     )
   )
 
   private val gameStateChain = ChainHandler[ChessField, GameState] (List[ChessField => Option[GameState]]
     (
-      ( in => if playing then None else Some(RUNNING) ),
-      ( in => if state.halfMoves < 50 then None else Some(DRAW) ),
-      ( in => if in.legalMoves.forall( entry => in.getLegalMoves(entry(0)).isEmpty ) then None else Some(RUNNING) ),
-      ( in => if in.inCheck then Some(CHECKMATE) else Some(DRAW) )
+      ( _ => if playing then None else Some(RUNNING) ),
+      ( _ => if state.halfMoves < 50 then None else Some(DRAW) ),
+      ( field => if field.legalMoves.forall( entry => field.getLegalMoves(entry(0)).isEmpty ) then None else Some(RUNNING) ),
+      ( field => if field.inCheck then Some(CHECKMATE) else Some(DRAW) )
     )
   )
 
@@ -123,8 +124,9 @@ case class ChessField @Inject() (
               .get
               .filter(    // Filters out moves, which leave King in Check
                 tile2 => 
-                  if getKingSquare.isDefined
-                    then !ChessField(
+                  getKingSquare match
+                    case Some(kSq) =>
+                        !ChessField(
                             field.replace(tile2.row, tile2.col, cell(tile))
                                  .replace(tile.row, tile.col, None ),
                             state.evaluateMove((tile, tile2), cell(tile).get, cell(tile2))
@@ -133,9 +135,9 @@ case class ChessField @Inject() (
                           .isAttacked(
                             if (cell(tile).get.getType == King) 
                               then tile2
-                              else getKingSquare.get
+                              else kSq
                           )
-                    else true
+                    case None => true
               )
 
   private def computeLegalMoves(tile: Tile): List[Tile] =
@@ -145,22 +147,22 @@ case class ChessField @Inject() (
 
   private val legalMoveChain = ChainHandler[Tile, List[Tile]] (List[(Tile => Option[List[Tile]])]
     (
-      ( in => if (cell(in).get.getColor != state.color) then Some(Nil) else None ),
-      ( in => Some( cell(in).get.getType match
-          case King   =>  kingMoveChain(in)
-          case Queen  =>  queenMoveChain(in)
-          case Rook   =>  rookMoveChain(in)
-          case Bishop =>  bishopMoveChain(in)
-          case Knight =>  knightMoveChain(in)
-          case Pawn   =>  pawnMoveChain(in) 
+      ( tile => if (cell(tile).get.getColor != state.color) then Some(Nil) else None ),
+      ( tile => Some( cell(tile).get.getType match
+          case King   =>  kingMoveChain(tile)
+          case Queen  =>  queenMoveChain(tile)
+          case Rook   =>  rookMoveChain(tile)
+          case Bishop =>  bishopMoveChain(tile)
+          case Knight =>  knightMoveChain(tile)
+          case Pawn   =>  pawnMoveChain(tile) 
         )
       )
     )
   )
   private val tileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
     (
-      ( in => if cell(in).isDefined then None else Some(in) ),
-      ( in => if cell(in).get.getColor != state.color then Some(in) else None )
+      ( tile => if cell(tile).isDefined then None else Some(tile) ),
+      ( tile => if cell(tile).get.getColor != state.color then Some(tile) else None )
     )
   )
   private def doCastle(tile: Tile, matr: Matrix[Option[Piece]]): Matrix[Option[Piece]] = tile.file match
@@ -227,8 +229,8 @@ case class ChessField @Inject() (
 
   private def slidingMoveChain(moves: List[Tuple2[Int, Int]])(start: Tile) : List[Tile] =
     moves.map{ move => iterateMove(start, move) }
-    .flatMap{ x => x.takeWhile( p => p.isDefined ) }
-    .map{ x => x.get }
+         .flatMap{ x => x.takeWhile( p => p.isDefined ) }
+         .map{ x => x.get }
 
   @tailrec
   private def iterateMove(start: Tile, move: Tuple2[Int, Int], count: Int = 1, list: List[Option[Tile]] = Nil) : List[Option[Tile]] =
@@ -252,8 +254,8 @@ case class ChessField @Inject() (
 
   private def knightMoveChain(in: Tile) : List[Tile] =
     knightMoveList.filter( x => Try(in - x).isSuccess )
-                .filter( x => tileHandle.handleRequest(in - x).isDefined )
-                .map( x => in - x )
+                  .filter( x => tileHandle.handleRequest(in - x).isDefined )
+                  .map( x => in - x )
   
   private def doublePawnChain(in: Tile) = state.color match
     case White => whiteDoublePawnChain.handleRequest(in).get
@@ -262,15 +264,15 @@ case class ChessField @Inject() (
   private val whiteDoublePawnChain =
     ChainHandler[Tile, List[Tile]] (List[Tile => Option[List[Tile]]]
     (
-      ( in => if (in.rank != 2 || cell(in + (0,1)).isDefined) then Some(Nil) else None ),
-      ( in => if cell(in + (0,2)).isDefined then Some(Nil) else Some(List(in + (0,2))) )
+      ( tile => if (tile.rank != 2 || cell(tile + (0,1)).isDefined) then Some(Nil) else None ),
+      ( tile => if cell(tile + (0,2)).isDefined then Some(Nil) else Some(List(tile + (0,2))) )
     ))
 
   private val blackDoublePawnChain =
     ChainHandler[Tile, List[Tile]] (List[Tile => Option[List[Tile]]]
     (
-      ( in => if (in.rank != size - 1 || cell(in - (0,1)).isDefined) then Some(Nil) else None ),
-      ( in => if cell(in - (0,2)).isDefined then Some(Nil) else Some(List(in - (0,2))) )
+      ( tile => if (tile.rank != size - 1 || cell(tile - (0,1)).isDefined) then Some(Nil) else None ),
+      ( tile => if cell(tile - (0,2)).isDefined then Some(Nil) else Some(List(tile - (0,2))) )
     ))
 
   private def pawnMoveChain(in: Tile) : List[Tile] =
@@ -294,26 +296,26 @@ case class ChessField @Inject() (
         then None else Some(true)
   private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
     (
-      ( reverseAttackCheck(Queen, queenMoveChain) _ ),
-      ( reverseAttackCheck(Rook, rookMoveChain) _ ),
-      ( reverseAttackCheck(Bishop, bishopMoveChain) _ ),
-      ( reverseAttackCheck(Knight, knightMoveChain) _ ),
-      ( reverseAttackCheck(Pawn, pawnMoveChain) _ )
+      reverseAttackCheck(Queen, queenMoveChain) _ ,
+      reverseAttackCheck(Rook, rookMoveChain) _ ,
+      reverseAttackCheck(Bishop, bishopMoveChain) _ ,
+      reverseAttackCheck(Knight, knightMoveChain) _ ,
+      reverseAttackCheck(Pawn, pawnMoveChain) _
     )
   )
 
-  val legalMoves: Map[Tile, List[Tile]] =
-    Map from
-      (1 to size)
+  private val allTiles: Seq[Tile] =
+    (1 to size)
       .flatMap( file => (1 to size)
         .map( rank => Tile(file, rank, size) )
-      ).map(tile => tile -> computeLegalMoves(tile))
+      )
+
+  val legalMoves: Map[Tile, List[Tile]] =
+    Map from
+      allTiles.map(tile => tile -> computeLegalMoves(tile))
 
   override val getKingSquare: Option[Tile] =
-    (1 to size)
-    .flatMap( file => (1 to size)
-      .map( rank => Tile(file, rank, size) )
-    ).find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
+    allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
 
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
   override def stop: ChessField = ChessField(field, state.stop)
