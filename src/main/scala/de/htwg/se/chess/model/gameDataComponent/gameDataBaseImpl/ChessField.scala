@@ -119,6 +119,9 @@ case class ChessField @Inject() (
 
     ret.copy(gameState = newGameState)
 
+//**************************************************************************
+// Legal move computation extractable?
+
   override def getLegalMoves(tile: Tile): List[Tile] =
     legalMoves.get(tile)  // legalMoves defined later
               .get
@@ -289,11 +292,10 @@ case class ChessField @Inject() (
         )
         .appendedAll(doublePawnChain(in))
   
-  def isAttacked(tile: Tile): Boolean = if attackedTiles.contains(tile) then true else reverseAttackChain.handleRequest(tile).getOrElse(false)
-
+        
   private def reverseAttackCheck(pieceType: PieceType, chain: Tile => List[Tile])(in: Tile) : Option[Boolean] =
     if chain(in).forall( tile => cell(tile).getOrElse(W_KING).getType != pieceType)
-        then None else Some(true)
+      then None else Some(true)
   private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
     (
       reverseAttackCheck(Queen, queenMoveChain) _ ,
@@ -306,17 +308,21 @@ case class ChessField @Inject() (
 
   private val allTiles: Seq[Tile] =
     (1 to size)
-      .flatMap( file => (1 to size)
+    .flatMap( file => (1 to size)
         .map( rank => Tile(file, rank, size) )
-      )
-
+        )
+        
   val legalMoves: Map[Tile, List[Tile]] =
     Map from
       allTiles.map(tile => tile -> computeLegalMoves(tile))
-
+          
   override val getKingSquare: Option[Tile] =
     allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
 
+// End of legal move computation
+//********************************************************************************************************************
+
+  def isAttacked(tile: Tile): Boolean = if attackedTiles.contains(tile) then true else reverseAttackChain.handleRequest(tile).getOrElse(false)
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
   override def stop: ChessField = ChessField(field, state.stop)
   override def loadFromFen(fen: String): ChessField = ChessField.fromFen(fen, field.size)
@@ -354,6 +360,7 @@ case class ChessField @Inject() (
       rowStr + (if (ind != 0) then ind.toString else "") + (if (row == size - 1) then "" else "/")
     ).mkString
 
+  // Fen could also be extracted into a persistence service
   override def toFen: String = toFenPart + " " + state.toFenPart
 
 object ChessField:
@@ -374,6 +381,8 @@ object ChessField:
       tmpField.setColor(state.color.invert).legalMoves.flatMap( entry => entry._2).toList.sorted
     )
   
+  // If Fen is moved into persistence service this would move with it and instead create a matrix
+  // ChessField would then call that service to create a matrix and instantiate itself
   def fromFen(fen: String, fieldSize: Int = 8): ChessField =
     val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, fieldSize, fieldSize).toVector
     val newMatrix = 
