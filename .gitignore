@@ -11,17 +11,18 @@ metals.sbt
 
 # exlude class and binaries
 project/target
+**/target
 project/project
-target/bg-jobs
-target/global-logging
-target/**/classes
-target/**/jacoco
-target/**/test-classes
-target/**/test-zinc
-target/**/update
-target/**/zinc
-target/**/*.jar
-target/streams
-target/task-temp-directory
-target/test-reports
-target/.history3
+**target/bg-jobs
+**/target/global-logging
+**/target/**/classes
+**/target/**/jacoco
+**/target/**/test-classes
+**/target/**/test-zinc
+**/target/**/update
+**/target/**/zinc
+**/target/**/*.jar
+**/target/streams
+**/target/task-temp-directory
+**/target/test-reports
+**/target/.history3
