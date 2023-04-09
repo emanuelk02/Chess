@@ -14,9 +14,9 @@ package controller
 package controllerComponent
 package controllerMockImpl
 
-import model.Tile
-import model.Piece
 import model.gameDataComponent.GameField
+import util.Tile
+import util.Piece
 import util.Matrix
 
 

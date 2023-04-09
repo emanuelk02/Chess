@@ -36,7 +36,7 @@ import javax.swing.ImageIcon
 import javax.swing.border.EmptyBorder
 
 import controller.controllerComponent._
-import model.Tile
+import util.Tile
 
 
 class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
@@ -45,12 +45,12 @@ class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:
         val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize();
         val height = (screenSize.getHeight() / (controller.size + 2)).toInt
         val dim = new Dimension(height, height)
-        val imagePath = "src/main/resources/logo.png"
+        val imagePath = "ui/src/main/resources/logo.png"
         val img: BufferedImage = Try(ImageIO.read(File(imagePath))) match
                 case s: Success[BufferedImage] => s.value
                 case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB)}
         iconImage = img
-        val winImagePath = "src/main/resources/winlogo.png"
+        val winImagePath = "ui/src/main/resources/winlogo.png"
         val winimg: BufferedImage = Try(ImageIO.read(File(winImagePath))) match
                 case s: Success[BufferedImage] => s.value
                 case f: Failure[BufferedImage] => { controller.publish(ErrorEvent(f.exception.getMessage)); BufferedImage(20,20, BufferedImage.TYPE_INT_ARGB)}
