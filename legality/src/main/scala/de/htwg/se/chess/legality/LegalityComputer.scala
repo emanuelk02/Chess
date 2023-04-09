@@ -39,7 +39,7 @@ object LegalityComputer:
      * @return          List of tiles which are legal to move to
      */
     def getLegalMoves(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): List[Tile] =
-        val wrapper = MatrixWrapper(field, state)
+        val wrapper = new MatrixWrapper(field, state)
         wrapper.legalMoves.get(tile)
             .get
             .filter(    // Filters out moves, which leave King in Check
@@ -61,20 +61,33 @@ object LegalityComputer:
             )
 
     def getLegalMoves(field: Matrix[Option[Piece]], state: ChessState): Map[Tile, List[Tile]] =
-        val wrapper = MatrixWrapper(field, state)
+        val wrapper = new MatrixWrapper(field, state)
         wrapper.legalMoves
 
     def isAttacked(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): Boolean =
-        val wrapper = MatrixWrapper(field, state)
+        val wrapper = new MatrixWrapper(field, state)
         wrapper.isAttacked(tile)
 
     /*def getLegalMoves(fen: String, tile: Tile): List[Tile] =
         val (field, state) = FENParser.parse(fen)
         getLegalMoves(field, state, tile)*/
 
-private case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
+case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
     val size: Int = field.size
     def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
+
+    private def reverseAttackCheck(pieceType: PieceType, chain: Tile => List[Tile])(in: Tile) : Option[Boolean] =
+      if chain(in).forall( tile => cell(tile).getOrElse(W_KING).getType != pieceType)
+        then None else Some(true)
+    private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
+      (
+        reverseAttackCheck(Queen, queenMoveChain) _ ,
+        reverseAttackCheck(Rook, rookMoveChain) _ ,
+        reverseAttackCheck(Bishop, bishopMoveChain) _ ,
+        reverseAttackCheck(Knight, knightMoveChain) _ ,
+        reverseAttackCheck(Pawn, pawnMoveChain) _
+      )
+    )
 
     private val allTiles: Seq[Tile] =
         (1 to size)
@@ -88,11 +101,6 @@ private case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState
 
     val getKingSquare: Option[Tile] =
       allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
-
-    def color = state.color
-    def setColor(color: PieceColor): MatrixWrapper = copy(state = state.copy(color = color))
-
-    def isAttacked(tile: Tile): Boolean = reverseAttackChain.handleRequest(tile).getOrElse(false)
 
     private def computeLegalMoves(tile: Tile): List[Tile] =
         if (cell(tile).isDefined)
@@ -236,17 +244,8 @@ private case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState
             } 
           )
           .appendedAll(doublePawnChain(in))
-        
-        
-    private def reverseAttackCheck(pieceType: PieceType, chain: Tile => List[Tile])(in: Tile) : Option[Boolean] =
-      if chain(in).forall( tile => cell(tile).getOrElse(W_KING).getType != pieceType)
-        then None else Some(true)
-    private val reverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
-      (
-        reverseAttackCheck(Queen, queenMoveChain) _ ,
-        reverseAttackCheck(Rook, rookMoveChain) _ ,
-        reverseAttackCheck(Bishop, bishopMoveChain) _ ,
-        reverseAttackCheck(Knight, knightMoveChain) _ ,
-        reverseAttackCheck(Pawn, pawnMoveChain) _
-      )
-    )
+
+    def color = state.color
+    def setColor(color: PieceColor): MatrixWrapper = copy(state = state.copy(color = color))
+
+    def isAttacked(tile: Tile): Boolean = reverseAttackChain.handleRequest(tile).getOrElse(false)

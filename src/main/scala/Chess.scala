@@ -9,27 +9,26 @@
 \*                                                                                      */
 
 
-//package de.htwg.se.chess
-//
-//import scala.io.StdIn.readLine
-//
-//import com.google.inject.Guice
-//
-//import aview.TUI
-//import aview.gui.SwingGUI
-//import controller.controllerComponent.ControllerInterface
-//
-//
-//object starter:
-//  val injector = Guice.createInjector(ChessModule())
-//  val controller = injector.getInstance(classOf[ControllerInterface])
-//  val tui = TUI(controller)
-//  def runTUI: Unit = tui.run
-//  def runSwingGUI = SwingGUI(controller).startup(Array())
-//
-//object MainTUI extends App:
-//    starter.runTUI
-//object MainSwingGUI extends App:
-//    starter.runSwingGUI
-//    starter.runTUI
-//
+package de.htwg.se.chess
+
+import scala.io.StdIn.readLine
+
+import com.google.inject.Guice
+
+import aview.TUI
+import aview.gui.SwingGUI
+import controller.controllerComponent.ControllerInterface
+
+
+object starter:
+  val injector = Guice.createInjector(ChessModule())
+  val controller = injector.getInstance(classOf[ControllerInterface])
+  val tui = TUI(controller)
+  def runTUI: Unit = tui.run
+  def runSwingGUI = SwingGUI(controller).startup(Array())
+
+object MainTUI extends App:
+    starter.runTUI
+object MainSwingGUI extends App:
+    starter.runSwingGUI
+    starter.runTUI
