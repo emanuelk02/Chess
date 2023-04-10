@@ -21,10 +21,10 @@ import controllerBaseImpl.ChessCommand
 import model.gameDataComponent.GameField
 import model.gameDataComponent.GameState._
 import model.gameDataComponent.gameDataBaseImpl._
-import model.Tile
-import model.Piece
-import model.Piece._
-import model.PieceColor._
+import util.Tile
+import util.Piece
+import util.Piece._
+import util.PieceColor._
 import util.Matrix
 
 

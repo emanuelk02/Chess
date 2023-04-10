@@ -21,9 +21,9 @@ import scala.util.Try
 import scala.swing.event.Event
 
 import model.gameDataComponent.gameDataBaseImpl.ChessField
-import model.gameDataComponent.gameDataBaseImpl.ChessState
 import model.gameDataComponent.GameField
-import model.Tile
+import util.Tile
+import util.ChessState
 import util.Matrix
 
 

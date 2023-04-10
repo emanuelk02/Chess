@@ -17,7 +17,8 @@ package gameDataBaseImpl
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import model.Piece._
+import util.Piece
+import util.Piece._
 import util.Matrix
 
 

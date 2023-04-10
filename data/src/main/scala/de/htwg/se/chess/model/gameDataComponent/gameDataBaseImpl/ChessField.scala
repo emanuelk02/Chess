@@ -48,13 +48,13 @@ case class ChessField @Inject() (
 
   override def replace(tile: Tile, fill: String | Option[Piece]): ChessField = 
     fill match
-        case str: String => copy(field.replace(tile.row, tile.col, Piece(str)), attackedTiles = attackedTiles)
-        case piece: Option[Piece] => copy(field.replace(tile.row, tile.col, piece), attackedTiles = attackedTiles)
+        case str: String => ChessField(field.replace(tile.row, tile.col, Piece(str)))
+        case piece: Option[Piece] => ChessField(field.replace(tile.row, tile.col, piece))
 
   override def fill(filling: String | Option[Piece]): ChessField =
     filling match
-        case str: String => copy(field.fill(Piece(str)), attackedTiles = attackedTiles)
-        case piece: Option[Piece] => copy(field.fill(piece), attackedTiles = attackedTiles)
+        case str: String => ChessField(field.fill(Piece(str)))
+        case piece: Option[Piece] => ChessField(field.fill(piece))
 
   private val specialMoveChain = ChainHandler[Tuple3[Tile, Tile, ChessField], ChessField] (List[Tuple3[Tile, Tile, ChessField] => Option[ChessField]]
    (

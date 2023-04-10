@@ -15,15 +15,20 @@ package legality
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
+import LegalityComputer._
 import util.Piece
 import util.Piece._
 import util.PieceColor._
 import util.Tile
 import util.Matrix
+import util.FenParser.matrixFromFen
+import de.htwg.se.chess.util.ChessState
 
 
 class LegalityComputerSpec extends AnyWordSpec:
   "A LegalityComputer" should {
+    var matr = matrixFromFen("8/8/8/8/8/8/8/8 w - 0 1")
+    var state = ChessState("8/8/8/8/8/8/8/8 w - 0 1", 8)
     "compute legal moves for a given tile" in {
       //---------------------------------------------------------------------------------- Individual Pieces
 
@@ -103,8 +108,9 @@ class LegalityComputerSpec extends AnyWordSpec:
        * the tile he could move on is attacked.
        * These cases will also be covered later.
        * */
-      cf = cf.loadFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1")
-      cf.getLegalMoves(Tile("E2")).sorted shouldBe (
+      matr = matrixFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1")
+      state = ChessState("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E2")).sorted shouldBe (
         Tile("D3") :: Tile("E3") :: /* Queen */
         Tile("D2") ::  /* King */   Tile("F2") :: /* Bishop */
         Tile("D1") :: Tile("E1") :: /* Bishop attack */
@@ -118,8 +124,9 @@ class LegalityComputerSpec extends AnyWordSpec:
        * her path ends on enemy pieces or before allied pieces
        * but is otherwise free to move any number of tiles.
        * */
-      cf = cf.loadFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1")
-      cf.getLegalMoves(Tile("D3")).sorted shouldBe (
+      matr = matrixFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1")
+      state = ChessState("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1", 8)
+      getLegalMoves(matr, state, Tile("D3")).sorted shouldBe (
                                                   Tile("D8") ::
                                                   Tile("D7") ::                                           Tile("H7") :: // rook
         Tile("A6") ::                             Tile("D6") ::                             Tile("G6") ::
@@ -132,8 +139,9 @@ class LegalityComputerSpec extends AnyWordSpec:
       ).sorted
 
       // Rook //
-      cf = cf.loadFromFen("8/8/8/8/8/3R2R1/8/8 w - 0 1")
-      cf.getLegalMoves(Tile("D3")).sorted shouldBe (
+      matr = matrixFromFen("8/8/8/8/8/3R2R1/8/8 w - 0 1")
+      state = ChessState("8/8/8/8/8/3R2R1/8/8 w - 0 1", 8)
+      getLegalMoves(matr, state, Tile("D3")).sorted shouldBe (
                                                   Tile("D8") ::
                                                   Tile("D7") ::
                                                   Tile("D6") ::
@@ -150,8 +158,9 @@ class LegalityComputerSpec extends AnyWordSpec:
        * Bishops move only diagonally.
        * Their path ends on enemy pieces or before allied pieces.
        * */
-      cf = cf.loadFromFen("8/8/6r1/8/8/3B4/8/8 w - 0 1")
-      cf.getLegalMoves(Tile("D3")).sorted shouldBe (
+      matr = matrixFromFen("8/8/6r1/8/8/3B4/8/8 w - 0 1")
+      state = ChessState("8/8/6r1/8/8/3B4/8/8 w - 0 1", 8)
+      getLegalMoves(matr, state, Tile("D3")).sorted shouldBe (
         Tile("A6") ::                                                                       Tile("G6") :: // rook
                       Tile("B5") ::                                           Tile("F5") ::
                                     Tile("C4") ::               Tile("E4") ::
@@ -168,8 +177,9 @@ class LegalityComputerSpec extends AnyWordSpec:
        * meaning that his path can only be blocked by an allied piece occupying
        * the destination tile.
        * */
-      cf = cf.loadFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1")
-      cf.getLegalMoves(Tile("D3")).sorted shouldBe (
+      matr = matrixFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1")
+      state = ChessState("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1", 8)
+      getLegalMoves(matr, state, Tile("D3")).sorted shouldBe (
                                     Tile("C5") ::                Tile("E5") ::
                       Tile("B4") ::  /* King */     /* King */   /* King */    Tile("F4") ::
                                      /* King */    /* Knight */  /* King */
@@ -184,8 +194,9 @@ class LegalityComputerSpec extends AnyWordSpec:
        * and only towards the other end of the board.
        * On their first move, pawns are allowed to move two tiles at once.
        * */
-      cf = cf.loadFromFen("8/8/8/8/8/8/4r3/3P4 w - 0 1")
-      cf.getLegalMoves(Tile("D1")).sorted shouldBe (
+      matr = matrixFromFen("8/8/8/8/8/8/4r3/3P4 w - 0 1")
+      state = ChessState("8/8/8/8/8/8/4r3/3P4 w - 0 1", 8)
+      getLegalMoves(matr, state, Tile("D1")).sorted shouldBe (
                       Tile("D2") :: Tile("E2") :: // rook
                       /* Pawn */
         Nil
@@ -196,42 +207,45 @@ class LegalityComputerSpec extends AnyWordSpec:
        * Black pawns simply move in the other direction than
        * the white ones.
        * */
-      cf = cf.loadFromFen("8/8/8/8/8/8/3p4/2R5 b - 0 1")
-      cf.getLegalMoves(Tile("D2")).sorted shouldBe (
+      matr = matrixFromFen("8/8/8/8/8/8/3p4/2R5 b - 0 1")
+      state = ChessState("8/8/8/8/8/8/3p4/2R5 b - 0 1", 8)
+      getLegalMoves(matr, state, Tile("D2")).sorted shouldBe (
         // Rook        /* Pawn */
         Tile("C1") :: Tile("D1") ::
         Nil
       ).sorted
 
       //---------------------------------------------------------------------------------- Starting Position
-      cf = cf.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+      matr = matrixFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+      state = ChessState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 8)
       for (file <- 1 to 8) {    // Rank 1: white back-rank
         // -> No pieces should be able to move because they are blocked by the pawns
         if (file == 2 || file == 7) // except for the Knights
-          then cf.getLegalMoves(Tile(file, 1)).sorted shouldBe (
+          then getLegalMoves(matr, state, Tile(file, 1)).sorted shouldBe (
             Tile(file - 1, 3) :: Tile(file + 1, 3) :: Nil
           ).sorted
-          else cf.getLegalMoves(Tile(file, 1)) shouldBe Nil
+          else getLegalMoves(matr, state, Tile(file, 1)) shouldBe Nil
       }
       for (file <- 1 to 8) {    // Rank 2: white pawns
-        cf.getLegalMoves(Tile(file, 2)).sorted shouldBe (
+        getLegalMoves(matr, state, Tile(file, 2)).sorted shouldBe (
           // Can move on square up or do double progression (on first move)
           Tile(file, 3) :: Tile(file, 4) :: Nil
         ).sorted
       }
       for (file <- 1 to 8) {    // Rank 3: empty
         // Empty tiles should result in no legal moves
-        cf.getLegalMoves(Tile(file, 3)) shouldBe Nil
+        getLegalMoves(matr, state, Tile(file, 3)) shouldBe Nil
       }
 
       // ...
 
       for (file <- 1 to 8) {    // Rank 7: black pawns
-        cf.getLegalMoves(Tile(file, 7)) shouldBe Nil //not blacks turn
+        getLegalMoves(matr, state, Tile(file, 7)) shouldBe Nil //not blacks turn
       }
-      cf = cf.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
+      matr = matrixFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
+      state = ChessState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", 8)
       for (file <- 1 to 8) {    // Rank 7: black pawns
-        cf.getLegalMoves(Tile(file, 7)).sorted shouldBe (
+        getLegalMoves(matr, state, Tile(file, 7)).sorted shouldBe (
           // Can move one square down or do double progression (on first move)
           Tile(file, 6) :: Tile(file, 5) :: Nil
         ).sorted
@@ -239,78 +253,91 @@ class LegalityComputerSpec extends AnyWordSpec:
       for (file <- 1 to 8) {    // Rank 8: black back-rank
         // -> No pieces should be able to move because they are blocked by the pawns
         if (file == 2 || file == 7) // except for the Knights
-          then cf.getLegalMoves(Tile(file, 8)).sorted shouldBe (
+          then getLegalMoves(matr, state, Tile(file, 8)).sorted shouldBe (
             Tile(file - 1, 6) :: Tile(file + 1, 6) :: Nil
           ).sorted
-          else cf.getLegalMoves(Tile(file, 1)) shouldBe Nil
+          else getLegalMoves(matr, state, Tile(file, 1)) shouldBe Nil
       }
 
 
       //-------------------------------------------------------------------------- En-Passant + Pawn Capture
       // White //
-      cf = cf.loadFromFen("8/8/2n5/pP6/8/qkq5/1P6/8 w KQkq A6 0 1")
+      matr = matrixFromFen("8/8/2n5/pP6/8/qkq5/1P6/8 w KQkq A6 0 1")
+      state = ChessState("8/8/2n5/pP6/8/qkq5/1P6/8 w KQkq A6 0 1", 8)
       
       // En passant
-      cf.getLegalMoves(Tile("B5")).sorted shouldBe (Tile("A6") :: Tile("B6") :: Tile("C6") :: Nil).sorted
+      getLegalMoves(matr, state, Tile("B5")).sorted shouldBe (Tile("A6") :: Tile("B6") :: Tile("C6") :: Nil).sorted
       // Pawn capture and blocked double pawn progression
-      cf.getLegalMoves(Tile("B2")).sorted shouldBe (Tile("A3") :: Tile("C3") :: Nil).sorted
+      getLegalMoves(matr, state, Tile("B2")).sorted shouldBe (Tile("A3") :: Tile("C3") :: Nil).sorted
 
-      cf = cf.loadFromFen("8/8/8/8/1Q6/q1q5/1P6/8 w KQkq A6 0 1")
-      cf.getLegalMoves(Tile("B2")).sorted shouldBe (Tile("A3") :: Tile("B3") :: Tile("C3") :: Nil).sorted
+      matr = matrixFromFen("8/8/8/8/1Q6/q1q5/1P6/8 w KQkq A6 0 1")
+      getLegalMoves(matr, state, Tile("B2")).sorted shouldBe (Tile("A3") :: Tile("B3") :: Tile("C3") :: Nil).sorted
 
       // Black //
-      cf = cf.loadFromFen("8/1p6/QKQ5/8/2Pp4/8/8/8 b KQkq C3 0 1")
+      matr = matrixFromFen("8/1p6/QKQ5/8/2Pp4/8/8/8 b KQkq C3 0 1")
+      state = ChessState("8/1p6/QKQ5/8/2Pp4/8/8/8 b KQkq C3 0 1", 8)
       
       // En passant
-      cf.getLegalMoves(Tile("D4")).sorted shouldBe (Tile("C3") :: Tile("D3") :: Nil).sorted
+      getLegalMoves(matr, state, Tile("D4")).sorted shouldBe (Tile("C3") :: Tile("D3") :: Nil).sorted
       // Pawn capture and blocked double pawn progression
-      cf.getLegalMoves(Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("C6") :: Nil).sorted
+      getLegalMoves(matr, state, Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("C6") :: Nil).sorted
 
-      cf = cf.loadFromFen("8/1p6/Q1Q5/1n6/8/8/8/8 b KQkq C3 0 1")
-      cf.getLegalMoves(Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("B6") :: Tile("C6") :: Nil).sorted
+      matr = matrixFromFen("8/1p6/Q1Q5/1n6/8/8/8/8 b KQkq C3 0 1")
+      state = ChessState("8/1p6/Q1Q5/1n6/8/8/8/8 b KQkq C3 0 1", 8)
+      getLegalMoves(matr, state, Tile("B7")).sorted shouldBe (Tile("A6") :: Tile("B6") :: Tile("C6") :: Nil).sorted
 
 
       //-------------------------------------------------------------------------------------------- Castles
       // All castles
-      cf = cf.loadFromFen("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1")
-      cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("C1") :: Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+      matr = matrixFromFen("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1")
+      state = ChessState("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("C1") :: Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil).sorted
 
-      cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/8/8 b KQkq - 0 1")
-      cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("C8") :: Tile("D8") :: Tile("F8") :: Tile("G8") :: Nil).sorted
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/8/8 b KQkq - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/8/8 b KQkq - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("C8") :: Tile("D8") :: Tile("F8") :: Tile("G8") :: Nil).sorted
 
       // No more castles available via state
-      cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1")
-      cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Nil).sorted
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Nil).sorted
 
-      cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1")
-      cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Nil).sorted
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Nil).sorted
 
       // Castles on either side
-      cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w K - 0 1")
-      cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w K - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w K - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil).sorted
 
-      cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b q - 0 1")
-      cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Tile("C8") :: Nil).sorted
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b q - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b q - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Tile("C8") :: Nil).sorted
 
       // Castles blocked by check
-      cf = cf.loadFromFen("8/8/8/8/8/8/3r4/R3K2R b KQ - 0 1").start.move(Tile("D2"), Tile("E2")) // move the rook to check the king
-      cf.inCheck shouldBe true
-      cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("E2") :: Tile("D1") :: Tile("F1") :: Nil).sorted
+      matr = matrixFromFen("8/8/8/8/8/8/4r3/R3K2R w KQ - 0 1")
+      state = ChessState("8/8/8/8/8/8/4r3/R3K2R w KQ - 0 1", 8)
+      inCheck(matr, state) shouldBe true
+      getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("E2") :: Tile("D1") :: Tile("F1") :: Nil).sorted
 
       // Castles blocked by passing through attacked tile
       // White Side //
-      cf = cf.loadFromFen("8/8/8/8/8/8/3r4/R3K2R w KQ - 0 1")
-      cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D2") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+      matr = matrixFromFen("8/8/8/8/8/8/3r4/R3K2R w KQ - 0 1")
+      state = ChessState("8/8/8/8/8/8/3r4/R3K2R w KQ - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("D2") :: Tile("F1") :: Tile("G1") :: Nil).sorted
 
-      cf = cf.loadFromFen("8/8/8/8/8/8/5r2/R3K2R w KQ - 0 1")
-      cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("F2") :: Tile("D1")  :: Tile("C1") :: Nil).sorted
+      matr = matrixFromFen("8/8/8/8/8/8/5r2/R3K2R w KQ - 0 1")
+      state = ChessState("8/8/8/8/8/8/5r2/R3K2R w KQ - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("F2") :: Tile("D1")  :: Tile("C1") :: Nil).sorted
 
       // Black Side //
-      cf = cf.loadFromFen("r3k2r/3R4/8/8/8/8/8/8 b kq - 0 1")
-      cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D7") :: Tile("F8") :: Tile("G8") :: Nil).sorted
+      matr = matrixFromFen("r3k2r/3R4/8/8/8/8/8/8 b kq - 0 1")
+      state = ChessState("r3k2r/3R4/8/8/8/8/8/8 b kq - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("D7") :: Tile("F8") :: Tile("G8") :: Nil).sorted
 
-      cf = cf.loadFromFen("r3k2r/5R2/8/8/8/8/8/8 b kq - 0 1")
-      cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("F7") :: Tile("D8")  :: Tile("C8") :: Nil).sorted
-
+      matr = matrixFromFen("r3k2r/5R2/8/8/8/8/8/8 b kq - 0 1")
+      state = ChessState("r3k2r/5R2/8/8/8/8/8/8 b kq - 0 1", 8)
+      getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("F7") :: Tile("D8")  :: Tile("C8") :: Nil).sorted
     }
   }

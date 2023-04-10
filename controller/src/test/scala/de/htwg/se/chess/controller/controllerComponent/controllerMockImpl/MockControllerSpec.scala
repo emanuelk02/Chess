@@ -21,9 +21,9 @@ import scala.swing.Reactor
 
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataBaseImpl._
-import model.Tile
-import model.Piece
-import model.Piece._
+import util.Tile
+import util.Piece
+import util.Piece._
 import util.Matrix
 
 class MockControllerSpec extends AnyWordSpec:

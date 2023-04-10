@@ -17,10 +17,11 @@ package gameDataBaseImpl
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import model.Piece._
-import model.PieceColor._
-import model.Tile
 import model.gameDataComponent.GameState._
+import util.Piece
+import util.Piece._
+import util.PieceColor._
+import util.Tile
 import util.Matrix
 
 

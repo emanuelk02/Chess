@@ -68,6 +68,10 @@ object LegalityComputer:
         val wrapper = new MatrixWrapper(field, state)
         wrapper.isAttacked(tile)
 
+    def inCheck(field: Matrix[Option[Piece]], state: ChessState): Boolean =
+        val wrapper = new MatrixWrapper(field, state)
+        wrapper.inCheck
+
     /*def getLegalMoves(fen: String, tile: Tile): List[Tile] =
         val (field, state) = FENParser.parse(fen)
         getLegalMoves(field, state, tile)*/
@@ -127,10 +131,6 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
         ( tile => if cell(tile).get.getColor != state.color then Some(tile) else None )
       )
     )
-
-    private val inCheck = getKingSquare match
-        case None => false
-        case Some(tile) => isAttacked(tile)
 
     def castleTiles: List[Tile] = state.color match
       case White => 
@@ -249,3 +249,7 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
     def setColor(color: PieceColor): MatrixWrapper = copy(state = state.copy(color = color))
 
     def isAttacked(tile: Tile): Boolean = reverseAttackChain.handleRequest(tile).getOrElse(false)
+
+    val inCheck = getKingSquare match
+        case Some(tile) => isAttacked(tile)
+        case None => false

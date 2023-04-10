@@ -21,9 +21,9 @@ import scala.util.Try
 
 import controller.controllerComponent.controllerBaseImpl._
 import model.gameDataComponent.gameDataBaseImpl._
-import model.Piece
-import model.Piece._
-import model.Tile
+import util.Piece
+import util.Piece._
+import util.Tile
 import util.Matrix
 
 
