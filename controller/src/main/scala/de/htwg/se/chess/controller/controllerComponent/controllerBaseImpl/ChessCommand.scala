@@ -16,11 +16,11 @@ package controllerBaseImpl
 
 import scala.swing.event.Event
 
-import model.Tile
-import model.Piece
-import model.PieceColor
 import model.gameDataComponent.GameField
 import model.gameDataComponent.GameState._
+import util.Tile
+import util.Piece
+import util.PieceColor
 import util.Command
 
 trait ChessCommand(field: GameField) extends CommandInterface:

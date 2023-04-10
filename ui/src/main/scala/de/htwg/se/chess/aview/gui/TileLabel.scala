@@ -29,9 +29,9 @@ import javax.swing.table._
 import javax.imageio.ImageIO
 
 import controller.controllerComponent._
-import model.Piece
-import model.PieceColor
-import model.Tile
+import util.Piece
+import util.PieceColor
+import util.Tile
 
 
 class TileLabel(tile: Tile, controller: ControllerInterface, var source: String) extends GridPanel(1, 1):
@@ -115,7 +115,7 @@ object ImageLoader:
         val dim = new Dimension(height, height)
         val mb = Map.newBuilder[Piece, Image]
         for piece <- Piece.values do
-            val imagePath = "src/main/resources/pieces/"+style+"/" + (piece.getColor match { case PieceColor.Black => "b" case _ => "W" }) + piece.toString + ".png"
+            val imagePath = "ui/src/main/resources/pieces/"+style+"/" + (piece.getColor match { case PieceColor.Black => "b" case _ => "W" }) + piece.toString + ".png"
             val image: BufferedImage =
                 Try(ImageIO.read(File(imagePath))) match
                     case s: Success[BufferedImage] => s.value

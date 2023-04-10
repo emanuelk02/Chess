@@ -28,6 +28,7 @@ import util.PieceColor
 import util.Piece._
 import util.PieceType._
 import util.PieceColor._
+import util.invert
 import util.Tile
 import util.Matrix
 import util.ChessState
@@ -194,7 +195,7 @@ case class ChessField @Inject() (
   val legalMoves = LegalityComputer.getLegalMoves(field, state)
 
   private def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
-  override def getLegalMoves(tile: Tile): List[Tile] = legalMoves.getOrElse(tile, Nil)
+  override def getLegalMoves(tile: Tile): List[Tile] = LegalityComputer.getLegalMoves(field, state, tile)
   override val getKingSquare: Option[Tile] =
     allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves

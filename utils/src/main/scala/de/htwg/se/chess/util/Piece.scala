@@ -19,8 +19,6 @@ enum PieceType:
 enum PieceColor:
   case Black, White
 
-  def invert: PieceColor = this.invert
-
 extension (color: PieceColor)
     def invert: PieceColor = if color == PieceColor.White then PieceColor.Black else PieceColor.White
 

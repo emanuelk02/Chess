@@ -99,3 +99,4 @@ lazy val root = project
   )
   .enablePlugins(JacocoCoverallsPlugin)
   .aggregate(utils, persistence, data, legality, controller, ui)
+  .dependsOn(utils, persistence, data, legality, controller, ui)

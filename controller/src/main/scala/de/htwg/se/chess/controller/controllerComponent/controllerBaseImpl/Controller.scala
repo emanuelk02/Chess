@@ -23,8 +23,8 @@ import net.codingwell.scalaguice.InjectorExtensions._
 
 import model.gameDataComponent.GameField
 import model.fileIOComponent.FileIOInterface
-import model.Tile
-import model.Piece
+import util.Tile
+import util.Piece
 import util.Command
 
 
