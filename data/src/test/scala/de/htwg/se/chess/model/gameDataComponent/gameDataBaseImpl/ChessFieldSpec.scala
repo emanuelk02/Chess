@@ -648,46 +648,59 @@ class ChessFieldSpec extends AnyWordSpec:
 
         //-------------------------------------------------------------------------------------------- Castles
         // All castles
+        //
+        // Tiles available for Castling can be accessed via castleTiles
+        // and are incorporated into the list of legalMoves
         cf = cf.loadFromFen("8/8/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1")
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("C1") :: Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+        cf.castleTiles.sorted shouldBe (Tile("C1") :: Tile("G1") :: Nil).sorted
 
         cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/8/8 b KQkq - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("C8") :: Tile("D8") :: Tile("F8") :: Tile("G8") :: Nil).sorted
+        cf.castleTiles.sorted shouldBe (Tile("C8") :: Tile("G8") :: Nil).sorted
 
         // No more castles available via state
         cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1")
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Nil).sorted
+        cf.castleTiles shouldBe Nil
 
         cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Nil).sorted
+        cf.castleTiles shouldBe Nil
 
         // Castles on either side
         cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w K - 0 1")
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+        cf.castleTiles.sorted shouldBe (Tile("G1") :: Nil).sorted
 
         cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b q - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Tile("C8") :: Nil).sorted
+        cf.castleTiles.sorted shouldBe (Tile("C8") :: Nil).sorted
 
         // Castles blocked by check
         cf = cf.loadFromFen("8/8/8/8/8/8/3r4/R3K2R b KQ - 0 1").start.move(Tile("D2"), Tile("E2")) // move the rook to check the king
         cf.inCheck shouldBe true
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("E2") :: Tile("D1") :: Tile("F1") :: Nil).sorted
+        cf.castleTiles shouldBe Nil
 
         // Castles blocked by passing through attacked tile
         // White Side //
         cf = cf.loadFromFen("8/8/8/8/8/8/3r4/R3K2R w KQ - 0 1")
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D2") :: Tile("F1") :: Tile("G1") :: Nil).sorted
+        cf.castleTiles shouldBe (Tile("G1") :: Nil)
 
         cf = cf.loadFromFen("8/8/8/8/8/8/5r2/R3K2R w KQ - 0 1")
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("F2") :: Tile("D1")  :: Tile("C1") :: Nil).sorted
+        cf.castleTiles shouldBe (Tile("C1") :: Nil)
 
         // Black Side //
         cf = cf.loadFromFen("r3k2r/3R4/8/8/8/8/8/8 b kq - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D7") :: Tile("F8") :: Tile("G8") :: Nil).sorted
+        cf.castleTiles shouldBe (Tile("G8") :: Nil)
 
         cf = cf.loadFromFen("r3k2r/5R2/8/8/8/8/8/8 b kq - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("F7") :: Tile("D8")  :: Tile("C8") :: Nil).sorted
-
+        cf.castleTiles shouldBe (Tile("C8") :: Nil)
       }
       "allow to start and stop the game by changing its state" in {
         // The starting and stopping mechanic was added to allow

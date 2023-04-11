@@ -30,7 +30,7 @@ class FileIO extends FileIOInterface:
 
     override def save(field: GameField): Unit = saveString(field)
 
-    def saveString(field: GameField) =
+    private def saveString(field: GameField) =
         import java.io._
         val pw = PrintWriter(File("field.xml"))
         val prettyPrinter = PrettyPrinter(120, 4)

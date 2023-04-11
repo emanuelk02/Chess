@@ -15,6 +15,7 @@ package util
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
+import util.ChessState._
 import util.PieceColor
 import util.PieceColor.{White, Black}
 import util.Piece._
@@ -47,8 +48,56 @@ class ChessStateSpec extends AnyWordSpec:
                 default.fullMoves should be (1)
                 default.enPassant should be (None)
             }
+            "be instantiated using FEN notation" in {
+                /* FEN is a standard notation for describing a board position of a chess game.
+                 * 
+                 * The implementation accepts full FEN strings such as specified in the
+                 * Chess Programming Wiki: https://www.chessprogramming.org/Forsyth-Edwards_Notation
+                 *
+                 * FEN Strings are composed of two main parts:
+                 *  1. The piece constellation
+                 *  2. The game state
+                 * 
+                 * Game state:
+                 *    The second component of the string describes the game state:
+                 *
+                 *  - First is, which colors turn it is (w for White; b for Black)
+                 * 
+                 *  - Next is, what castling each color has availabe
+                 *    (K for king-side; Q for queen-side -> uppercase means white, lowercase -> black)
+                 * 
+                 *  - Then is either '-' or a tile which is available for En-Passant (https://www.chessprogramming.org/En_passant)
+                 * 
+                 *  - Lastly are the number of half-moves and full-moves
+                 */
+                
+                // FEN String for the default state
+                // The description of the pieces can be omitted
+                val fen = "... w KQkq - 0 1"
+                val state = ChessState(fen, 8)
+
+                state.playing should be (false)
+                state.color should be (White)
+                state.whiteCastle should be (Castles(true, true))
+                state.blackCastle should be (Castles(true, true))
+                state.halfMoves should be (0)
+                state.fullMoves should be (1)
+                state.enPassant should be (None)
+
+                // FEN String for a custom state
+                val fen2 = "... b Kq E2 5 12"
+                val state2 = ChessState(fen2, 4)
+
+                state2.playing should be (false)
+                state2.color should be (Black)
+                state2.whiteCastle should be (Castles(false, true))
+                state2.blackCastle should be (Castles(true, false))
+                state2.halfMoves should be (5)
+                state2.fullMoves should be (12)
+                state2.enPassant should be (Some(Tile("E2")))
+            }
         }
-        "initialzied" should {
+        "initialized" should {
             "change its internal playing state" in {
                 var state = ChessState()
 

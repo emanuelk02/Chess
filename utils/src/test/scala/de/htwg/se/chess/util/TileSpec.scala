@@ -47,7 +47,7 @@ class TileSpec extends AnyWordSpec:
             an [AssertionError] should be thrownBy Tile("A3", 2)
             an [AssertionError] should be thrownBy Tile("C2", 2)
         }
-        "be manipulatable with + and - operators and comparable with ==" in {
+        "be manipulatable with + and - operators and comparable with == and < or >" in {
             // Comparison simply involves the rank and file.
             // Different size is not taken into account.
 
@@ -64,6 +64,15 @@ class TileSpec extends AnyWordSpec:
             an [AssertionError] should be thrownBy tile1 - tile2
             an [AssertionError] should be thrownBy tile2 - (2, 0)
             an [AssertionError] should be thrownBy tile2 - Tile(0, 2, 8)
+        }
+        "have an implicit ordering and thus allow to be sorted in a list" in {
+            val tile1 = Tile(2, 2, 8)
+            val tile2 = Tile(2, 1, 8)
+            val tile3 = Tile(1, 1, 8)
+            val tile4 = Tile(1, 2, 8)
+
+            val list = List(tile1, tile2, tile3, tile4)
+            list.sorted shouldBe List(tile3, tile4, tile2, tile1)
         }
         "allow conversion to matrix collumns and rows" in {
             val tile1 = Tile("A1")

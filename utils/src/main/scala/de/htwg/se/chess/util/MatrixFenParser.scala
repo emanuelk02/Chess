@@ -13,11 +13,9 @@ package de.htwg.se.chess
 package util
 
 
-object FenParser:
-    def parseFen(fen: String, fieldSize: Int = 8): Tuple2[Matrix[Option[Piece]], ChessState] =
-        (matrixFromFen(fen, fieldSize), ChessState(fen, fieldSize))
-
-    def matrixFromFen(fen: String, fieldSize: Int = 8): Matrix[Option[Piece]] =
+object MatrixFenParser:
+    def matrixFromFen(fen: String): Matrix[Option[Piece]] =
+      val fieldSize = fen.count(c => c == '/') + 1
       val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, fieldSize, fieldSize).toVector
       Matrix(
         Vector.tabulate(fieldSize) { rank => fenList.drop(rank * fieldSize).take(fieldSize) }

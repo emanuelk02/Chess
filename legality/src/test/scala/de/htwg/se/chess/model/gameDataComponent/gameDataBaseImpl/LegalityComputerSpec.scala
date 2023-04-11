@@ -21,7 +21,7 @@ import util.Piece._
 import util.PieceColor._
 import util.Tile
 import util.Matrix
-import util.FenParser.matrixFromFen
+import util.MatrixFenParser.matrixFromFen
 import de.htwg.se.chess.util.ChessState
 
 

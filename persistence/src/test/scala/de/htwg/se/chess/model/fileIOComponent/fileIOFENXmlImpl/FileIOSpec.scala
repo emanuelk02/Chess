@@ -33,6 +33,9 @@ class FileIOSpec extends AnyWordSpec:
                 val cf = GameField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
                 val xml = fileIO.fieldToXml(cf)
                 (xml \\ "fen").text shouldBe "5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23"
+
+                fileIO.save(cf)
+                fileIO.load shouldBe cf
             }
             "load a field through the FEN" in {
                 val xml = {
@@ -43,6 +46,10 @@ class FileIOSpec extends AnyWordSpec:
                 val fen = (xml \\ "fen").text
                 val cf = GameField().loadFromFen(fen)
                 cf shouldBe GameField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+
+                val fileIO = fileIoFenXmlImpl.FileIO()
+                fileIO.save(cf)
+                fileIO.load shouldBe cf
             }
         }
     }
