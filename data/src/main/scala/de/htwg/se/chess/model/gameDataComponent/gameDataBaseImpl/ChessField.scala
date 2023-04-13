@@ -33,6 +33,7 @@ import util.Tile
 import util.Matrix
 import util.ChessState
 import util.ChainHandler
+import util.MatrixFenParser
 import legality.LegalityComputer
 
 
@@ -221,19 +222,7 @@ case class ChessField @Inject() (
 
   override def toString: String = field.toBoard() + state.toString + "\n"
 
-  override def toFenPart: String =
-    field.rows
-      .zipWithIndex
-      .flatMap( (rowVector, row) =>
-      val (rowStr, ind) = rowVector.foldLeft("", 0) { (prev, piece) =>
-          if (piece.isEmpty) then
-            (prev(0), prev(1) + 1)
-          else if (prev(1) != 0) then 
-            (prev(0) + prev(1).toString + piece.get.toString, 0)
-          else (prev(0) + piece.get.toString, 0)
-      }
-      rowStr + (if (ind != 0) then ind.toString else "") + (if (row == size - 1) then "" else "/")
-    ).mkString
+  override def toFenPart: String = MatrixFenParser.fenFromMatrix(field)
 
   // Fen could also be extracted into a persistence service
   override def toFen: String = toFenPart + " " + state.toFenPart
@@ -259,27 +248,10 @@ object ChessField:
   // If Fen is moved into persistence service this would move with it and instead create a matrix
   // ChessField would then call that service to create a matrix and instantiate itself
   def fromFen(fen: String, fieldSize: Int = 8): ChessField =
-    val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, fieldSize, fieldSize).toVector
-    val newMatrix = 
-      Matrix(
-        Vector.tabulate(fieldSize) { rank => fenList.drop(rank * fieldSize).take(fieldSize) }
-      )
+    val newMatrix = MatrixFenParser.matrixFromFen(fen)
     val newState: ChessState = ChessState(size = fieldSize).evaluateFen(fen)
     val tmpField = ChessField( newMatrix, newState ).start.setColor(newState.color.invert)
     val newInCheck = tmpField.setColor(newState.color).getKingSquare match
         case Some(kingSq) => tmpField.setColor(newState.color).isAttacked(kingSq)
         case None => false
     tmpField.copy( newMatrix, tmpField.state.copy(color = newState.color), newInCheck, attackedTiles = tmpField.attackedTiles)
-
-  private def fenToList(fen: List[Char], remaining: Int, fieldSize: Int): List[Option[Piece]] =
-    fen match
-      case '/' :: rest => List.fill(remaining)(None) ::: fenToList(rest, fieldSize, fieldSize)
-      case s :: rest =>
-        if s.isDigit then
-          List.fill(s.toInt - '0'.toInt)(None) ::: fenToList(
-            rest,
-            remaining - (s.toInt - '0'.toInt),
-            fieldSize
-          )
-        else Piece(s) :: fenToList(rest, remaining - 1, fieldSize)
-      case _ => List.fill(remaining)(None)
