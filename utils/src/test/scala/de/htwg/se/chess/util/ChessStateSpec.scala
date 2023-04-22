@@ -74,8 +74,9 @@ class ChessStateSpec extends AnyWordSpec:
                 // FEN String for the default state
                 // The description of the pieces can be omitted
                 val fen = "... w KQkq - 0 1"
-                val state = ChessState(fen, 8)
+                val state = ChessState(fen)
 
+                state.size should be (8)
                 state.playing should be (false)
                 state.color should be (White)
                 state.whiteCastle should be (Castles(true, true))
@@ -85,7 +86,7 @@ class ChessStateSpec extends AnyWordSpec:
                 state.enPassant should be (None)
 
                 // FEN String for a custom state
-                val fen2 = "... b Kq E2 5 12"
+                val fen2 = "b Kq E2 5 12"
                 val state2 = ChessState(fen2, 4)
 
                 state2.playing should be (false)
@@ -189,7 +190,7 @@ class ChessStateSpec extends AnyWordSpec:
                         enPassant = None
                     )
                 )
-                checkIdleStateFen(state, "... b Kq e4 10 42")
+                checkIdleStateFen(state, "b Kq e4 10 42")
                 (
                     state.copy(
                         color = Black,
@@ -200,7 +201,7 @@ class ChessStateSpec extends AnyWordSpec:
                         enPassant = Some(Tile("E4"))
                     )
                 )
-                checkIdleStateFen(state, "... b H1 1 110")
+                checkIdleStateFen(state, "b H1 1 110")
                 (
                     state.copy(
                         color = Black,

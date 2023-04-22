@@ -91,7 +91,9 @@ case class ChessState
 
 object ChessState:
     def apply(fen: String, size: Int): ChessState =
-        var cutFen = fen.dropWhile(c => !c.equals(' ')).drop(1)
+        var cutFen = if (!fen.startsWith("w ") && !fen.startsWith("b ")) 
+            then fen.dropWhile(c => !c.equals(' ')).drop(1)
+            else fen
 
         val col: PieceColor = if (cutFen(0).toLower == 'w') 
             then White 
@@ -122,6 +124,8 @@ object ChessState:
         val fullM = cutFen.toInt
 
         ChessState(false, None, col, whiteC, blackC, halfM, fullM, enP, size)
+
+    def apply(fen: String): ChessState = apply(fen, 8)
 
 case class Castles(queenSide: Boolean = true, kingSide: Boolean = true):
     override def toString(): String = (if (kingSide) then "k" else "") + (if (queenSide) then "q" else "")
