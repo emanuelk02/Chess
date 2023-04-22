@@ -22,100 +22,23 @@ import util.PieceColor._
 import util.Tile
 import util.Matrix
 import util.MatrixFenParser.matrixFromFen
-import de.htwg.se.chess.util.ChessState
+import util.ChessState
 
 
-class LegalityComputerSpec extends AnyWordSpec:
-  "A LegalityComputer" should {
+class LegalityRestApiSpec extends AnyWordSpec:
+  "The LegalityComputer " should {
     var matr = matrixFromFen("8/8/8/8/8/8/8/8 w - 0 1")
     var state = ChessState("8/8/8/8/8/8/8/8 w - 0 1", 8)
-    "compute legal moves for a given tile" in {
+
+    
+    "respond with legal moves for a Post request with a FEN" in {
       //---------------------------------------------------------------------------------- Individual Pieces
 
-      /**
-       * Tiles are arranged as to mimic the move behaviour of the /* pieces */
-       * given the corresponding position in hopes of making it easier to read.
-       * 
-       * e.g:
-       *             Tile
-       *             Tile
-       *   Tile Tile Rook Tile Tile
-       *             Tile
-       *             Tile
-       * 
-       * Pieces shouldn't be allowed to move beyond enemy pieces 
-       * and not onto allied pieces.
-       * With the exception of the knight which can jump over pieces.
-       * 
-       * Furthermore: There are 2 types of pieces:
-       *  - Sliding: https://www.chessprogramming.org/Sliding_Pieces
-       *  - Non-Sliding
-       * 
-       * For the sliding pieces, their directional movement needs to
-       * be treated like an extending line, which ends at the board border.
-       * 
-       * To account for this, we simply iterate over the directionial
-       * list field-size times. It containins Tuples, that if added to a 
-       * tile mimic the pieces movement. Additionally, while iterating
-       * We keep track of the piece which was on the tile we looked at before.
-       * 
-       * If that previous piece is not empty, we stop the iteration:
-       *
-       *  var prevPiece: Option[Piece] = None
-       *  for i <- 1 to size 
-       *  yield {
-       *    if (prevPiece.isEmpty) {
-       *      Try(in - (move(0)*i, move(1)*i)) match {
-       *        case s: Success[Tile] => {
-       *            prevPiece = cell(s.get)
-       *            tileHandle.handleRequest(s.get)
-       *        }
-       *        case f: Failure[Tile] => None
-       *      }
-       *    }
-       *    else None
-       *  }
-       * 
-       * The tileHandle checks if the destination tile is empty and if it
-       * is not, wether the tile contains an enemy piece. If it is an enemy
-       * piece that tile will be added as well, but if it is allied, we
-       * skip it and the iteration ends there.
-       * 
-       * 
-       * For the non-sliding pieces, we treat the direction tuples as
-       * destinations and simply map them to their return value of the tileHandle:
-       * e.g: the Knight
-       *    knightMoveList.filter( x => Try(in - x).isSuccess )
-       *        .filter( x => tileHandle.handleRequest(in - x).isDefined )
-       *        .map( x => in - x )
-       * 
-       * For King and Pawn we have to additionally append the special tiles
-       * for Castling(King), En Passant(Pawn) and Double Push(Pawn).
-       * These are calculated in seperate Chains.
-       * The rules for these are explained in the Chess Programming Wiki:
-       * 
-       *  - Castling: https://www.chessprogramming.org/Castling
-       *  - En Passant: https://www.chessprogramming.org/En_passant
-       *  - Double Push: https://www.chessprogramming.org/Pawn_Push#DoublePush
-       * 
-       * */
-
-      // King //
-      /**
-       * The King only moves on tile at the time.
-       * (With the exception of castles which will be covered later on)
-       * The king may move in every direction unless he is in check or
-       * the tile he could move on is attacked.
-       * These cases will also be covered later.
-       * */
       matr = matrixFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1")
       state = ChessState("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1", 8)
-      getLegalMoves(matr, state, Tile("E2")).sorted shouldBe (
-        Tile("D3") :: Tile("E3") :: /* Queen */
-        Tile("D2") ::  /* King */   Tile("F2") :: /* Bishop */
-        Tile("D1") :: Tile("E1") :: /* Bishop attack */
-        Nil
-      ).sorted
+
+      
+      getLegalMoves(matr, state, Tile("E2"))
 
       // Queen //
       /**

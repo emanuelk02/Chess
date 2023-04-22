@@ -17,16 +17,10 @@ import scala.util.Success
 import scala.util.Failure
 import scala.annotation.tailrec
 
-import util.Piece
-import util.PieceType
-import util.PieceColor
-import util.Tile
+import util._
 import util.Piece._
-import util.PieceType._
 import util.PieceColor._
-import util.Matrix
-import util.ChessState
-import util.ChainHandler
+import util.PieceType._
 
 
 object LegalityComputer:
@@ -40,29 +34,17 @@ object LegalityComputer:
      */
     def getLegalMoves(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): List[Tile] =
         val wrapper = new MatrixWrapper(field, state)
-        wrapper.legalMoves.get(tile)
-            .get
-            .filter(    // Filters out moves, which leave King in Check
-              tile2 => 
-                wrapper.getKingSquare match
-                  case Some(kSq) =>
-                      !MatrixWrapper(
-                          field.replace(tile2.row, tile2.col, wrapper.cell(tile))
-                               .replace(tile.row, tile.col, None ),
-                          state.evaluateMove((tile, tile2), wrapper.cell(tile).get, wrapper.cell(tile2))
-                        )
-                        .setColor(wrapper.color)
-                        .isAttacked(
-                          if (wrapper.cell(tile).get.getType == King) 
-                            then tile2
-                            else kSq
-                        )
-                  case None => true
-            )
+        wrapper.getLegalMoves(tile)
 
     def getLegalMoves(field: Matrix[Option[Piece]], state: ChessState): Map[Tile, List[Tile]] =
         val wrapper = new MatrixWrapper(field, state)
         wrapper.legalMoves
+
+    def getLegalMoves(fen: String, tile: Tile): List[Tile] =
+        getLegalMoves(MatrixFenParser.matrixFromFen(fen), ChessState(fen), tile)
+
+    def getLegalMoves(fen: String): Map[Tile, List[Tile]] =
+        getLegalMoves(MatrixFenParser.matrixFromFen(fen), ChessState(fen))
 
     def isAttacked(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): Boolean =
         val wrapper = new MatrixWrapper(field, state)
@@ -72,9 +54,6 @@ object LegalityComputer:
         val wrapper = new MatrixWrapper(field, state)
         wrapper.inCheck
 
-    /*def getLegalMoves(fen: String, tile: Tile): List[Tile] =
-        val (field, state) = FENParser.parse(fen)
-        getLegalMoves(field, state, tile)*/
 
 case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
     val size: Int = field.size
@@ -102,6 +81,28 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
     def legalMoves: Map[Tile, List[Tile]] =
       Map from
         allTiles.map(tile => tile -> computeLegalMoves(tile))
+                .map( (tile, moves) => tile -> 
+                moves.filter(    // Filters out moves, which leave King in Check
+                  tile2 => 
+                    getKingSquare match
+                      case Some(kSq) =>
+                          !MatrixWrapper(
+                              field.replace(tile2.row, tile2.col, cell(tile))
+                                   .replace(tile.row, tile.col, None ),
+                              state.evaluateMove((tile, tile2), cell(tile).get, cell(tile2))
+                            )
+                            .setColor(color)
+                            .isAttacked(
+                              if (cell(tile).get.getType == King) 
+                                then tile2
+                                else kSq
+                            )
+                      case None => true
+                )
+            )
+
+    def getLegalMoves(tile: Tile): List[Tile] =
+        legalMoves.get(tile).getOrElse(Nil)
 
     val getKingSquare: Option[Tile] =
       allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
