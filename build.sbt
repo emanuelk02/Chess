@@ -11,7 +11,8 @@ lazy val commonDependency = Seq(
     "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
     "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
     "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion,
-    "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion
+    "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion,
+    "io.spray" %%  "spray-json" % "1.3.6"
 )
 
 lazy val commonSettings = Seq(
