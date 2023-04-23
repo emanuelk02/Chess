@@ -25,13 +25,6 @@ import util.PieceType._
 
 object LegalityComputer:
 
-    /**
-     * Returns a list of all tiles the piece in given tile can move to.
-     * Returned tiles are fully legal and respect check.
-     * For empty tiles an empty list is returned.
-     * @param tile      Source tile
-     * @return          List of tiles which are legal to move to
-     */
     def getLegalMoves(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): List[Tile] =
         val wrapper = new MatrixWrapper(field, state)
         wrapper.getLegalMoves(tile)
@@ -41,10 +34,10 @@ object LegalityComputer:
         wrapper.legalMoves
 
     def getLegalMoves(fen: String, tile: Tile): List[Tile] =
-        getLegalMoves(MatrixFenParser.matrixFromFen(fen), ChessState(fen), tile)
+        getLegalMoves(FenParser.matrixFromFen(fen), ChessState(fen), tile)
 
     def getLegalMoves(fen: String): Map[Tile, List[Tile]] =
-        getLegalMoves(MatrixFenParser.matrixFromFen(fen), ChessState(fen))
+        getLegalMoves(FenParser.matrixFromFen(fen), ChessState(fen))
 
     def isAttacked(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): Boolean =
         val wrapper = new MatrixWrapper(field, state)
@@ -81,25 +74,26 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
     def legalMoves: Map[Tile, List[Tile]] =
       Map from
         allTiles.map(tile => tile -> computeLegalMoves(tile))
+                .filter( (tile, moves) => moves.nonEmpty )
                 .map( (tile, moves) => tile -> 
-                moves.filter(    // Filters out moves, which leave King in Check
-                  tile2 => 
-                    getKingSquare match
-                      case Some(kSq) =>
-                          !MatrixWrapper(
-                              field.replace(tile2.row, tile2.col, cell(tile))
-                                   .replace(tile.row, tile.col, None ),
-                              state.evaluateMove((tile, tile2), cell(tile).get, cell(tile2))
-                            )
-                            .setColor(color)
-                            .isAttacked(
-                              if (cell(tile).get.getType == King) 
-                                then tile2
-                                else kSq
-                            )
-                      case None => true
-                )
-            )
+                  moves.filter(    // Filters out moves, which leave King in Check
+                    tile2 => 
+                      getKingSquare match
+                        case Some(kSq) =>
+                            !MatrixWrapper(
+                                field.replace(tile2.row, tile2.col, cell(tile))
+                                     .replace(tile.row, tile.col, None ),
+                                state.evaluateMove((tile, tile2), cell(tile).get, cell(tile2))
+                              )
+                              .setColor(color)
+                              .isAttacked(
+                                if (cell(tile).get.getType == King) 
+                                  then tile2
+                                  else kSq
+                              )
+                        case None => true
+                  )
+                ).filter( (tile, moves) => moves.nonEmpty )
 
     def getLegalMoves(tile: Tile): List[Tile] =
         legalMoves.get(tile).getOrElse(Nil)

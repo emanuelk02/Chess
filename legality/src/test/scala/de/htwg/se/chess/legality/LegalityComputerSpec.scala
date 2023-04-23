@@ -12,9 +12,6 @@
 package de.htwg.se.chess
 package legality
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.http.scaladsl.server.Directives._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
@@ -24,7 +21,7 @@ import util.Piece._
 import util.PieceColor._
 import util.Tile
 import util.Matrix
-import util.MatrixFenParser.matrixFromFen
+import util.FenParser.matrixFromFen
 import util.ChessState
 
 
@@ -345,10 +342,10 @@ class LegalityComputerSpec extends AnyWordSpec:
         var legalMovesMap = getLegalMoves(matr, state)
 
         legalMovesMap(Tile("E1")).sorted shouldBe (Tile("E2") :: Tile("D1")  :: Tile("F1") :: Nil).sorted
-        legalMovesMap(Tile("A1")).sorted shouldBe (Nil)
-        legalMovesMap(Tile("H1")).sorted shouldBe (Nil)
-        legalMovesMap(Tile("E2")).sorted shouldBe (Nil)
-        legalMovesMap(Tile("H3")).sorted shouldBe (Nil)
+        legalMovesMap.get(Tile("A1")) shouldBe None
+        legalMovesMap.get(Tile("H1")) shouldBe None
+        legalMovesMap.get(Tile("E2")) shouldBe None
+        legalMovesMap.get(Tile("H3")) shouldBe None
 
         legalMovesMap = getLegalMoves("8/8/8/8/8/8/8/R3K2R w KQ - 0 1")
         legalMovesMap(Tile("E1")).sorted shouldBe (Tile("D1")  :: Tile("E2") :: Tile("D2") :: Tile("F1") :: Tile("F2") :: Tile("C1") :: Tile("G1") :: Nil).sorted
