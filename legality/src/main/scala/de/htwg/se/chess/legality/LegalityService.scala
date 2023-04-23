@@ -87,28 +87,28 @@ object LegalityService:
                 Some(complete(HttpEntity(ContentTypes.`application/json`, LegalityComputer.getLegalMoves(fen).toJson.toString)))
     ) )
 
-    val route = concat(
-        path("computeForTile") {
-            post {
-                entity(as[String]) { str =>
-                    computeForTileHandler.handleRequest(str.parseJson.asJsObject)
-                        .getOrElse(complete {
-                            HttpResponse(StatusCodes.InternalServerError, entity = "Something went wrong while trying to compute legal moves")
-                        })
+    val route = 
+      pathPrefix("compute") {
+        post {
+          concat(
+            path("tile") {
+              entity(as[String]) { str =>
+                computeForTileHandler.handleRequest(str.parseJson.asJsObject)
+                  .getOrElse(complete {
+                    HttpResponse(StatusCodes.InternalServerError, entity = "Something went wrong while trying to compute legal moves")
+                  })
+              }
+            },
+            path("all") {
+              entity(as[String]) { str =>
+                computeForAllHandler.handleRequest(str.parseJson.asJsObject)
+                  .getOrElse(complete {
+                    HttpResponse(StatusCodes.InternalServerError, entity = "Something went wrong while trying to compute legal moves")
+                  })
                 }
-            }
-        },
-        path("computeForAll") {
-            post {
-                entity(as[String]) { str =>
-                    computeForAllHandler.handleRequest(str.parseJson.asJsObject)
-                        .getOrElse(complete {
-                            HttpResponse(StatusCodes.InternalServerError, entity = "Something went wrong while trying to compute legal moves")
-                        })
-                }
-            }
-       }
-    )
+            })
+          }
+        }
 
     def apply(ip: String, port: Int): LegalityService =
         implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "LegalityComputerService")
