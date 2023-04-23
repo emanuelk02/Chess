@@ -33,7 +33,7 @@ import util.Tile
 import util.Matrix
 import util.FenParser._
 import util.ChessState
-import util.ChessJsonProtocol._
+import util.services.ChessJsonProtocol._
 
 
 class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with ScalatestRouteTest:
