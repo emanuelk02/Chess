@@ -12,14 +12,37 @@
 package de.htwg.se.chess
 package util
 
+import scala.util.Try
 
-object MatrixFenParser:
+
+object FenParser:
     def matrixFromFen(fen: String): Matrix[Option[Piece]] =
       val fieldSize = fen.count(c => c == '/') + 1
       val fenList = fenToList(fen.takeWhile(c => !c.equals(' ')).toCharArray.toList, fieldSize, fieldSize).toVector
       Matrix(
         Vector.tabulate(fieldSize) { rank => fenList.drop(rank * fieldSize).take(fieldSize) }
       )
+
+    def stateFromFen(fen: String): ChessState = 
+        val fieldSize = fen.count(c => c == '/') + 1
+        ChessState(fen, fieldSize)
+
+    def checkFen(check: String): Boolean =
+        val size = check.count(c => c == '/') + 1
+
+        size == 8
+        &&
+        check.split(' ').head.split('/')
+          .zipWithIndex
+          .map( (str, ind) => str.foldLeft(0, false, ind) { (prev, c) =>
+            if c.isDigit then (prev(0) + c.toInt - '0'.toInt, false, ind)
+            else if c.isLetter then (prev(0) + 1, false, ind)
+            else (prev(0), true, ind)
+          })
+          .filter( (str, check, _) => str != size || check )
+          .isEmpty
+        &&
+        Try(ChessState(check, size)).isSuccess
 
     private def fenToList(fen: List[Char], remaining: Int, fieldSize: Int): List[Option[Piece]] =
       fen match
@@ -34,6 +57,12 @@ object MatrixFenParser:
           else Piece(s) :: fenToList(rest, remaining - 1, fieldSize)
         case _ => List.fill(remaining)(None)
 
+    extension (state: ChessState)
+      def toFen: String = state.toFenPart
+
+    extension (matrix: Matrix[Option[Piece]])
+      def toFen: String = fenFromMatrix(matrix)
+    
     def fenFromMatrix(matrix: Matrix[Option[Piece]]): String =
       matrix.rows
             .zipWithIndex

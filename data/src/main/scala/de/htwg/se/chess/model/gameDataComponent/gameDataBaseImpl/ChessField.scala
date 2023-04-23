@@ -33,7 +33,8 @@ import util.Tile
 import util.Matrix
 import util.ChessState
 import util.ChainHandler
-import util.MatrixFenParser
+import util.FenParser
+import util.FenParser._
 import legality.LegalityComputer
 
 
@@ -196,7 +197,7 @@ case class ChessField @Inject() (
   val legalMoves = LegalityComputer.getLegalMoves(field, state)
 
   private def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
-  override def getLegalMoves(tile: Tile): List[Tile] = LegalityComputer.getLegalMoves(field, state, tile)
+  override def getLegalMoves(tile: Tile): List[Tile] = legalMoves.get(tile).getOrElse(Nil)
   override val getKingSquare: Option[Tile] =
     allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
   override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
@@ -222,10 +223,10 @@ case class ChessField @Inject() (
 
   override def toString: String = field.toBoard() + state.toString + "\n"
 
-  override def toFenPart: String = MatrixFenParser.fenFromMatrix(field)
+  override def toFenPart: String = field.toFen
 
   // Fen could also be extracted into a persistence service
-  override def toFen: String = toFenPart + " " + state.toFenPart
+  override def toFen: String = toFenPart + " " + state.toFen
 
 object ChessField:
   def apply(field: Matrix[Option[Piece]]): ChessField =
@@ -248,7 +249,7 @@ object ChessField:
   // If Fen is moved into persistence service this would move with it and instead create a matrix
   // ChessField would then call that service to create a matrix and instantiate itself
   def fromFen(fen: String, fieldSize: Int = 8): ChessField =
-    val newMatrix = MatrixFenParser.matrixFromFen(fen)
+    val newMatrix = FenParser.matrixFromFen(fen)
     val newState: ChessState = ChessState(size = fieldSize).evaluateFen(fen)
     val tmpField = ChessField( newMatrix, newState ).start.setColor(newState.color.invert)
     val newInCheck = tmpField.setColor(newState.color).getKingSquare match
