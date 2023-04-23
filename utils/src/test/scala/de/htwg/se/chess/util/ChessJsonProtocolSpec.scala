@@ -16,7 +16,8 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import spray.json._
 
-import ChessJsonProtocol._
+import util.services.ChessJsonProtocol._
+
 
 
 class ChessJsonProtocolSpec extends AnyWordSpec:

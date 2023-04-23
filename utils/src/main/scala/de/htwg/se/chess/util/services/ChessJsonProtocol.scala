@@ -11,6 +11,7 @@
 
 package de.htwg.se.chess
 package util
+package services
 
 
 import spray.json._

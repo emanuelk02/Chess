@@ -1,12 +1,11 @@
-import de.htwg.se.chess.util.ChessState
-import de.htwg.se.chess.util.FenParser
-
 import de.htwg.se.chess._
 
-import util.ChessJsonProtocol._
+import util.services.ChessJsonProtocol._
 import spray.json._
 import util.Tile
 import legality.LegalityComputer
+import util.FenParser
+import util.ChessState
 
 
 val jsonTile = """{"file": 1, "rank": 2, "size": 4}""".parseJson
@@ -27,3 +26,6 @@ ChessState("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1")
 val matr = FenParser.matrixFromFen("8/8/8/8/8/8/4r3/R3K2R w KQ - 0 1")
 val state = ChessState("8/8/8/8/8/8/4r3/R3K2R w KQ - 0 1")
 var legalMovesMap = LegalityComputer.getLegalMoves(matr, state)
+
+
+"{}".parseJson

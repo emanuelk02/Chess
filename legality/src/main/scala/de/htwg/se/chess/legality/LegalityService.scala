@@ -16,24 +16,21 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContextExecutor
-import scala.concurrent.ExecutionContext
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
+import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
+import scala.util.{Try,Success,Failure}
 import scala.quoted._
 import spray.json._
 
 import util.Tile
 import util.FenParser
 import util.ChainHandler
-import util.ChessJsonProtocol._
-import akka.http.scaladsl.model.ContentType.WithFixedCharset
-import akka.http.scaladsl.server.StandardRoute
+import util.services.JsonHandlerService
+import util.services.ChessJsonProtocol._
 
 
 case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
@@ -45,23 +42,7 @@ case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(i
           .onComplete(_ => system.terminate()) // and shutdown when done
 
 
-object LegalityService:
-    private def checkForJsonFields(fields: List[String])(json: JsObject): Option[StandardRoute] =
-        if fields.forall(json.fields.contains(_))
-            then None
-            else Some(complete(
-                StatusCodes.BadRequest, 
-                s"""Missing fields in body: ${fields.filterNot(json.fields.contains(_)).map(field => "\"" + field + "\"").mkString}"""
-            ))
-    
-    private def validateJsonField[T: JsonReader](field: String, validator: T => Boolean)(json: JsObject): Option[StandardRoute] =
-        Try(json.getFields(field).head.convertTo[T]) match
-            case Success(value) =>
-                if validator(value)
-                    then None
-                    else Some(complete(StatusCodes.BadRequest, s"""Invalid $field: ${json.getFields(field).head}"""))
-            case Failure(_) => Some(complete(StatusCodes.BadRequest, s"""Invalid $field: ${json.getFields(field).head}"""))
-
+object LegalityService extends JsonHandlerService:
 
     private val computeForTileHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
         (
@@ -83,25 +64,18 @@ object LegalityService:
                 Some(complete(HttpEntity(ContentTypes.`application/json`, LegalityComputer.getLegalMoves(fen).toJson.toString)))
     ) )
 
+    val error500 = 
+        "Something went wrong while trying to compute legal moves"
+
     val route = 
       pathPrefix("compute") {
         post {
           concat(
             path("tile") {
-              entity(as[String]) { str =>
-                computeForTileHandler.handleRequest(str.parseJson.asJsObject)
-                  .getOrElse(complete {
-                    HttpResponse(StatusCodes.InternalServerError, entity = "Something went wrong while trying to compute legal moves")
-                  })
-              }
+              handleRequestEntity(computeForTileHandler, error500)
             },
             path("all") {
-              entity(as[String]) { str =>
-                computeForAllHandler.handleRequest(str.parseJson.asJsObject)
-                  .getOrElse(complete {
-                    HttpResponse(StatusCodes.InternalServerError, entity = "Something went wrong while trying to compute legal moves")
-                  })
-                }
+              handleRequestEntity(computeForAllHandler, error500)
             })
           }
         }
