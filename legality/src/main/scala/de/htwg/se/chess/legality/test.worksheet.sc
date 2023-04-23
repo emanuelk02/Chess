@@ -17,6 +17,7 @@ tile.toJson
 val fen = "8/8/8/8/8/5Q2/4K1b1/8 w - 0 1"
 tile = Tile("E2")
 tile.toJson
+
 LegalityComputer.getLegalMoves(fen).toJson
 
 FenParser.checkFen("8/6r1/8/8/8/3Q1K2/8/8 w KQ A1 0 1")

@@ -89,34 +89,34 @@ class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with Scalat
       Post("/compute/tile", s"""{"fen":"$fen","tile":"A1"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Invalid FEN: "$fen""""
+        responseAs[String] shouldEqual s"""Invalid fen: "$fen""""
       }
       Post("/compute/all", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Invalid FEN: "$fen""""
+        responseAs[String] shouldEqual s"""Invalid fen: "$fen""""
       }
 
       // Wrong or missing field name in json object
       Post("/compute/tile", s"""{"fenString":"$fen","tile":"A1"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Missing "fen" or "tile" in body"""
+        responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
       Post("/compute/all", s"""{"fenString":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Missing "fen" in body"""
+        responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
       Post("/compute/tile", s"""{"tile":"A1"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Missing "fen" or "tile" in body"""
+        responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
       Post("/compute/all", s"""{"other":"blah"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Missing "fen" in body"""
+        responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
     }
     /*
@@ -145,12 +145,12 @@ class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with Scalat
       Post("/compute/tile", s"""{"fen":"$fen","piece":"A1"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Missing "fen" or "tile" in body"""
+        responseAs[String] shouldEqual s"""Missing fields in body: "tile""""
       }
       Post("/compute/tile", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
-        responseAs[String] shouldEqual s"""Missing "fen" or "tile" in body"""
+        responseAs[String] shouldEqual s"""Missing fields in body: "tile""""
       }
     }
   }

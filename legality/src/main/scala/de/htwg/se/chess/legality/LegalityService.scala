@@ -46,24 +46,28 @@ case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(i
 
 
 object LegalityService:
+    private def checkForJsonFields(fields: List[String])(json: JsObject): Option[StandardRoute] =
+        if fields.forall(json.fields.contains(_))
+            then None
+            else Some(complete(
+                StatusCodes.BadRequest, 
+                s"""Missing fields in body: ${fields.filterNot(json.fields.contains(_)).map(field => "\"" + field + "\"").mkString}"""
+            ))
+    
+    private def validateJsonField[T: JsonReader](field: String, validator: T => Boolean)(json: JsObject): Option[StandardRoute] =
+        Try(json.getFields(field).head.convertTo[T]) match
+            case Success(value) =>
+                if validator(value)
+                    then None
+                    else Some(complete(StatusCodes.BadRequest, s"""Invalid $field: ${json.getFields(field).head}"""))
+            case Failure(_) => Some(complete(StatusCodes.BadRequest, s"""Invalid $field: ${json.getFields(field).head}"""))
+
+
     private val computeForTileHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
         (
-            // Check if json contains fen and tile
-            json => if json.fields.contains("fen") && json.fields.contains("tile") 
-                then None else Some(complete(StatusCodes.BadRequest, """Missing "fen" or "tile" in body""")),
-            // Check if fen is valid
-            json =>
-                val fen = json.getFields("fen").head.convertTo[String]
-                if FenParser.checkFen(fen) 
-                    then None 
-                    else Some(complete(StatusCodes.BadRequest, s"""Invalid FEN: "$fen"""")),
-            // Check if tile is valid
-            json =>
-                val tryTile = Try(json.getFields("tile").head.convertTo[Tile])
-                tryTile match
-                    case Success(tile) => None
-                    case Failure(_) => Some(complete(StatusCodes.BadRequest, s"""Invalid tile: ${json.getFields("tile").head}""")),
-            // Compute and return legal moves
+            checkForJsonFields(List("fen", "tile")) _,
+            validateJsonField[String]("fen", FenParser.checkFen) _,
+            validateJsonField[Tile]("tile", { _ => true }) _,
             json =>
                 val fen = json.getFields("fen").head.convertTo[String]
                 val tile = json.getFields("tile").head.convertTo[Tile]
@@ -72,16 +76,8 @@ object LegalityService:
 
     private val computeForAllHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
         (
-            // Check if json contains fen and tile
-            json => if json.fields.contains("fen")
-                then None else Some(complete(StatusCodes.BadRequest, """Missing "fen" in body""")),
-            // Check if fen is valid
-            json =>
-                val fen = json.getFields("fen").head.convertTo[String]
-                if FenParser.checkFen(fen) 
-                    then None 
-                    else Some(complete(StatusCodes.BadRequest, s"""Invalid FEN: "$fen"""")),
-            // Compute and return legal moves
+            checkForJsonFields(List("fen")) _,
+            validateJsonField[String]("fen", FenParser.checkFen) _,
             json =>
                 val fen = json.getFields("fen").head.convertTo[String]
                 Some(complete(HttpEntity(ContentTypes.`application/json`, LegalityComputer.getLegalMoves(fen).toJson.toString)))
