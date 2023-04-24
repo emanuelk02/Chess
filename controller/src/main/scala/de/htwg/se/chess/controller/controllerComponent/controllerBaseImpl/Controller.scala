@@ -50,11 +50,11 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
 
   def save: Unit =
     def fileIO = Guice.createInjector(ChessModule()).getInstance(classOf[FileIOInterface])
-    fileIO.save(field)
+    fileIO.save(field.toFen)
 
   def load: Unit =
     def fileIO = Guice.createInjector(ChessModule()).getInstance(classOf[FileIOInterface])
-    field = fileIO.load
+    field = field.loadFromFen(fileIO.load)
 
   def start: Unit = field = field.start
   def stop: Unit = field = field.stop

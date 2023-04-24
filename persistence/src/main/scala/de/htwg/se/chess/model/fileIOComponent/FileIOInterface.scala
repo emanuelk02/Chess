@@ -19,7 +19,8 @@ import util.ChessState
 
 
 trait FileIOInterface:
-    def load: Tuple2[Matrix[Option[Piece]], ChessState]
+    def load: String
+    def save(fen: String): Unit
     def save(field: Matrix[Option[Piece]], state: ChessState): Unit
 
 object FileIOInterface:

@@ -26,11 +26,15 @@ import util.FenParser._
 
 
 class FileIO extends FileIOInterface:
-    override def load: Tuple2[Matrix[Option[Piece]], ChessState] =
+    override def load: String = 
+        loadFile match
+            case (matr, state) => matr.toFen + " " + state.toFen
+    def loadFile: Tuple2[Matrix[Option[Piece]], ChessState] =
         val file = scala.xml.XML.loadFile("field.xml")
         val fen = (file \\ "fen").text
         (matrixFromFen(fen), stateFromFen(fen))
 
+    override def save(fen: String): Unit = saveString(matrixFromFen(fen), stateFromFen(fen))
     override def save(field: Matrix[Option[Piece]], state: ChessState): Unit = saveString(field, state)
 
     private def saveString(field: Matrix[Option[Piece]], state: ChessState) =
