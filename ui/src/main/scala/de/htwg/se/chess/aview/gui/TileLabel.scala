@@ -59,16 +59,16 @@ class TileLabel(tile: Tile, controller: ControllerInterface, var source: String)
     val checkColor = Color(230, 75, 40)
 
     preferredSize = dim
-    background = if controller.isSelected(tile) then selectedColor else tileColor
+    background = if controller.selected.getOrElse(None).equals(tile) then selectedColor else tileColor
     contents += new Label("", newPicture, Alignment.Center) { preferredSize = dim }
 
     listenTo(mouse.clicks)
 
     reactions += {
         case e: MouseClicked =>
-            if (controller.isSelected(tile))
+            if (controller.selected.getOrElse(None).equals(tile))
                 then unselectReaction
-                else if (controller.hasSelected) 
+                else if (controller.selected.isDefined) 
                     then { moveReaction }
                     else selectReaction
     }
@@ -81,7 +81,7 @@ class TileLabel(tile: Tile, controller: ControllerInterface, var source: String)
         contents.clear
         contents += Label("", newPicture, Alignment.Center)
         background = (
-            if ( controller.isSelected(tile) )
+            if ( controller.selected.getOrElse(None).equals(tile) )
                 then selectedColor 
                 else highlightColor
         )

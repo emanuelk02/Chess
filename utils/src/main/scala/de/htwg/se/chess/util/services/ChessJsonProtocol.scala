@@ -31,3 +31,12 @@ object ChessJsonProtocol extends DefaultJsonProtocol:
                 else
                     Tile(file, rank)
             case _ => throw DeserializationException("Tile expected")
+
+    implicit object PieceStringFormat extends RootJsonFormat[Piece]:
+        def write(p: Piece): JsValue = JsString(p.toString)
+        def read(value: JsValue): Piece = value match
+            case JsString(s) => 
+                Piece(s) match
+                    case Some(p) => p
+                    case None => throw DeserializationException("Piece expected")
+            case _ => throw DeserializationException("Piece expected")
