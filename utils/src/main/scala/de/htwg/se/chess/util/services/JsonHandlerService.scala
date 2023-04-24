@@ -13,16 +13,20 @@ package de.htwg.se.chess
 package util
 package services
 
-import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.ContentTypes
+import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.StandardRoute
+import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import spray.json._
 import scala.concurrent.ExecutionContext
 import scala.util.{Try,Success,Failure}
-import akka.http.scaladsl.unmarshalling.Unmarshaller
+
+import ChessJsonProtocol._
 
 
 trait JsonHandlerService:
@@ -35,8 +39,28 @@ trait JsonHandlerService:
                 s"""Missing fields in body: ${fields.filterNot(json.fields.contains(_)).map(field => "\"" + field + "\"").mkString}"""
             ))
     
-    def validateJsonField[T: JsonReader](field: String, validator: T => Boolean)(json: JsObject): Option[StandardRoute] =
-        Try(json.getFields(field).head.convertTo[T]) match
+    def getValidatingJsonHandler(
+      fieldValidators: Map[String, (String, JsObject) => Option[StandardRoute]],
+      resolveFunction: Array[JsValue] => String
+      ) : ChainHandler[JsObject, StandardRoute] = ChainHandler(
+        checkForJsonFields(fieldValidators.keys.toList) _
+        :: fieldValidators.map((field, validator) => validator(field, _)).toList
+        ::: ( (json: JsObject) =>
+              Some(complete(
+                HttpEntity(
+                  ContentTypes.`application/json`,
+                  resolveFunction(fieldValidators.map((field, _) => json.getFields(field).head).toArray)
+                )
+              ))
+            )
+        :: Nil
+      )
+
+    def jsonFieldValidator[T: JsonReader](validator: T => Boolean): (String, JsObject) => Option[StandardRoute] =
+        deserializingValidateJsonField[T](jsVal => Try(jsVal.convertTo[T]), validator) _
+
+    private def deserializingValidateJsonField[T: JsonReader](deserializer: JsValue => Try[T], validator: T => Boolean)(field: String, json: JsObject): Option[StandardRoute] =
+        deserializer(json.getFields(field).head) match
             case Success(value) =>
                 if validator(value)
                     then None

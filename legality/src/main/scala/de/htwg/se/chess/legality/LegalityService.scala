@@ -44,7 +44,29 @@ case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(i
 
 object LegalityService extends JsonHandlerService:
 
-    private val computeForTileHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
+    private val computeForTileHandler = getValidatingJsonHandler(
+      Map(
+        "fen" -> jsonFieldValidator[String](FenParser.checkFen),
+        "tile" -> jsonFieldValidator[Tile]({ _ => true })
+      ),
+      (values: Array[JsValue]) => 
+        LegalityComputer.getLegalMoves(
+          values(0).convertTo[String],
+          values(1).convertTo[Tile]
+        ).toJson.toString
+    )
+
+    private val computeForAllHandler = getValidatingJsonHandler(
+      Map(
+        "fen" -> jsonFieldValidator[String](FenParser.checkFen)
+      ),
+      (values: Array[JsValue]) => 
+        LegalityComputer.getLegalMoves(
+          values(0).convertTo[String]
+        ).toJson.toString
+    )
+
+    /*private val computeForTileHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
         (
             checkForJsonFields(List("fen", "tile")) _,
             validateJsonField[String]("fen", FenParser.checkFen) _,
@@ -53,16 +75,16 @@ object LegalityService extends JsonHandlerService:
                 val fen = json.getFields("fen").head.convertTo[String]
                 val tile = json.getFields("tile").head.convertTo[Tile]
                 Some(complete(HttpEntity(ContentTypes.`application/json`, LegalityComputer.getLegalMoves(fen, tile).toJson.toString)))
-    ) )
+    ) )*/
 
-    private val computeForAllHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
+    /*private val computeForAllHandler = ChainHandler[JsObject, StandardRoute] ( List[JsObject => Option[StandardRoute]]
         (
             checkForJsonFields(List("fen")) _,
             validateJsonField[String]("fen", FenParser.checkFen) _,
             json =>
                 val fen = json.getFields("fen").head.convertTo[String]
                 Some(complete(HttpEntity(ContentTypes.`application/json`, LegalityComputer.getLegalMoves(fen).toJson.toString)))
-    ) )
+    ) )*/
 
     val error500 = 
         "Something went wrong while trying to compute legal moves"
