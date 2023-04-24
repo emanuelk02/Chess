@@ -13,12 +13,14 @@ package de.htwg.se.chess
 package model
 package fileIOComponent
 
-import gameDataComponent.GameField
+import util.Piece
+import util.Matrix
+import util.ChessState
 
 
 trait FileIOInterface:
-    def load: GameField
-    def save(field: GameField): Unit
+    def load: Tuple2[Matrix[Option[Piece]], ChessState]
+    def save(field: Matrix[Option[Piece]], state: ChessState): Unit
 
 object FileIOInterface:
     def apply(): FileIOInterface =

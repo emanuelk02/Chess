@@ -18,27 +18,30 @@ import com.google.inject.{ Guice, Inject }
 import net.codingwell.scalaguice.InjectorExtensions._
 import scala.xml.{ NodeSeq, PrettyPrinter }
 
-import gameDataComponent.GameField
+import util.Piece
+import util.Matrix
+import util.ChessState
+import util.FenParser
+import util.FenParser._
 
 
 class FileIO extends FileIOInterface:
-    override def load: GameField =
+    override def load: Tuple2[Matrix[Option[Piece]], ChessState] =
         val file = scala.xml.XML.loadFile("field.xml")
-        var cf = GameField()
         val fen = (file \\ "fen").text
-        cf.loadFromFen(fen)
+        (matrixFromFen(fen), stateFromFen(fen))
 
-    override def save(field: GameField): Unit = saveString(field)
+    override def save(field: Matrix[Option[Piece]], state: ChessState): Unit = saveString(field, state)
 
-    private def saveString(field: GameField) =
+    private def saveString(field: Matrix[Option[Piece]], state: ChessState) =
         import java.io._
         val pw = PrintWriter(File("field.xml"))
         val prettyPrinter = PrettyPrinter(120, 4)
-        val xml = prettyPrinter.format(fieldToXml(field))
+        val xml = prettyPrinter.format(fieldToXml(field, state))
         pw.write(xml)
         pw.close
 
-    def fieldToXml(field: GameField) =
+    def fieldToXml(field: Matrix[Option[Piece]], state: ChessState) =
         <field>
-            <fen>{field.toFen}</fen>
+            <fen>{field.toFen} {state.toFen}</fen>
         </field>

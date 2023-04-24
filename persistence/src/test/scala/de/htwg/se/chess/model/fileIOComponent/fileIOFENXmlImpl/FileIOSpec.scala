@@ -17,7 +17,7 @@ package fileIOFENXmlImpl
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import model.gameDataComponent.GameField
+import util.FenParser._
 import model.fileIOComponent.fileIoFenXmlImpl._
 
 
@@ -30,12 +30,13 @@ class FileIOSpec extends AnyWordSpec:
             }
             "write its FEN to File as Xml" in {
                 val fileIO = fileIoFenXmlImpl.FileIO()
-                val cf = GameField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
-                val xml = fileIO.fieldToXml(cf)
+                val cf = matrixFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+                val state = stateFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+                val xml = fileIO.fieldToXml(cf, state)
                 (xml \\ "fen").text shouldBe "5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23"
 
-                fileIO.save(cf)
-                fileIO.load shouldBe cf
+                fileIO.save(cf, state)
+                fileIO.load shouldBe (cf, state)
             }
             "load a field through the FEN" in {
                 val xml = {
@@ -44,12 +45,14 @@ class FileIOSpec extends AnyWordSpec:
                     </field>
                 }
                 val fen = (xml \\ "fen").text
-                val cf = GameField().loadFromFen(fen)
-                cf shouldBe GameField().loadFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+                val cf = matrixFromFen(fen)
+                val state = stateFromFen(fen)
+                cf shouldBe matrixFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+                state shouldBe stateFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
 
                 val fileIO = fileIoFenXmlImpl.FileIO()
-                fileIO.save(cf)
-                fileIO.load shouldBe cf
+                fileIO.save(cf, state)
+                fileIO.load shouldBe (cf, state)
             }
         }
     }
