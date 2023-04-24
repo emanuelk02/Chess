@@ -29,14 +29,17 @@ class FileIOSpec extends AnyWordSpec:
                 fileIO shouldBe a [fileIoFenXmlImpl.FileIO]
             }
             "write its FEN to File as Xml" in {
+                val fen = "5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23"
                 val fileIO = fileIoFenXmlImpl.FileIO()
-                val cf = matrixFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
-                val state = stateFromFen("5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23")
+                val cf = matrixFromFen(fen)
+                val state = stateFromFen(fen)
                 val xml = fileIO.fieldToXml(cf, state)
-                (xml \\ "fen").text shouldBe "5k2/ppp5/4P3/3R3p/6P1/1K2Nr2/PP3P2/8 b Qk a6 8 23"
+                (xml \\ "fen").text shouldBe fen
 
                 fileIO.save(cf, state)
-                fileIO.load shouldBe (cf, state)
+                fileIO.load shouldBe fen
+                fileIO.save(fen)
+                fileIO.load shouldBe fen
             }
             "load a field through the FEN" in {
                 val xml = {
@@ -52,7 +55,9 @@ class FileIOSpec extends AnyWordSpec:
 
                 val fileIO = fileIoFenXmlImpl.FileIO()
                 fileIO.save(cf, state)
-                fileIO.load shouldBe (cf, state)
+                fileIO.load shouldBe fen
+                fileIO.save(fen)
+                fileIO.load shouldBe fen
             }
         }
     }
