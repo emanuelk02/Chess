@@ -59,14 +59,6 @@ lazy val legality = project
     .enablePlugins(JacocoCoverallsPlugin)
     .dependsOn(utils)
 
-lazy val data: Project = project
-    .in(file("data"))
-    .settings(
-        name := "data",
-        commonSettings
-    )
-    .enablePlugins(JacocoCoverallsPlugin)
-    .dependsOn(utils, legality)
 
 lazy val persistence: Project = project
     .in(file("persistence"))
@@ -76,7 +68,7 @@ lazy val persistence: Project = project
         libraryDependencies += ("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
     )
     .enablePlugins(JacocoCoverallsPlugin)
-    .dependsOn(utils, data)
+    .dependsOn(utils)
 
 
 lazy val controller = project
@@ -87,7 +79,7 @@ lazy val controller = project
         libraryDependencies += ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13)
     )
     .enablePlugins(JacocoCoverallsPlugin)
-    .dependsOn(utils, persistence, data, legality)
+    .dependsOn(utils, persistence, legality)
 
 lazy val ui = project
     .in(file("ui"))
@@ -97,7 +89,7 @@ lazy val ui = project
         libraryDependencies += ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13)
     )
     .enablePlugins(JacocoCoverallsPlugin)
-    .dependsOn(utils, persistence, data, legality, controller)
+    .dependsOn(utils, persistence, legality, controller)
 
 lazy val root = project
   .in(file("."))
@@ -108,5 +100,5 @@ lazy val root = project
     commonSettings
   )
   .enablePlugins(JacocoCoverallsPlugin)
-  .aggregate(utils, persistence, data, legality, controller, ui)
-  .dependsOn(utils, persistence, data, legality, controller, ui)
+  .aggregate(utils, persistence, legality, controller, ui)
+  .dependsOn(utils, persistence, legality, controller, ui)

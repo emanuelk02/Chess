@@ -42,7 +42,7 @@ case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(i
           .onComplete(_ => system.terminate()) // and shutdown when done
 
 
-object LegalityService extends JsonHandlerService:
+object DataService extends JsonHandlerService:
 
     private def computeForTileHandler(tile: Tile) = getValidatingJsonHandler(
       Map(
@@ -68,16 +68,27 @@ object LegalityService extends JsonHandlerService:
     val error500 = 
         "Something went wrong while trying to compute legal moves"
 
-    val route = 
-      pathPrefix("compute") {
-        post {
-          parameter("tile".as[Tile].optional) { tile =>
-            tile match
-                case Some(t) => handleRequestEntity(computeForTileHandler(t), error500)
-                case None    => handleRequestEntity(computeForAllHandler, error500)
-            }
-          }
-        }
+
+
+
+    //def cell(tile: Tile): Option[Piece]
+    //def replace(tile: Tile, fill: String | Option[Piece]): GameField
+    //def fill(filling: String | Option[Piece]): GameField
+    //def move(tile1: Tile, tile2: Tile): GameField
+    //def getLegalMoves(tile: Tile): List[Tile]
+    //def getKingSquare: Option[Tile]
+    //def loadFromFen(fen: String): GameField
+    //def select(tile: Option[Tile]): GameField
+    //def selected: Option[Tile]
+    //def playing: Boolean
+    //def color: PieceColor
+    //def setColor(color: PieceColor): GameField
+    //def inCheck: Boolean
+    //def gameState: GameState
+    //def start: GameField
+    //def stop:  GameField
+    //def toFenPart: String
+    //def toFen: String
 
     def apply(ip: String, port: Int): LegalityService =
         implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "LegalityComputerService")
