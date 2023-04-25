@@ -17,11 +17,11 @@ import scala.util.{Try,Success,Failure}
 import scala.quoted._
 import spray.json._
 
-import util.Piece
-import util.Matrix
-import util.ChessState
+import util.data.Piece
+import util.data.Matrix
+import util.data.ChessState
+import util.data.ChessJsonProtocol._
 import util.services.JsonHandlerService
-import util.services.ChessJsonProtocol._
 import fileIOComponent.FileIOInterface
 
 

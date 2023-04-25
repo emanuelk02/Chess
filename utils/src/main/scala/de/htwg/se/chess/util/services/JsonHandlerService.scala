@@ -28,6 +28,7 @@ import scala.util.{Try,Success,Failure}
 
 import data.ChessJsonProtocol._
 import patterns.ChainHandler
+import spray.json.JsonFormat
 
 
 trait JsonHandlerService:
@@ -75,3 +76,6 @@ trait JsonHandlerService:
                 HttpResponse(InternalServerError, entity = errorMessage)
               })
             }
+
+    def jsonStringEntitiy(field: String, value: String): String =
+        s"""{$field:"$value"}"""

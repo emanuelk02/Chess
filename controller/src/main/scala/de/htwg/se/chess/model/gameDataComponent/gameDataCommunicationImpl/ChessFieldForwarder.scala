@@ -16,6 +16,7 @@ package gameDataCommunicationImpl
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.Uri.Path
@@ -40,22 +41,16 @@ import legality.LegalityComputer
 import gameDataBaseImpl.toBoard
 
 
-case class ChessFieldForwarder(legalityService: Uri):
+case class ChessFieldForwarder(legalityService: Uri)
+    (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 
-  private implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "ChessFieldForwarder")
-  private implicit val executionContext: ExecutionContext = system.executionContext
+    def getLegalMoves(fen: String): Future[HttpResponse] =
+        Http().singleRequest(
+            Post(
+                legalityService.withPath(Path("/compute")),
+                s"""{"fen": "$fen"}"""
+            )
+        )
 
-  def getLegalMoves(fen: String): Map[Tile, List[Tile]] =
-    val request = HttpRequest(
-      method = HttpMethods.POST,
-      uri = legalityService.withPath(Path("/compute")),
-      entity = HttpEntity(
-        ContentTypes.`application/json`,
-        s"""{"fen": "$fen"}"""
-      )
-    )
-    val response = Http().singleRequest(request)
-    while(!response.isCompleted) { Thread.sleep(100) }
-    response.value.get match
-      case Success(res) => Unmarshal(res).to[Map[Tile, List[Tile]]].
-      case Failure(_) => Map()
+    def deserializeLegalMoves(response: HttpResponse): Future[Map[Tile, List[Tile]]] =
+        Unmarshal(response.entity).to[Map[Tile, List[Tile]]]

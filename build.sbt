@@ -14,7 +14,8 @@ lazy val commonDependency = Seq(
     "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
     "org.slf4j" % "slf4j-simple" % "2.0.7",
-    "io.spray" %%  "spray-json" % "1.3.6"
+    "io.spray" %%  "spray-json" % "1.3.6",
+    ("com.typesafe.play" %% "play-json" % "2.9.3").cross(CrossVersion.for3Use2_13)
 )
 
 lazy val commonSettings = Seq(

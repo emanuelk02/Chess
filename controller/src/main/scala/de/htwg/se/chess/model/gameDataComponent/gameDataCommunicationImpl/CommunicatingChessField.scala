@@ -14,10 +14,17 @@ package model
 package gameDataComponent
 package gameDataCommunicationImpl
 
+
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.model.Uri
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 import scala.annotation.tailrec
+import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
 
 import com.google.inject.{Guice, Inject}
 
@@ -28,37 +35,46 @@ import util.data.PieceType._
 import util.data.PieceColor._
 import util.data.invert
 import util.data.FenParser._
+import util.data.ChessJsonProtocol._
 import util.patterns.ChainHandler
 import legality.LegalityComputer
 import gameDataBaseImpl.toBoard
+import gameDataBaseImpl.ChessField
+import util.client.BlockingClient._
+import akka.http.scaladsl.model.HttpEntity
+import spray.json._
+
+given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "CommunicatingChessField")
+given executionContext: ExecutionContextExecutor = system.executionContext
 
 
-case class ChessField @Inject() (
+case class CommunicatingChessField @Inject() (
   field: Matrix[Option[Piece]] = new Matrix(8, None), 
   state: ChessState = ChessState(), 
   inCheck: Boolean = false, 
   attackedTiles: List[Tile] = Nil, 
-  gameState: GameState = RUNNING
+  gameState: GameState = RUNNING,
+  forwarder: ChessFieldForwarder = ChessFieldForwarder(Uri("http://localhost:8082"))
 ) extends GameField(field):
 
   override def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
-  override def replace(tile: Tile, fill: String | Option[Piece]): ChessField = 
+  override def replace(tile: Tile, fill: String | Option[Piece]): CommunicatingChessField = 
     fill match
-        case str: String => ChessField(field.replace(tile.row, tile.col, Piece(str)))
-        case piece: Option[Piece] => ChessField(field.replace(tile.row, tile.col, piece))
+        case str: String => CommunicatingChessField(field.replace(tile.row, tile.col, Piece(str)))
+        case piece: Option[Piece] => CommunicatingChessField(field.replace(tile.row, tile.col, piece))
 
-  override def fill(filling: String | Option[Piece]): ChessField =
+  override def fill(filling: String | Option[Piece]): CommunicatingChessField =
     filling match
-        case str: String => ChessField(field.fill(Piece(str)))
-        case piece: Option[Piece] => ChessField(field.fill(piece))
+        case str: String => CommunicatingChessField(field.fill(Piece(str)))
+        case piece: Option[Piece] => CommunicatingChessField(field.fill(piece))
 
-  private val specialMoveChain = ChainHandler[Tuple3[Tile, Tile, ChessField], ChessField] (List[Tuple3[Tile, Tile, ChessField] => Option[ChessField]]
+  private val specialMoveChain = ChainHandler[Tuple3[Tile, Tile, CommunicatingChessField], CommunicatingChessField] (List[Tuple3[Tile, Tile, CommunicatingChessField] => Option[CommunicatingChessField]]
    (
-      // in(0): tile1 (source);    in(1): tile2 (dest);    in(2): ChessField
+      // in(0): tile1 (source);    in(1): tile2 (dest);    in(2): CommunicatingChessField
       ( (src, dest, field) => if !playing then Some(field) else None ),
       ( (src, dest, field) => if (cell(src).get.getType == King && castleTiles.contains(dest)) // Castling
-        then Some(ChessField(
+        then Some(CommunicatingChessField(
              doCastle(dest, field.field),
              state.evaluateMove((src, dest), cell(src).get, cell(dest)).copy(color = state.color)
             ))
@@ -68,7 +84,7 @@ case class ChessField @Inject() (
           if state.enPassant.isDefined               // En Passant
              && cell(src).get.getType == Pawn
              && state.enPassant.get == dest
-             then Some(ChessField(
+             then Some(CommunicatingChessField(
                 doEnPassant(dest, field.field)
                   .replace(dest.row, dest.col, cell(src))
                   .replace(src.row, src.col, None ),
@@ -78,7 +94,7 @@ case class ChessField @Inject() (
       ),
       ( (src, dest, field) => 
         if cell(src).get.getType == Pawn && (dest.rank == 1 || dest.rank == size)   // Pawn Promotion
-            then Some(ChessField(
+            then Some(CommunicatingChessField(
               doPromotion(dest, field.field),
               state.evaluateMove((src, dest), if color == White then W_QUEEN else B_QUEEN, cell(dest)).copy(color = state.color)
             ))
@@ -87,7 +103,7 @@ case class ChessField @Inject() (
     )
   )
 
-  private val gameStateChain = ChainHandler[ChessField, GameState] (List[ChessField => Option[GameState]]
+  private val gameStateChain = ChainHandler[CommunicatingChessField, GameState] (List[CommunicatingChessField => Option[GameState]]
     (
       ( _ => if playing then None else Some(RUNNING) ),
       ( _ => if state.halfMoves < 50 then None else Some(DRAW) ),
@@ -96,10 +112,10 @@ case class ChessField @Inject() (
     )
   )
 
-  override def move(tile1: Tile, tile2: Tile): ChessField =
+  override def move(tile1: Tile, tile2: Tile): CommunicatingChessField =
     val piece = cell(tile1)
     var tempField =  // anticipates change to load inCheck and attackedTiles from
-      ChessField(
+      CommunicatingChessField(
         field.replace(tile2.row, tile2.col, piece)
              .replace(tile1.row, tile1.col, None ),
         state.evaluateMove((tile1, tile2), cell(tile1).get, cell(tile2)).copy(color = state.color)
@@ -112,11 +128,12 @@ case class ChessField @Inject() (
       then invertedTempField.isAttacked(invertedTempField.getKingSquare.get)
       else false
 
+    val tmpLegalMoves = tempField.setColor(color).legalMoves
     val ret = copy(
         tempField.field,
         state.evaluateMove((tile1, tile2), cell(tile1).get, cell(tile2)),
         newInCheck,
-        tempField.setColor(color).legalMoves.flatMap( entry => entry._2).toList.sorted
+        tmpLegalMoves.flatMap( entry => entry._2).toList.sorted
       )
 
     val newGameState = gameStateChain.handleRequest(ret).get
@@ -189,20 +206,24 @@ case class ChessField @Inject() (
         .map( rank => Tile(file, rank, size) )
         )
 
-  val legalMoves = LegalityComputer.getLegalMoves(field, state)
+  var legalMoves: Map[Tile, List[Tile]] = blockingReceive(
+    forwarder.deserializeLegalMoves(blockingReceive(
+        forwarder.getLegalMoves(toFen)
+    )))
 
-  private def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
+
+  def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
   override def getLegalMoves(tile: Tile): List[Tile] = legalMoves.get(tile).getOrElse(Nil)
   override val getKingSquare: Option[Tile] =
     allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )
-  override def start: ChessField = ChessField(field, state.start) // new construction to compute legal moves
-  override def stop: ChessField = ChessField(field, state.stop)
-  override def loadFromFen(fen: String): ChessField = ChessField.fromFen(fen, field.size)
+  override def start: CommunicatingChessField = CommunicatingChessField(field, state.start) // new construction to compute legal moves
+  override def stop: CommunicatingChessField = CommunicatingChessField(field, state.stop)
+  override def loadFromFen(fen: String): CommunicatingChessField = CommunicatingChessField.fromFen(fen, field.size)
   override def select(tile: Option[Tile]) = copy(field, state.select(tile))
   override def selected: Option[Tile] = state.selected
   override def playing = state.playing
   override def color = state.color
-  override def setColor(color: PieceColor): ChessField = copy(state = state.copy(color = color))
+  override def setColor(color: PieceColor): CommunicatingChessField = copy(state = state.copy(color = color))
 
   def checkFen(check: String): String =
     check.split('/')
@@ -223,31 +244,33 @@ case class ChessField @Inject() (
   // Fen could also be extracted into a persistence service
   override def toFen: String = toFenPart + " " + state.toFen
 
-object ChessField:
-  def apply(field: Matrix[Option[Piece]]): ChessField =
-    ChessField(
+object CommunicatingChessField:
+  def apply(field: Matrix[Option[Piece]]): CommunicatingChessField =
+    CommunicatingChessField(
       field,
       ChessState(size = field.size)
     )
 
-  def apply(field: Matrix[Option[Piece]], state: ChessState): ChessField =
-    val tmpField = new ChessField( field, state )
-    new ChessField(
+  def apply(field: Matrix[Option[Piece]], state: ChessState): CommunicatingChessField =
+    CommunicatingChessField(field, state, Uri("http://localhost:8082"))
+
+  def apply(field: Matrix[Option[Piece]], state: ChessState, legalityServiceUri: Uri): CommunicatingChessField =
+    val tmpField = new CommunicatingChessField( field, state )
+    new CommunicatingChessField(
       field,
       state,
       tmpField.getKingSquare match
         case Some(kingSq) => tmpField.isAttacked(kingSq)
         case None => false,
-      tmpField.setColor(state.color.invert).legalMoves.flatMap( entry => entry._2).toList.sorted
+      tmpField.legalMoves.flatMap( entry => entry._2).toList.sorted,
+      forwarder = ChessFieldForwarder(legalityServiceUri)
     )
-  
-  // If Fen is moved into persistence service this would move with it and instead create a matrix
-  // ChessField would then call that service to create a matrix and instantiate itself
-  def fromFen(fen: String, fieldSize: Int = 8): ChessField =
+
+  def fromFen(fen: String, fieldSize: Int = 8): CommunicatingChessField =
     val newMatrix = FenParser.matrixFromFen(fen)
     val newState: ChessState = ChessState(size = fieldSize).evaluateFen(fen)
-    val tmpField = ChessField( newMatrix, newState ).start.setColor(newState.color.invert)
+    val tmpField: CommunicatingChessField = CommunicatingChessField( newMatrix, newState ).start.setColor(newState.color.invert)
     val newInCheck = tmpField.setColor(newState.color).getKingSquare match
         case Some(kingSq) => tmpField.setColor(newState.color).isAttacked(kingSq)
         case None => false
-    tmpField.copy( newMatrix, tmpField.state.copy(color = newState.color), newInCheck, attackedTiles = tmpField.attackedTiles)
+    new CommunicatingChessField( newMatrix, tmpField.state.copy(color = newState.color), newInCheck, attackedTiles = tmpField.attackedTiles, forwarder = tmpField.forwarder)

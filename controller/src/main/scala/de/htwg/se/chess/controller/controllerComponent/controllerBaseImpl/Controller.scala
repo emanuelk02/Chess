@@ -16,6 +16,7 @@ package controllerBaseImpl
 
 import scala.swing.Publisher
 import scala.swing.event.Event
+import scala.concurrent.Future
 
 import com.google.inject.name.Names
 import com.google.inject.{Guice, Inject}

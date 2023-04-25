@@ -190,7 +190,7 @@ case class ChessField @Inject() (
 
   val legalMoves = LegalityComputer.getLegalMoves(field, state)
 
-  private def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
+  def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
   override def getLegalMoves(tile: Tile): List[Tile] = legalMoves.get(tile).getOrElse(Nil)
   override val getKingSquare: Option[Tile] =
     allTiles.find( tile => cell(tile).isDefined && cell(tile).get.getType == King && cell(tile).get.getColor == state.color )

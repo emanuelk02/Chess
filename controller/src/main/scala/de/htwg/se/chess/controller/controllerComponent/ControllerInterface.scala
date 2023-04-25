@@ -15,6 +15,7 @@ package controllerComponent
 
 import scala.swing.Publisher
 import scala.swing.event.Event
+import scala.concurrent.Future
 
 import model.gameDataComponent.GameField
 import util.data.Tile
@@ -139,7 +140,13 @@ trait ControllerInterface extends Publisher:
     def isSelected(tile: Tile): Boolean
     /** Checks if a tile is currently selected @return true if any tile is selected, false if not */
     def hasSelected: Boolean
-    /** Returns all fully legal moves for given tile */
+    /** 
+     * Returns all fully legal moves for given tile 
+     * @param tile      Tile containing the piece you want the legal moves for
+     * @return          Future of the list of tiles the piece can move to.
+     *                  Legal move computation is asynchronous and may not be completed
+     *                  when requesting it.
+     * */
     def getLegalMoves(tile: Tile): List[Tile]
     /** Returns tile of king with current color to move @return Tile of the king or None if there is none */
     def getKingSquare:  Option[Tile]
