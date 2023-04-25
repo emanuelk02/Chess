@@ -15,9 +15,9 @@ package controllerComponent
 package controllerMockImpl
 
 import model.gameDataComponent.GameField
-import util.Tile
-import util.Piece
-import util.Matrix
+import util.data.Tile
+import util.data.Piece
+import util.data.Matrix
 
 
 class MockController extends ControllerInterface:

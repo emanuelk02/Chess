@@ -14,7 +14,7 @@ package model
 package gameDataComponent
 package gameDataBaseImpl
 
-import util.Matrix
+import util.data.Matrix
 
 
 val eol = sys.props("line.separator")

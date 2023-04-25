@@ -18,11 +18,11 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import model.gameDataComponent.GameState._
-import util.Piece
-import util.Piece._
-import util.PieceColor._
-import util.Tile
-import util.Matrix
+import util.data.Piece
+import util.data.Piece._
+import util.data.PieceColor._
+import util.data.Tile
+import util.data.Matrix
 
 
 class ChessFieldSpec extends AnyWordSpec:

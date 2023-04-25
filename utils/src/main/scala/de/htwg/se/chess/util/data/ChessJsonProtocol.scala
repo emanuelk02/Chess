@@ -11,30 +11,23 @@
 
 package de.htwg.se.chess
 package util
+package data
 
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers._
+
 import spray.json._
 
-import util.services.ChessJsonProtocol._
 
-
-
-class ChessJsonProtocolSpec extends AnyWordSpec:
-    "A ChessJsonProtocol" should {
-        "convert a Tile to json" in {
-            val tile = Tile("A1")
-            val json = tile.toJson
-            json shouldEqual JsString("A1")
-        }
-        "parse a JsObject to Tile" in {
-            var json = JsObject(
-                "file" -> JsNumber(1),
-                "rank" -> JsNumber(1),
-                "size" -> JsNumber(4)
-            )
-            json.convertTo[Tile] shouldEqual Tile("A1", 4)
-            var jsString = JsString("A2")
-            jsString.convertTo[Tile] shouldEqual Tile("A2")
-        }
-    }
+object ChessJsonProtocol extends DefaultJsonProtocol:
+    implicit object TileStringFormat extends RootJsonFormat[Tile]:
+        def write(t: Tile): JsValue = JsString(t.toString)
+        def read(value: JsValue): Tile = value match
+            case JsString(s) => Tile(s)
+            case JsObject(fields) =>
+                val file = fields("file").convertTo[Int]
+                val rank = fields("rank").convertTo[Int]
+                if fields.contains("size") then
+                    val size = fields("size").convertTo[Int]
+                    Tile(file, rank, size)
+                else
+                    Tile(file, rank)
+            case _ => throw DeserializationException("Tile expected")

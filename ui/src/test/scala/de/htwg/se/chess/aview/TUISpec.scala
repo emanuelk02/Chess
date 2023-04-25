@@ -21,10 +21,10 @@ import scala.util.Try
 
 import controller.controllerComponent.controllerBaseImpl._
 import model.gameDataComponent.gameDataBaseImpl._
-import util.Piece
-import util.Piece._
-import util.Tile
-import util.Matrix
+import util.data.Piece
+import util.data.Piece._
+import util.data.Tile
+import util.data.Matrix
 
 
 class TUISpec extends AnyWordSpec {

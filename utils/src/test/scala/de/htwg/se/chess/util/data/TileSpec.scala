@@ -10,7 +10,7 @@
 
 
 package de.htwg.se.chess
-package util
+package util.data
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._

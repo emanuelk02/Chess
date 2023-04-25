@@ -26,7 +26,8 @@ import spray.json._
 import scala.concurrent.ExecutionContext
 import scala.util.{Try,Success,Failure}
 
-import ChessJsonProtocol._
+import data.ChessJsonProtocol._
+import patterns.ChainHandler
 
 
 trait JsonHandlerService:

@@ -36,7 +36,7 @@ import javax.swing.ImageIcon
 import javax.swing.border.EmptyBorder
 
 import controller.controllerComponent._
-import util.Tile
+import util.data.Tile
 
 
 class SwingGUI(controller: ControllerInterface) extends SimpleSwingApplication:

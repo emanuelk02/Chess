@@ -11,6 +11,7 @@
 
 package de.htwg.se.chess
 package util
+package data
 
 
 case class Tile(file: Int, rank: Int, size: Int = 8):

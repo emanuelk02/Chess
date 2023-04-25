@@ -26,15 +26,10 @@ import spray.json._
 
 import LegalityComputer._
 import LegalityService._
-import util.Piece
-import util.Piece._
-import util.PieceColor._
-import util.Tile
-import util.Matrix
-import util.FenParser._
-import util.ChessState
-import util.services.ChessJsonProtocol._
-import spray.json.JsValue
+import util.data.Piece._
+import util.data.PieceColor._
+import util.data.FenParser._
+import util.data.ChessJsonProtocol._
 
 
 class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with ScalatestRouteTest:

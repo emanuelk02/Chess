@@ -17,9 +17,9 @@ package gameDataBaseImpl
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import util.Piece
-import util.Piece._
-import util.Matrix
+import util.data.Piece
+import util.data.Piece._
+import util.data.Matrix
 
 
 class ChessBoardSpec extends AnyWordSpec:

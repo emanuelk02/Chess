@@ -22,19 +22,13 @@ import scala.annotation.tailrec
 import com.google.inject.{Guice, Inject}
 
 import GameState._
-import util.Piece
-import util.PieceType
-import util.PieceColor
-import util.Piece._
-import util.PieceType._
-import util.PieceColor._
-import util.invert
-import util.Tile
-import util.Matrix
-import util.ChessState
-import util.ChainHandler
-import util.FenParser
-import util.FenParser._
+import util.data._
+import util.data.Piece._
+import util.data.PieceType._
+import util.data.PieceColor._
+import util.data.invert
+import util.data.FenParser._
+import util.patterns.ChainHandler
 import legality.LegalityComputer
 
 

@@ -19,9 +19,9 @@ import org.scalatest.matchers.should.Matchers._
 
 import model.gameDataComponent.GameField
 import model._
-import util.Piece._
-import util.Tile
-import util.Matrix
+import util.data.Piece._
+import util.data.Tile
+import util.data.Matrix
 
 
 class ChessCommandInvokerSpec extends AnyWordSpec {

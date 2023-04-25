@@ -11,15 +11,14 @@
 
 package de.htwg.se.chess
 package util
+package data
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import util.ChessState._
-import util.PieceColor
-import util.PieceColor.{White, Black}
-import util.Piece._
-import util.Tile
+import ChessState._
+import PieceColor.{White, Black}
+import Piece._
 
 
 class ChessStateSpec extends AnyWordSpec:

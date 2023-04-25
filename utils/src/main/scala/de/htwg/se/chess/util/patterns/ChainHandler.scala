@@ -11,6 +11,7 @@
 
 package de.htwg.se.chess
 package util
+package patterns
 
 
 import scala.util.Try

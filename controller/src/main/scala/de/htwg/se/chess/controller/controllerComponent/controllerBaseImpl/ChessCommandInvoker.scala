@@ -15,9 +15,9 @@ package controllerComponent
 package controllerBaseImpl
 
 import model.gameDataComponent.GameField
-import util.CommandInvoker
-import util.Command
-import util.ChainHandler
+import util.patterns.ChainHandler
+import util.patterns.CommandInvoker
+import util.patterns.Command
 
 
 class ChessCommandInvoker extends CommandInvoker[GameField]:

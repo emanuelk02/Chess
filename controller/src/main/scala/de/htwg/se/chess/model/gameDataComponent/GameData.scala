@@ -14,10 +14,10 @@ package model
 package gameDataComponent
 
 import gameDataBaseImpl.ChessField
-import util.Tile
-import util.Piece
-import util.PieceColor
-import util.Matrix
+import util.data.Tile
+import util.data.Piece
+import util.data.PieceColor
+import util.data.Matrix
 
 enum GameState:
     case CHECKMATE, DRAW, RUNNING

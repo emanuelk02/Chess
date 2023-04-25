@@ -11,23 +11,29 @@
 
 package de.htwg.se.chess
 package util
-package services
+package patterns
 
 
-import spray.json._
+trait CommandInvoker[T]:
+    protected var undoStack: List[Command[T]]= Nil
+    protected var redoStack: List[Command[T]]= Nil
 
+    def doStep(command: Command[T]): T =
+        undoStack = command::undoStack
+        command.execute
 
-object ChessJsonProtocol extends DefaultJsonProtocol:
-    implicit object TileStringFormat extends RootJsonFormat[Tile]:
-        def write(t: Tile): JsValue = JsString(t.toString)
-        def read(value: JsValue): Tile = value match
-            case JsString(s) => Tile(s)
-            case JsObject(fields) =>
-                val file = fields("file").convertTo[Int]
-                val rank = fields("rank").convertTo[Int]
-                if fields.contains("size") then
-                    val size = fields("size").convertTo[Int]
-                    Tile(file, rank, size)
-                else
-                    Tile(file, rank)
-            case _ => throw DeserializationException("Tile expected")
+    def undoStep: Option[T]  =
+        undoStack match
+          case  Nil => None
+          case head::stack =>
+            undoStack = stack
+            redoStack = head::redoStack
+            Some(head.undo)
+
+    def redoStep: Option[T] =
+        redoStack match
+            case Nil => None
+            case head::stack =>
+                redoStack = stack
+                undoStack = head::undoStack
+                Some(head.redo)

@@ -29,9 +29,9 @@ import javax.swing.table._
 import javax.imageio.ImageIO
 
 import controller.controllerComponent._
-import util.Piece
-import util.PieceColor
-import util.Tile
+import util.data.Piece
+import util.data.PieceColor
+import util.data.Tile
 
 
 class TileLabel(tile: Tile, controller: ControllerInterface, var source: String) extends GridPanel(1, 1):

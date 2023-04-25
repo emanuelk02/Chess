@@ -21,11 +21,11 @@ import controllerBaseImpl.ChessCommand
 import model.gameDataComponent.GameField
 import model.gameDataComponent.GameState._
 import model.gameDataComponent.gameDataBaseImpl._
-import util.Tile
-import util.Piece
-import util.Piece._
-import util.PieceColor._
-import util.Matrix
+import util.data.Tile
+import util.data.Piece
+import util.data.Piece._
+import util.data.PieceColor._
+import util.data.Matrix
 
 
 case class TestChessCommand(field: GameField) extends ChessCommand(field):

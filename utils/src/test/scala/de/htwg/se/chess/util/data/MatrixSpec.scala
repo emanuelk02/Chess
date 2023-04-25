@@ -11,11 +11,10 @@
 
 package de.htwg.se.chess
 package util
+package data
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
-
-import util.Matrix
 
 
 class MatrixSpec extends AnyWordSpec:
