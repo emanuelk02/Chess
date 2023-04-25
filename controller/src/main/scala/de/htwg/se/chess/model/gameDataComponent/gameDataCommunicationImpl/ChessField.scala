@@ -12,7 +12,7 @@
 package de.htwg.se.chess
 package model
 package gameDataComponent
-package gameDataBaseImpl
+package gameDataCommunicationImpl
 
 import scala.util.Try
 import scala.util.Success
@@ -30,6 +30,7 @@ import util.data.invert
 import util.data.FenParser._
 import util.patterns.ChainHandler
 import legality.LegalityComputer
+import gameDataBaseImpl.toBoard
 
 
 case class ChessField @Inject() (

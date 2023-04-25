@@ -16,13 +16,10 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import LegalityComputer._
-import util.Piece
-import util.Piece._
-import util.PieceColor._
-import util.Tile
-import util.Matrix
-import util.FenParser.matrixFromFen
-import util.ChessState
+import util.data._
+import util.data.Piece._
+import util.data.PieceColor._
+import util.data.FenParser.matrixFromFen
 
 
 class LegalityComputerSpec extends AnyWordSpec:

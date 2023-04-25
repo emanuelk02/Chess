@@ -18,11 +18,11 @@ import com.google.inject.{ Guice, Inject }
 import net.codingwell.scalaguice.InjectorExtensions._
 import scala.xml.{ NodeSeq, PrettyPrinter }
 
-import util.Piece
-import util.Matrix
-import util.ChessState
-import util.FenParser
-import util.FenParser._
+import util.data.Piece
+import util.data.Matrix
+import util.data.ChessState
+import util.data.FenParser
+import util.data.FenParser._
 
 
 class FileIO extends FileIOInterface:

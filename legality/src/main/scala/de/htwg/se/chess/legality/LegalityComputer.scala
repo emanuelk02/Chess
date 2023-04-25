@@ -17,10 +17,11 @@ import scala.util.Success
 import scala.util.Failure
 import scala.annotation.tailrec
 
-import util._
-import util.Piece._
-import util.PieceColor._
-import util.PieceType._
+import util.data._
+import util.data.Piece._
+import util.data.PieceColor._
+import util.data.PieceType._
+import util.patterns.ChainHandler
 
 
 object LegalityComputer:

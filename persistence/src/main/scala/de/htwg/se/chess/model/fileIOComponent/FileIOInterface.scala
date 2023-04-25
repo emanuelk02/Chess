@@ -13,9 +13,9 @@ package de.htwg.se.chess
 package model
 package fileIOComponent
 
-import util.Piece
-import util.Matrix
-import util.ChessState
+import util.data.Piece
+import util.data.Matrix
+import util.data.ChessState
 
 
 trait FileIOInterface:

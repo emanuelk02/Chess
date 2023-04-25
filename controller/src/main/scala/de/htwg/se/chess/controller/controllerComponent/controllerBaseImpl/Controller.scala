@@ -23,9 +23,9 @@ import net.codingwell.scalaguice.InjectorExtensions._
 
 import model.gameDataComponent.GameField
 import model.fileIOComponent.FileIOInterface
-import util.Tile
-import util.Piece
-import util.Command
+import util.data.Tile
+import util.data.Piece
+import util.patterns.Command
 
 
 case class Controller @Inject() (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface:

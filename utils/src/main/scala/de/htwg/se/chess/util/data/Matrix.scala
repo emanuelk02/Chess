@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -11,9 +11,16 @@
 
 package de.htwg.se.chess
 package util
+package data
+
+import com.google.inject.Inject
 
 
-trait Command[T]:
-    def execute: T
-    def undo: T
-    def redo: T
+case class Matrix[T] (rows: Vector[Vector[T]]):
+  def this(size: Int, filling: T) = this(Vector.tabulate(size, size) { (rows, col) => filling})
+  val size: Int = rows.size
+  def cell(row: Int, col: Int): T = rows(row)(col)
+  def fill(filling: T): Matrix[T] = copy(Vector.tabulate(size, size) { (row, col) => filling})
+  def replace(row: Int, col: Int, fill: T): Matrix[T] = copy(rows.updated(row, rows(row).updated(col, fill)))
+  def height: Int = rows.size
+  def width: Int = rows(0).size

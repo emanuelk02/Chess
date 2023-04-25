@@ -11,14 +11,13 @@
 
 package de.htwg.se.chess
 package util
+package data
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import util.Matrix
-import util.ChessState
-import util.Piece._
-import util.FenParser._
+import Piece._
+import FenParser._
 
 
 class FenParserSpec extends AnyWordSpec:

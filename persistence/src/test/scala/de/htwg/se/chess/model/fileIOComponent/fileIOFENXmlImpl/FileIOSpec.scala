@@ -17,7 +17,7 @@ package fileIOFENXmlImpl
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
-import util.FenParser._
+import util.data.FenParser._
 import model.fileIOComponent.fileIoFenXmlImpl._
 
 

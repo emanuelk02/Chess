@@ -20,7 +20,7 @@ import scala.util.Success
 import scala.util.Failure
 
 import controller.controllerComponent._
-import util.Tile
+import util.data.Tile
 
 
 class TUI(controller: ControllerInterface) extends Reactor:

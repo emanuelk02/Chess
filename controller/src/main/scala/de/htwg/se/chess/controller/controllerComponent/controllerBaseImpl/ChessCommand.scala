@@ -18,10 +18,10 @@ import scala.swing.event.Event
 
 import model.gameDataComponent.GameField
 import model.gameDataComponent.GameState._
-import util.Tile
-import util.Piece
-import util.PieceColor
-import util.Command
+import util.data.Tile
+import util.data.Piece
+import util.data.PieceColor
+import util.patterns.Command
 
 trait ChessCommand(field: GameField) extends CommandInterface:
     protected val prevField = field

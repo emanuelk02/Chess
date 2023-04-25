@@ -11,9 +11,11 @@
 
 package de.htwg.se.chess
 package util
+package data
 
 import PieceColor._
 import PieceType._
+import patterns.ChainHandler
 
 
 case class ChessState

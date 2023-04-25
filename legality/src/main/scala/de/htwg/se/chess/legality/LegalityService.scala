@@ -26,11 +26,11 @@ import scala.util.{Try,Success,Failure}
 import scala.quoted._
 import spray.json._
 
-import util.Tile
-import util.FenParser
-import util.ChainHandler
+import util.data.Tile
+import util.data.FenParser
+import util.data.ChessJsonProtocol._
+import util.patterns.ChainHandler
 import util.services.JsonHandlerService
-import util.services.ChessJsonProtocol._
 
 
 case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
