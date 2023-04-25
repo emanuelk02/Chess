@@ -13,8 +13,14 @@ package de.htwg.se.chess
 package util
 package data
 
-
+import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
+import akka.http.scaladsl.unmarshalling.Unmarshaller
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json._
+import play.api.libs.json.Json
 
 
 object ChessJsonProtocol extends DefaultJsonProtocol:
@@ -40,3 +46,18 @@ object ChessJsonProtocol extends DefaultJsonProtocol:
                     case Some(p) => p
                     case None => throw DeserializationException("Piece expected")
             case _ => throw DeserializationException("Piece expected")
+
+    implicit val um:Unmarshaller[HttpEntity, JsObject] = {
+        Unmarshaller.byteStringUnmarshaller.mapWithCharset { (data, charset) =>
+            Json.parse(data.toArray).toString().parseJson.asJsObject
+        }
+    }
+    implicit val legalMovesUM:Unmarshaller[HttpEntity, Map[Tile, List[Tile]]] = {
+        Unmarshaller.byteStringUnmarshaller.mapWithCharset { (data, charset) =>
+            Json.parse(data.toArray).toString().parseJson.asJsObject.convertTo[Map[Tile, List[Tile]]]
+        }
+    }
+    //implicit val legalMovesFromReqUM:FromRequestUnmarshaller[Map[Tile, List[Tile]]] = {
+    //    given ExecutionContext = ExecutionContext.global
+    //    Unmarshaller.strict((request: HttpRequest) => legalMovesUM.apply(request.entity.asInstanceOf[HttpEntity]))
+    //}
