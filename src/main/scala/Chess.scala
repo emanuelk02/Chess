@@ -21,23 +21,37 @@ import controller.controllerComponent.ControllerInterface
 import de.htwg.se.chess.service.ControllerService
 import de.htwg.se.chess.legality.LegalityService
 import de.htwg.se.chess.model.persistence.PersistenceService
+import util.client.BlockingClient._
+import akka.http.scaladsl.Http
+import scala.concurrent.ExecutionContext
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.client.RequestBuilding._
+import de.htwg.se.chess.service.ChessService
 
 
 object starter:
-  val injector = Guice.createInjector(ChessModule())
-  val controller = injector.getInstance(classOf[ControllerInterface])
-  val tui = TUI(controller)
-  val controllerApi = ControllerService("localhost", 8080)
-  val legalityApi = LegalityService("localhost", 8081)
-  val persistenceApi = PersistenceService("localhost", 8082)
-  def runApi: Unit = controllerApi.run; persistenceApi.run;
-  def runTUI: Unit = tui.run
-  def runSwingGUI = SwingGUI(controller).startup(Array())
+  val legalityApi = LegalityService("localhost", 8082)
+  implicit val sys: ActorSystem[Any] = ActorSystem(Behaviors.empty, "Main-Api")
+  implicit val ex: ExecutionContext = sys.executionContext
+  
+  def runApi: Unit = { 
+    val persistenceApi = PersistenceService("localhost", 8083)
+    persistenceApi.run
+    val chessApi = ChessService("localhost", 8084)
+    chessApi.run
+  }
 
 object Main extends App:
     starter.runApi
 object MainTUI extends App:
-    starter.runTUI
+    val injector = Guice.createInjector(ChessModule())
+    val controller = injector.getInstance(classOf[ControllerInterface])
+    val tui = TUI(controller)
+    tui.run
 object MainSwingGUI extends App:
-    starter.runSwingGUI
-    starter.runTUI
+    val injector = Guice.createInjector(ChessModule())
+    val controller = injector.getInstance(classOf[ControllerInterface])
+    val tui = TUI(controller)
+    SwingGUI(controller).startup(Array())
+    tui.run
