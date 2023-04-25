@@ -10,7 +10,7 @@
 
 
 package de.htwg.se.chess
-package legality
+package service
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
