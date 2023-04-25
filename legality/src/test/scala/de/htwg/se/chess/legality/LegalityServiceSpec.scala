@@ -26,6 +26,7 @@ import spray.json._
 
 import LegalityComputer._
 import LegalityService._
+import util.data.Tile
 import util.data.Piece._
 import util.data.PieceColor._
 import util.data.FenParser._
