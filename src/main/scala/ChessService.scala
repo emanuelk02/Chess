@@ -82,7 +82,7 @@ case class ChessService(
 
     val route = concat(
         pathSingleSlash {
-            getFromResource("/index.html")
+            getFromResource("/src/main/scala/index.html")
         },
         pathPrefix("chess") { concat(
             controllerRoute,
@@ -111,7 +111,7 @@ case class ChessService(
     
     def redirectToLegality(query: Path, req: HttpRequest): Future[HttpResponse] =
         Http().singleRequest(req.copy(
-            uri = legality.withPath(query)
+            uri = legality.withPath(Path("/") ++ query)
         ))
 
     def run: Unit =
