@@ -11,22 +11,27 @@
 
 package de.htwg.se.chess
 
-import com.google.inject.AbstractModule
-import net.codingwell.scalaguice.ScalaModule
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import scala.concurrent.{ExecutionContextExecutor, ExecutionContext}
 
 import controller.controllerComponent.ControllerInterface
-import controller.controllerComponent.controllerBaseImpl.Controller
-import de.htwg.se.chess.controller.controllerComponent.controllerBaseImpl.ChessCommandInvoker
+import controller.controllerComponent._
+import controller.controllerComponent.controllerBaseImpl.ChessCommandInvoker
 import model.gameDataComponent.GameField
 import model.gameDataComponent.gameDataCommunicationImpl.CommunicatingChessField
+import model.gameDataComponent.gameDataBaseImpl.ChessField
 import model.fileIOComponent.FileIOInterface
 import model.fileIOComponent._
 
+object ControllerModule:
+  given controller: ControllerInterface = new controllerCommunicatingImpl.Controller()
+  given gameField: GameField = new CommunicatingChessField()
+  given fileIO: FileIOInterface = new fileIoFenXmlImpl.FileIO()
+  given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "ControllerService")
+  given executionContext: ExecutionContext = system.executionContext
 
-class ChessModule extends AbstractModule:
-  override def configure(): Unit =
-    bind(classOf[GameField]).toInstance(CommunicatingChessField())
-    bind(classOf[ControllerInterface]).toInstance(Controller(
-      CommunicatingChessField().loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), 
-      ChessCommandInvoker()))
-    bind(classOf[FileIOInterface]).toInstance(fileIoFenXmlImpl.FileIO())
+object BaseControllerModule:
+  given controller: ControllerInterface = new controllerBaseImpl.Controller()
+  given gameField: GameField = ChessField()
+  given fileIO: FileIOInterface = new fileIoFenXmlImpl.FileIO()

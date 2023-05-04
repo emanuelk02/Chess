@@ -18,10 +18,7 @@ import scala.swing.Publisher
 import scala.swing.event.Event
 import scala.concurrent.Future
 
-import com.google.inject.name.Names
-import com.google.inject.{Guice, Inject}
-import net.codingwell.scalaguice.InjectorExtensions._
-
+import BaseControllerModule.given
 import model.gameDataComponent.GameField
 import model.fileIOComponent.FileIOInterface
 import util.data.Tile
@@ -29,13 +26,13 @@ import util.data.Piece
 import util.patterns.Command
 
 
-case class Controller @Inject() (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface:
+case class Controller (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface:
   override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   //val fileIO = FileIOInterface() // something with Guices injector not working here
 
   def this() =
-    this(Guice.createInjector(ChessModule()).getInstance(classOf[GameField]), ChessCommandInvoker())
+    this(gameField, ChessCommandInvoker())
     this.field = field.loadFromFen(startingFen)
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit =
@@ -49,12 +46,10 @@ case class Controller @Inject() (var field: GameField, val commandHandler: Chess
   def putWithFen(args: String): ChessCommand = FenCommand(args, field)
   def select(args: Option[Tile]): ChessCommand = SelectCommand(args, field)
 
+  private def fileIO = FileIOInterface()
   def save: Unit =
-    def fileIO = Guice.createInjector(ChessModule()).getInstance(classOf[FileIOInterface])
     fileIO.save(field.toFen)
-
   def load: Unit =
-    def fileIO = Guice.createInjector(ChessModule()).getInstance(classOf[FileIOInterface])
     field = field.loadFromFen(fileIO.load)
 
   def start: Unit = field = field.start

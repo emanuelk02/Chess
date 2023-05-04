@@ -16,17 +16,15 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.google.inject.Guice
 import scala.concurrent.{Future, ExecutionContextExecutor, ExecutionContext}
 import scala.util.{Try, Success, Failure}
-import scala.quoted._
-import scala.swing.Reactor
 import spray.json._
 
 import util.data.Tile
@@ -36,8 +34,9 @@ import util.data.ChessJsonProtocol._
 import util.patterns.ChainHandler
 import util.services.SubscricableService
 import controller.controllerComponent._
-import scala.concurrent.ExecutionContext.parasitic
-import akka.http.scaladsl.model.Uri.Query
+
+import ChessModule.given
+
 
 case class ChessService(
     var bind: Future[ServerBinding],
@@ -55,9 +54,7 @@ case class ChessService(
         path("controller") {
             post {
                 controller = Some(Uri(s"http://localhost:8081"))
-                val inj = Guice.createInjector(new ChessModule)
-                val ctrl = inj.getInstance(classOf[ControllerInterface])
-                controllerService = Some(new ControllerService(Future.never, "localhost", 8081, ctrl))
+                controllerService = Some(new ControllerService(Future.never, "localhost", 8081))
                 controllerService.get.run
                 complete(HttpResponse(OK, entity = "Controller created."))
             }

@@ -28,23 +28,28 @@ import scala.quoted._
 import scala.swing.Reactor
 import spray.json._
 
+import controller.controllerComponent._
 import util.data.Tile
 import util.data.Piece
 import util.data.FenParser
 import util.data.ChessJsonProtocol._
 import util.patterns.ChainHandler
 import util.services.SubscricableService
-import controller.controllerComponent._
+
+import ControllerModule.given
+
 
 case class ControllerService(
-    var bind: Future[ServerBinding],
-    ip: String,
-    port: Int,
-    controller: ControllerInterface
-)(implicit system: ActorSystem[Any], executionContext: ExecutionContext)
-    extends SubscricableService
-    with Reactor:
-  println(s"Controller running. Please navigate to http://" + ip + ":" + port)
+  var bind: Future[ServerBinding],
+  ip: String,
+  port: Int
+)
+( using
+    controller: ControllerInterface,
+    system: ActorSystem[Any],
+    executionContext: ExecutionContext
+) extends SubscricableService
+  with Reactor:
 
   val route = pathPrefix("controller") {
     concat(
@@ -234,15 +239,6 @@ case class ControllerService(
 
 object ControllerService:
 
-  val error500 =
-    "Something went wrong while trying to compute legal moves"
-
-  def apply(ip: String, port: Int): ControllerService =
-    implicit val system: ActorSystem[Any] =
-      ActorSystem(Behaviors.empty, "ControllerService")
-    implicit val executionContext: ExecutionContext = system.executionContext
-    val injector = Guice.createInjector(ChessModule())
-    val controller = injector.getInstance(classOf[ControllerInterface])
-    ControllerService(Future.never, ip, port, controller)
+  def apply(ip: String, port: Int): ControllerService = new ControllerService(Future.never, ip, port)
 
   def apply(): ControllerService = ControllerService("localhost", 8080)

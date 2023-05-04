@@ -12,22 +12,24 @@
 package de.htwg.se.chess
 
 import scala.io.StdIn.readLine
-
-import com.google.inject.Guice
-
-import aview.TUI
-import aview.gui.SwingGUI
-import controller.controllerComponent.ControllerInterface
-import de.htwg.se.chess.service.ControllerService
-import de.htwg.se.chess.legality.LegalityService
-import de.htwg.se.chess.model.persistence.PersistenceService
-import util.client.BlockingClient._
-import akka.http.scaladsl.Http
 import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.Http
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.client.RequestBuilding._
-import de.htwg.se.chess.service.ChessService
+
+import com.google.inject.Guice
+
+import util.client.BlockingClient._
+import model.persistence.PersistenceService
+import legality.LegalityService
+import service.ChessService
+import service.ControllerService
+import aview.TUI
+import aview.gui.SwingGUI
+
+import ChessModule.given
+import de.htwg.se.chess.controller.controllerComponent.ControllerInterface
 
 
 object starter:
@@ -45,13 +47,9 @@ object starter:
 object Main extends App:
     starter.runApi
 object MainTUI extends App:
-    val injector = Guice.createInjector(ChessModule())
-    val controller = injector.getInstance(classOf[ControllerInterface])
     val tui = TUI(controller)
     tui.run
 object MainSwingGUI extends App:
-    val injector = Guice.createInjector(ChessModule())
-    val controller = injector.getInstance(classOf[ControllerInterface])
     val tui = TUI(controller)
     SwingGUI(controller).startup(Array())
     tui.run

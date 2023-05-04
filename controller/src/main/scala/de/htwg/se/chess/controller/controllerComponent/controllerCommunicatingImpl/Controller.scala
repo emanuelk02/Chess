@@ -22,11 +22,9 @@ import scala.util.{Success, Failure}
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.model.Uri
-import com.google.inject.name.Names
-import com.google.inject.{Guice, Inject}
-import net.codingwell.scalaguice.InjectorExtensions._
 
 import controllerBaseImpl._
+import ControllerModule.given
 import model.gameDataComponent.GameField
 import model.fileIOComponent.FileIOInterface
 import util.data.Tile
@@ -37,16 +35,15 @@ given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "CommunicatingCont
 given executionContext: ExecutionContextExecutor = system.executionContext
 
 
-case class Controller @Inject() (
+case class Controller (
   var field: GameField,
   val commandHandler: ChessCommandInvoker,
   val communicator: ControllerCommunicator) extends ControllerInterface:
   override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-  //val fileIO = FileIOInterface() // something with Guices injector not working here
 
   def this() =
-    this(Guice.createInjector(ChessModule()).getInstance(classOf[GameField]), ChessCommandInvoker(), ControllerCommunicator(Uri("http://localhost:8083")))
+    this(gameField, ChessCommandInvoker(), ControllerCommunicator(Uri("http://localhost:8083")))
     this.field = field.loadFromFen(startingFen)
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit =

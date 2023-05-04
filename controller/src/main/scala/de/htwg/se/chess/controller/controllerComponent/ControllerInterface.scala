@@ -17,11 +17,11 @@ import scala.swing.Publisher
 import scala.swing.event.Event
 import scala.concurrent.Future
 
-import model.gameDataComponent.GameField
 import util.data.Tile
 import util.data.Piece
 import util.data.PieceColor
 import util.patterns.Command
+import model.gameDataComponent.GameField
 
 
 /**

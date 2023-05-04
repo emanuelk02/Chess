@@ -19,8 +19,6 @@ import scala.util.Success
 import scala.util.Failure
 import scala.annotation.tailrec
 
-import com.google.inject.{Guice, Inject}
-
 import GameState._
 import util.data._
 import util.data.Piece._
@@ -32,7 +30,7 @@ import util.patterns.ChainHandler
 import legality.LegalityComputer
 
 
-case class ChessField @Inject() (
+case class ChessField(
   field: Matrix[Option[Piece]] = new Matrix(8, None), 
   state: ChessState = ChessState(), 
   inCheck: Boolean = false, 

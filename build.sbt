@@ -6,7 +6,6 @@ lazy val commonDependency = Seq(
     "com.novocode" % "junit-interface" % "0.11" % "test",
     "org.scalactic" %% "scalactic" % "3.2.10",
     "org.scalatest" %% "scalatest" % "3.2.10" % "test",
-    "com.google.inject" % "guice" % "4.2.3",
     "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
     "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
     "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
