@@ -16,8 +16,12 @@ package controllerCommunicatingImpl
 
 import scala.swing.Publisher
 import scala.swing.event.Event
-import scala.concurrent.Future
+import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
 
+
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.model.Uri
 import com.google.inject.name.Names
 import com.google.inject.{Guice, Inject}
 import net.codingwell.scalaguice.InjectorExtensions._
@@ -29,17 +33,20 @@ import util.data.Tile
 import util.data.Piece
 import util.patterns.Command
 
+given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "CommunicatingController")
+given executionContext: ExecutionContextExecutor = system.executionContext
+
 
 case class Controller @Inject() (
   var field: GameField,
   val commandHandler: ChessCommandInvoker,
-  val communicator: ControllerCo) extends ControllerInterface:
+  val communicator: ControllerCommunicator) extends ControllerInterface:
   override def size = field.size
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   //val fileIO = FileIOInterface() // something with Guices injector not working here
 
   def this() =
-    this(Guice.createInjector(ChessModule()).getInstance(classOf[GameField]), ChessCommandInvoker())
+    this(Guice.createInjector(ChessModule()).getInstance(classOf[GameField]), ChessCommandInvoker(), ControllerCommunicator(Uri("http://localhost:8083")))
     this.field = field.loadFromFen(startingFen)
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit =

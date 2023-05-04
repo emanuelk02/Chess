@@ -34,7 +34,7 @@ import spray.json._
 import util.client.BlockingClient.blockingReceiveRequest
 
 
-case class ChessFieldForwarder(persistenceService: Uri)
+case class ControllerCommunicator(persistenceService: Uri)
     (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 
     def save(fen: String): Future[HttpResponse] =
