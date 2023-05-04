@@ -38,7 +38,7 @@ object starter:
   def runApi: Unit = { 
     val persistenceApi = PersistenceService("localhost", 8083)
     persistenceApi.run
-    val chessApi = ChessService("localhost", 8084)
+    val chessApi = ChessService("localhost", 8080)
     chessApi.run
   }
 

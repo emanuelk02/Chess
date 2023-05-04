@@ -17,7 +17,7 @@ package controllerCommunicatingImpl
 import scala.swing.Publisher
 import scala.swing.event.Event
 import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
-
+import scala.util.{Success, Failure}
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
@@ -61,12 +61,12 @@ case class Controller @Inject() (
   def select(args: Option[Tile]): ChessCommand = SelectCommand(args, field)
 
   def save: Unit =
-    def fileIO = Guice.createInjector(ChessModule()).getInstance(classOf[FileIOInterface])
-    fileIO.save(field.toFen)
+    communicator.save(field.toFen)
 
   def load: Unit =
-    def fileIO = Guice.createInjector(ChessModule()).getInstance(classOf[FileIOInterface])
-    field = field.loadFromFen(fileIO.load)
+    communicator.load match
+        case Success(fen) => field = field.loadFromFen(fen)
+        case Failure(err) => publish(ErrorEvent(err.getMessage))
 
   def start: Unit = field = field.start
   def stop: Unit = field = field.stop
