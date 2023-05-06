@@ -41,34 +41,56 @@ class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with Scalat
     var tile = Tile("A1")
     val route = LegalityService.route
     /*
-     * Test for path /compute/tile
+     * Test for path /moves
      * 
      * Uses getLegalMoves(fen, tile) to get the legal moves for a given tile
      * It accepts a json object with the fields "fen" and "tile"
      * It returns a json array of with the tiles the piece on the given tile can move to
      */
-    "respond with legal moves for a Post request with a FEN and a tile on route /compute/tile" in {
+    "respond with legal moves for a Get request with a FEN on route /moves with parameter `tile`" in {
       fen = "8/6r1/8/8/8/3Q2K1/8/8 w - 0 1"
-      Post("/compute?tile=\"D3\"", s"""{"fen":"$fen"}""") ~> route ~> check {
+      Get("/moves?tile=\"D3\"", s"""{"fen":"$fen"}""") ~> route ~> check {
         status shouldEqual StatusCodes.OK
         contentType shouldEqual ContentTypes.`application/json`
         responseAs[JsValue] shouldEqual getLegalMoves(fen, Tile("D3")).toJson
       }
     }
     /*
-     * Test for path /compute/all
+     * Test for path /moves
      * 
      * Uses getLegalMoves(fen) to get the legal moves for all pieces on the board
      * It accepts a json object with the field "fen"
      * It returns a json object with the fields being the tiles containing a piece that has any legal moves
      * The value of each field is an array of tiles the piece on the given tile can move to
      */
-    "respond with a dictionary of legal moves for a Post request with a FEN on route /compute/all" in {
+    "respond with a dictionary of legal moves for a Get request with a FEN on route /moves" in {
       fen = "8/8/8/8/8/8/3r4/R3K2R w KQ - 0 1"
-      Post("/compute", s"""{"fen":"$fen"}""") ~> route ~> check {
+      Get("/moves", s"""{"fen":"$fen"}""") ~> route ~> check {
         status shouldEqual StatusCodes.OK
         contentType shouldEqual ContentTypes.`application/json`
         responseAs[JsValue] shouldEqual getLegalMoves(fen).toJson
+      }
+    }
+    /*
+     * Test for path /attacks
+     * 
+     * Uses isAttacked(fen) to check if the given tile is attacked
+     * It accepts a json object with the field "fen"
+     * It returns a json value with the only value being true or false
+     */
+    "respond with true or false for a Get request with a FEN on route /attacks" in {
+      fen = "8/8/8/8/8/8/r7/R3K2R w KQ - 0 1"
+      Get("/attacks?tile=\"A2\"", s"""{"fen":"$fen"}""") ~> route ~> check {
+        status shouldEqual StatusCodes.OK
+        contentType shouldEqual ContentTypes.`application/json`
+        responseAs[JsValue] shouldEqual isAttacked(fen, Tile("A2")).toJson
+        responseAs[JsValue] shouldEqual true.toJson
+      }
+      Get("/attacks?tile=\"H1\"", s"""{"fen":"$fen"}""") ~> route ~> check {
+        status shouldEqual StatusCodes.OK
+        contentType shouldEqual ContentTypes.`application/json`
+        responseAs[JsValue] shouldEqual isAttacked(fen, Tile("H1")).toJson
+        responseAs[JsValue] shouldEqual false.toJson
       }
     }
     /*
@@ -80,66 +102,66 @@ class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with Scalat
      * It accepts a json object with the fields "fen"
      * It returns a BadRequest if the FEN is invalid
      */
-    "return a BadRequest for a Post request with an invalid FEN" in {
+    "return a BadRequest for a request with an invalid FEN" in {
       // Route is sealed to ignore ErrorHandling
       fen = "8/8/8/8/8/8/8/8"
-      Post("/compute?tile=\"A1\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves?tile=\"A1\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual s"""Invalid fen: "$fen""""
       }
-      Post("/compute", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual s"""Invalid fen: "$fen""""
       }
 
       // Wrong or missing field name in json object
-      Post("/compute?tile=\"A1\"", s"""{"fenString":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves?tile=\"A1\"", s"""{"fenString":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
-      Post("/compute", s"""{"fenString":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves", s"""{"fenString":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
-      Post("/compute?tile=\"A1\"", s"""{}""") ~> Route.seal(route) ~> check {
+      Get("/moves?tile=\"A1\"", s"""{}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
-      Post("/compute", s"""{"other":"blah"}""") ~> Route.seal(route) ~> check {
+      Get("/moves", s"""{"other":"blah"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual s"""Missing fields in body: "fen""""
       }
     }
     /*
-     * Test for error handling for tiles on /compute/tile
+     * Test for error handling for tiles on /moves?tile
      * 
      * Tries to instantiate a Tile to check if the given tile is valid
      * 
      * It accepts a json object with the fields "tile"
      * It returns a BadRequest if the tile is invalid
      */
-    "return a BadRequest for a Post request with an invalid tile" in {
+    "return a BadRequest for a request with an invalid tile" in {
       // Route is sealed to ignore ErrorHandling
       fen = "8/8/8/8/8/8/8/8 w KQ - 0 1"
-      Post("/compute?tile=\"A0\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves?tile=\"A0\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual "The query parameter 'tile' was malformed:\nassertion failed: Invalid rank 0"
       }
-      Post("/compute?tile=\"J4\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves?tile=\"J4\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
         contentType shouldEqual ContentTypes.`text/plain(UTF-8)`
         responseAs[String] shouldEqual "The query parameter 'tile' was malformed:\nassertion failed: Invalid file 10"
       }
 
       // Wrong query parameter name (is ignored and runs as if no tile was given)
-      Post("/compute?piece=\"A1\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
+      Get("/moves?piece=\"A1\"", s"""{"fen":"$fen"}""") ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.OK
         contentType shouldEqual ContentTypes.`application/json`
         responseAs[JsValue] shouldEqual getLegalMoves(fen).toJson

@@ -65,19 +65,38 @@ object LegalityService extends JsonHandlerService:
         ).toJson.toString
     )
 
+    private def isAttackedTileHander(tile: Tile) = getValidatingJsonHandler(
+      Map(
+        "fen" -> jsonFieldValidator[String](FenParser.checkFen)
+      ),
+      (values: Array[JsValue]) => 
+        LegalityComputer.isAttacked(
+          values(0).convertTo[String],
+          tile
+        ).toJson.toString
+    )
+
     val error500 = 
         "Something went wrong while trying to compute legal moves"
 
-    val route = 
-      pathPrefix("compute") {
-        post {
+    val route = concat(
+      pathPrefix("moves") {
+        get {
           parameter("tile".as[Tile].optional) { tile =>
             tile match
                 case Some(t) => handleRequestEntity(computeForTileHandler(t), error500)
                 case None    => handleRequestEntity(computeForAllHandler, error500)
             }
           }
+        },
+      pathPrefix("attacks") {
+        get {
+          parameter("tile".as[Tile]) { tile =>
+            handleRequestEntity(isAttackedTileHander(tile), error500)
+          }
         }
+      }
+    )
 
     def apply(ip: String, port: Int): LegalityService =
         implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "LegalityComputerService")
