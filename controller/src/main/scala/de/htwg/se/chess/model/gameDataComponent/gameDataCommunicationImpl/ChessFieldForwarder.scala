@@ -46,7 +46,7 @@ case class ChessFieldForwarder(legalityService: Uri)
 
     def getLegalMoves(fen: String): Future[HttpResponse] =
         Http().singleRequest(
-            Post(
+            Get(
                 legalityService.withPath(Path("/compute")),
                 s"""{"fen": "$fen"}"""
             )
