@@ -79,7 +79,7 @@ case class ChessService(
 
     val route = concat(
         pathSingleSlash {
-            getFromResource("/src/main/scala/index.html")
+            redirect("/chess", PermanentRedirect)
         },
         pathPrefix("chess") { concat(
             controllerRoute,
