@@ -61,7 +61,10 @@ class CommunicatingChessField (
     )))
 
 
-  override def isAttacked(tile: Tile): Boolean = LegalityComputer.isAttacked(field, state, tile)
+  override def isAttacked(tile: Tile): Boolean = blockingReceive(
+    forwarder.deserializeIsAttacked(blockingReceive(
+        forwarder.isAttacked(toFen, tile)
+    )))
 
 
 object CommunicatingChessField:

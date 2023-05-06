@@ -20,7 +20,7 @@ import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.http.scaladsl.unmarshalling._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
 import scala.util.Try
@@ -52,5 +52,16 @@ case class ChessFieldForwarder(legalityService: Uri)
             )
         )
 
+    def isAttacked(fen: String, tile: Tile): Future[HttpResponse] =
+        Http().singleRequest(
+            Get(
+                legalityService.withPath(Path("/isAttacked?tile=" + tile.toString)),
+                s"""{"fen": "$fen"}"""
+            )
+        )
+
     def deserializeLegalMoves(response: HttpResponse): Future[Map[Tile, List[Tile]]] =
         Unmarshal(response.entity).to[Map[Tile, List[Tile]]]
+
+    def deserializeIsAttacked(response: HttpResponse): Future[Boolean] =
+        Unmarshal(response.entity).to[JsValue].map(_.convertTo[Boolean])
