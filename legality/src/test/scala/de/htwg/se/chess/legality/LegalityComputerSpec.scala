@@ -349,4 +349,13 @@ class LegalityComputerSpec extends AnyWordSpec:
         legalMovesMap(Tile("A1")).sorted shouldBe Tile(List("A2", "A3", "A4", "A5", "A6", "A7", "A8", "B1", "C1", "D1")).sorted
         legalMovesMap(Tile("H1")).sorted shouldBe Tile(List("H2", "H3", "H4", "H5", "H6", "H7", "H8", "G1", "F1")).sorted
     }
+    "return true or false if a given tile is under attack" in {
+        matr = matrixFromFen("8/8/8/8/8/r7/8/R3K2R w KQ - 0 1")
+        state = ChessState("8/8/8/8/8/r7/8/R3K2R w KQ - 0 1")
+
+        isAttacked(matr, state, Tile("A1")) shouldBe true
+        isAttacked(matr, state, Tile("A2")) shouldBe true
+        isAttacked(matr, state, Tile("A3")) shouldBe true
+        isAttacked(matr, state, Tile("H1")) shouldBe false
+    }
   }

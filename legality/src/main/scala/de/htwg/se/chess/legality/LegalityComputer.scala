@@ -40,6 +40,9 @@ object LegalityComputer:
     def getLegalMoves(fen: String): Map[Tile, List[Tile]] =
         getLegalMoves(FenParser.matrixFromFen(fen), ChessState(fen))
 
+    def isAttacked(fen: String, tile: Tile): Boolean =
+        isAttacked(FenParser.matrixFromFen(fen), ChessState(fen), tile)
+
     def isAttacked(field: Matrix[Option[Piece]], state: ChessState, tile: Tile): Boolean =
         val wrapper = new MatrixWrapper(field, state)
         wrapper.isAttacked(tile)
@@ -63,6 +66,15 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
         reverseAttackCheck(Bishop, bishopMoveChain) _ ,
         reverseAttackCheck(Knight, knightMoveChain) _ ,
         reverseAttackCheck(Pawn, pawnMoveChain) _
+      )
+    )
+    private val inverseColorReverseAttackChain = ChainHandler[Tile, Boolean] (List[Tile => Option[Boolean]]
+      (
+        reverseAttackCheck(Queen, inverseColorQueenMoveChain) _ ,
+        reverseAttackCheck(Rook, inverseColorRookMoveChain) _ ,
+        reverseAttackCheck(Bishop, inverseColorBishopMoveChain) _ ,
+        reverseAttackCheck(Knight, inverseColorKnightMoveChain) _ ,
+        reverseAttackCheck(Pawn, inverseColorPawnMoveChain) _
       )
     )
 
@@ -127,6 +139,12 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
         ( tile => if cell(tile).get.getColor != state.color then Some(tile) else None )
       )
     )
+    val inverseColorTileHandle = ChainHandler[Tile, Tile] (List[Tile => Option[Tile]]
+      (
+        ( tile => if cell(tile).isDefined then None else Some(tile) ),
+        ( tile => if cell(tile).get.getColor == state.color then Some(tile) else None )
+      )
+    )
 
     def castleTiles: List[Tile] = state.color match
       case White => 
@@ -172,7 +190,7 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
               )
 
     private val diagonalMoves     : List[Tuple2[Int, Int]] = ( 1, 1) :: ( 1,-1) :: (-1, 1) :: (-1,-1) :: Nil
-    private val straightMoves     : List[Tuple2[Int, Int]] = ( 0, 1) :: ( 1, 0) :: (-1, 0) :: ( 0,-1) :: Nil
+    val straightMoves     : List[Tuple2[Int, Int]] = ( 0, 1) :: ( 1, 0) :: (-1, 0) :: ( 0,-1) :: Nil
     private val knightMoveList    : List[Tuple2[Int, Int]] = (-1,-2) :: (-2,-1) :: (-2, 1) :: (-1, 2) :: ( 1, 2) :: ( 2, 1) :: ( 2,-1) :: ( 1,-2) :: Nil
     private val whitePawnTakeList : List[Tuple2[Int, Int]] = ( 1, 1) :: (-1, 1) :: Nil
     private val blackPawnTakeList : List[Tuple2[Int, Int]] = ( 1,-1) :: (-1,-1) :: Nil
@@ -183,14 +201,18 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
       moves.map{ move => iterateMove(start, move) }
            .flatMap{ x => x.takeWhile( p => p.isDefined ) }
            .map{ x => x.get }
+    def inverseColorSlidingMoveChain(moves: List[Tuple2[Int, Int]])(start: Tile) : List[Tile] =
+      moves.map{ move => iterateMove(start, move, tileHandleC = inverseColorTileHandle) }
+           .flatMap{ x => x.takeWhile( p => p.isDefined ) }
+           .map{ x => x.get }
 
-    @tailrec
-    private def iterateMove(start: Tile, move: Tuple2[Int, Int], count: Int = 1, list: List[Option[Tile]] = Nil) : List[Option[Tile]] =
+    
+    def iterateMove(start: Tile, move: Tuple2[Int, Int], count: Int = 1, list: List[Option[Tile]] = Nil, tileHandleC: ChainHandler[Tile, Tile] = tileHandle) : List[Option[Tile]] =
       Try(start - (move(0)*count, move(1)*count)) match
         case s: Success[Tile] =>
           cell(s.get) match
-            case Some(_) => list :+ tileHandle.handleRequest(s.get);
-            case None => iterateMove(start, move, count + 1, list :+ tileHandle.handleRequest(s.get))
+            case Some(_) => list :+ tileHandleC.handleRequest(s.get);
+            case None => iterateMove(start, move, count + 1, list :+ tileHandleC.handleRequest(s.get), tileHandleC)
         case f: Failure[Tile] => list
 
     private def kingMoveChain(in: Tile) : List[Tile] =
@@ -204,14 +226,25 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
     private def rookMoveChain = slidingMoveChain(straightMoves) _
     private def bishopMoveChain = slidingMoveChain(diagonalMoves) _
 
+    private def inverseColorQueenMoveChain = inverseColorSlidingMoveChain(queenMoveList) _
+    def inverseColorRookMoveChain = inverseColorSlidingMoveChain(straightMoves) _
+    private def inverseColorBishopMoveChain = inverseColorSlidingMoveChain(diagonalMoves) _
+
     private def knightMoveChain(in: Tile) : List[Tile] =
       knightMoveList.filter( x => Try(in - x).isSuccess )
                     .filter( x => tileHandle.handleRequest(in - x).isDefined )
+                    .map( x => in - x )
+    private def inverseColorKnightMoveChain(in: Tile) : List[Tile] =
+      knightMoveList.filter( x => Try(in - x).isSuccess )
+                    .filter( x => inverseColorTileHandle.handleRequest(in - x).isDefined )
                     .map( x => in - x )
 
     private def doublePawnChain(in: Tile) = state.color match
       case White => whiteDoublePawnChain.handleRequest(in).get
       case Black => blackDoublePawnChain.handleRequest(in).get
+    private def inverseColorDoublePawnChain(in: Tile) = state.color match
+      case White => blackDoublePawnChain.handleRequest(in).get
+      case Black => whiteDoublePawnChain.handleRequest(in).get
 
     private val whiteDoublePawnChain =
       ChainHandler[Tile, List[Tile]] (List[Tile => Option[List[Tile]]]
@@ -240,11 +273,29 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
             } 
           )
           .appendedAll(doublePawnChain(in))
+    private def inverseColorPawnMoveChain(in: Tile) : List[Tile] =
+        (if (state.color == White) 
+            then blackPawnTakeList 
+            else whitePawnTakeList)
+            .filter( x => Try(in + x).isSuccess )
+            .map( x => in + x)
+            .filter( x => (cell(x).isDefined && cell(x).get.getColor == state.color) )
+            .appendedAll( Try(in + (if (state.color == White) then (0,-1) else (0,1))) match {
+                case s: Success[Tile] => if cell(s.get).isDefined then Nil else List(s.get)
+                case f: Failure[Tile] => Nil
+                } 
+            )
+            .appendedAll(inverseColorDoublePawnChain(in))
 
     def color = state.color
     def setColor(color: PieceColor): MatrixWrapper = copy(state = state.copy(color = color))
+    def invertColor: MatrixWrapper = setColor(color.invert)
 
-    def isAttacked(tile: Tile): Boolean = reverseAttackChain.handleRequest(tile).getOrElse(false)
+    def isAttacked(tile: Tile): Boolean = cell(tile) match 
+        case None => reverseAttackChain.handleRequest(tile).getOrElse(false)
+        case Some(piece) => if (piece.getColor == color) 
+            then reverseAttackChain.handleRequest(tile).getOrElse(false)
+            else inverseColorReverseAttackChain.handleRequest(tile).getOrElse(false)
 
     val inCheck = getKingSquare match
         case Some(tile) => isAttacked(tile)
