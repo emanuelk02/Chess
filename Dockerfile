@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+FROM hseeberger/scala-sbt:17.0.2_1.6.2_3.1.1
 WORKDIR /chess
 ADD . /chess
 CMD sbt run
