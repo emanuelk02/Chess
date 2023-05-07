@@ -1,21 +1,4 @@
-val scala3Version = "3.2.2"
-
-val AkkaVersion = "2.7.0"
-val AkkaHttpVersion = "10.5.1"
-lazy val commonDependency = Seq(
-    "com.novocode" % "junit-interface" % "0.11" % "test",
-    "org.scalactic" %% "scalactic" % "3.2.10",
-    "org.scalatest" %% "scalatest" % "3.2.10" % "test",
-    "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
-    "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
-    "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
-    "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion,
-    "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion,
-    "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
-    "org.slf4j" % "slf4j-simple" % "2.0.7",
-    "io.spray" %%  "spray-json" % "1.3.6",
-    ("com.typesafe.play" %% "play-json" % "2.9.3").cross(CrossVersion.for3Use2_13)
-)
+import dependencies._
 
 lazy val commonSettings = Seq(
     scalaVersion := scala3Version,

@@ -18,8 +18,6 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.client.RequestBuilding._
 
-import com.google.inject.Guice
-
 import util.client.BlockingClient._
 import model.persistence.PersistenceService
 import legality.LegalityService
