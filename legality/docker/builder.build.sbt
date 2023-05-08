@@ -3,12 +3,13 @@ import dependencies._
 lazy val commonSettings = Seq(
     scalaVersion := scala3Version,
     libraryDependencies ++= commonDependency,
-    ThisBuild / javaOptions += "-Xmx2G",
+    ThisBuild / Compile / javaOptions += "-Xmx4G",
     ThisBuild / assemblyMergeStrategy := {   
       case PathList("reference.conf") => MergeStrategy.concat
-      case PathList("META-INF", xs @ _*) => MergeStrategy.discard   
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case PathList("module-info.class") => MergeStrategy.discard
       case x => 
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)
     }
 )
