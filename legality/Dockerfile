@@ -17,11 +17,12 @@ ARG PROJECTDIR=/opt/chess/legality
 
 
 #======================================================================================#
-# PROJECT BUILDER
+# PROJECT JAR ASSEMBLER
 #======================================================================================#
 FROM sbtscala/scala-sbt:${JDK_BASE}-${JAVA_VERSION}_${SBT_VERSION}_${SCALA_VERSION} as prebuilder
 
-WORKDIR /opt/chess/legality
+ARG PROJECTDIR
+WORKDIR ${PROJECTDIR}
 
 # Copy module source code
 COPY legality/src/main src/main
@@ -37,11 +38,15 @@ COPY legality/docker/builder.build.sbt build.sbt
 RUN sbt assembly
 
 
+#======================================================================================#
+# PROJECT RUNNER BUILDER
+#======================================================================================#
 FROM sbtscala/scala-sbt:${JDK_BASE}-${JAVA_VERSION}_${SBT_VERSION}_${SCALA_VERSION} as builder
 
-WORKDIR /opt/chess/legality
+ARG PROJECTDIR
+WORKDIR ${PROJECTDIR}
 
-COPY --from=prebuilder /opt/chess/legality/target/scala-*/legality-*.jar lib/
+COPY --from=prebuilder $PROJECTDIR/target/scala-*/legality-*.jar lib/
 
 # Copy module runner code
 COPY legality/docker/src src/
@@ -58,13 +63,16 @@ RUN sbt assembly
 #======================================================================================#
 # RUNNER
 #======================================================================================#
-FROM eclipse-temurin:17-jdk-jammy as runner
+FROM eclipse-temurin:17.0.7_7-jre-alpine as runner
 
-WORKDIR /opt/chess/legality
+ARG PROJECTDIR
+ARG SCALA_VERSION
+WORKDIR ${PROJECTDIR}
 
-COPY --from=builder /opt/chess/legality/target/scala-*/legality-*.jar lib/
+COPY --from=builder $PROJECTDIR/target/scala-*/legality-*.jar lib/
 COPY legality/docker/entrypoint.sh entrypoint.sh
 
+ENV PROJECTDIR=${PROJECTDIR}
 ENV SCALA_VERSION=${SCALA_VERSION}
 
 ENV LEGALITY_API_HOST=0.0.0.0
@@ -74,4 +82,4 @@ EXPOSE ${LEGALITY_API_PORT}
 
 RUN chmod a+x entrypoint.sh
 
-ENTRYPOINT ["/opt/chess/legality/entrypoint.sh"]
+ENTRYPOINT exec /opt/java/openjdk/bin/java -Duser.dir=${PROJECTDIR} -classpath ${PROJECTDIR}/lib/legality-*.jar de.htwg.se.chess.Legality
