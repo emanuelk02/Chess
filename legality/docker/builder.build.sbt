@@ -21,9 +21,9 @@ lazy val utils = project
     commonSettings
   )
 
-lazy val root = project
+lazy val service = project
     .in(file("."))
     .settings(
-        name := sys.env.get("PROJECT").getOrElse("Chess"),
+        name := "service",
         commonSettings
     ).dependsOn(utils)

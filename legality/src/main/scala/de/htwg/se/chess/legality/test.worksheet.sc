@@ -34,3 +34,8 @@ var legalMovesMap = LegalityComputer.getLegalMoves(matr, state).toJson.asJsObjec
 "{}".parseJson.asJsObject
 
 Uri("http://localhost:8080/controller/subscribe?event=move").rawQueryString
+
+val list = List(1, 2, 3, 4, 5)
+val list2 = List(5, 4, 3, 2, 1)
+Map.from(list.zip(list2))
+

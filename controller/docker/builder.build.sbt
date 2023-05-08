@@ -35,7 +35,7 @@ lazy val persistence = project
         commonSettings
     ).dependsOn(utils)
 
-lazy val root = project
+lazy val service = project
     .in(file("."))
     .settings(
         name := sys.env.get("PROJECT").getOrElse("Chess"),
