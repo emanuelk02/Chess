@@ -1,8 +1,9 @@
 import dependencies._
 
 lazy val commonSettings = Seq(
+    ThisBuild / javaOptions += "-Xmx1G",
     scalaVersion := scala3Version,
-    libraryDependencies ++= commonDependency
+    libraryDependencies ++= commonDependency,
     
     jacocoReportSettings := JacocoReportSettings(
       "Jacoco Coverage Report",
