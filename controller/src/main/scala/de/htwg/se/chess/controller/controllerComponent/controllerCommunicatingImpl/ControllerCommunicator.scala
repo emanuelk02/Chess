@@ -34,7 +34,10 @@ import spray.json._
 import util.client.BlockingClient.blockingReceiveRequest
 
 
-case class ControllerCommunicator(persistenceService: Uri)
+case class ControllerCommunicator(
+    persistenceService: Uri = 
+        Uri(s"http://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}")
+    )
     (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 
     def save(fen: String): Future[HttpResponse] =

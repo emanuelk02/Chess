@@ -10,15 +10,15 @@
 
 
 package de.htwg.se.chess
-package model
+package persistence
 package fileIOComponent
-package fileIOFENXmlImpl
+package fileIoFenXmlImpl
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 
 import util.data.FenParser._
-import model.fileIOComponent.fileIoFenXmlImpl._
+import fileIoFenXmlImpl._
 
 
 class FileIOSpec extends AnyWordSpec:

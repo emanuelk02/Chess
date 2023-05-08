@@ -17,9 +17,25 @@ lazy val utils = project
     commonSettings
   )
 
+lazy val legality = project
+    .in(file("legality"))
+    .settings(
+        name := "legality",
+        commonSettings
+    ).dependsOn(utils)
+
+lazy val persistence = project
+    .in(file("persistence"))
+    .settings(
+        name := "persistence",
+        commonSettings
+    ).dependsOn(utils)
+
 lazy val root = project
     .in(file("."))
     .settings(
         name := sys.env.get("PROJECT").getOrElse("Chess"),
         commonSettings
     ).dependsOn(utils)
+    .dependsOn(legality)
+    .dependsOn(persistence)

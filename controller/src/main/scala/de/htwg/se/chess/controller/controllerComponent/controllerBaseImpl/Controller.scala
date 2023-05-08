@@ -20,10 +20,11 @@ import scala.concurrent.Future
 
 import BaseControllerModule.given
 import model.gameDataComponent.GameField
-import model.fileIOComponent.FileIOInterface
+import persistence.fileIOComponent.FileIOInterface
 import util.data.Tile
 import util.data.Piece
 import util.patterns.Command
+
 
 
 case class Controller (var field: GameField, val commandHandler: ChessCommandInvoker) extends ControllerInterface:

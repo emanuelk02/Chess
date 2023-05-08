@@ -26,10 +26,10 @@ import akka.http.scaladsl.model.Uri
 import controllerBaseImpl._
 import ControllerModule.given
 import model.gameDataComponent.GameField
-import model.fileIOComponent.FileIOInterface
 import util.data.Tile
 import util.data.Piece
 import util.patterns.Command
+
 
 given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "CommunicatingController")
 given executionContext: ExecutionContextExecutor = system.executionContext
@@ -43,7 +43,7 @@ case class Controller (
   val startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
   def this() =
-    this(gameField, ChessCommandInvoker(), ControllerCommunicator(Uri("http://localhost:8083")))
+    this(gameField, ChessCommandInvoker(), ControllerCommunicator())
     this.field = field.loadFromFen(startingFen)
 
   def executeAndNotify[T](command: T => CommandInterface, args: T): Unit =

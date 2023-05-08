@@ -37,17 +37,17 @@ import util.data.invert
 import util.data.FenParser._
 import util.data.ChessJsonProtocol._
 import util.patterns.ChainHandler
-import legality.LegalityComputer
-import gameDataBaseImpl.toBoard
 
 
-case class ChessFieldForwarder(legalityService: Uri)
+case class ChessFieldForwarder(
+    legalityService: Uri = 
+        Uri(s"http://${sys.env.get("LEGALITY_API_HOST").getOrElse("localhost")}:${sys.env.get("LEGALITY_API_PORT").getOrElse("8082")}"))
     (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 
     def getLegalMoves(fen: String): Future[HttpResponse] =
         Http().singleRequest(
             Get(
-                legalityService.withPath(Path("/compute")),
+                legalityService.withPath(Path("/moves")),
                 s"""{"fen": "$fen"}"""
             )
         )
@@ -55,7 +55,7 @@ case class ChessFieldForwarder(legalityService: Uri)
     def isAttacked(fen: String, tile: Tile): Future[HttpResponse] =
         Http().singleRequest(
             Get(
-                legalityService.withPath(Path("/isAttacked?tile=" + tile.toString)),
+                legalityService.withPath(Path(s"/attacks?tile=\"${tile.toString}\"")),
                 s"""{"fen": "$fen"}"""
             )
         )

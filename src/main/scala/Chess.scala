@@ -19,7 +19,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.client.RequestBuilding._
 
 import util.client.BlockingClient._
-import model.persistence.PersistenceService
+import persistence.PersistenceService
 import legality.LegalityService
 import service.ChessService
 import service.ControllerService

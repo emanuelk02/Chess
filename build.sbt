@@ -2,8 +2,7 @@ import dependencies._
 
 lazy val commonSettings = Seq(
     scalaVersion := scala3Version,
-    libraryDependencies ++= commonDependency,
-    libraryDependencies += ("net.codingwell" %% "scala-guice" % "5.0.2").cross(CrossVersion.for3Use2_13),
+    libraryDependencies ++= commonDependency
     
     jacocoReportSettings := JacocoReportSettings(
       "Jacoco Coverage Report",
@@ -47,8 +46,7 @@ lazy val persistence: Project = project
     .in(file("persistence"))
     .settings(
         name := "persistence",
-        commonSettings,
-        libraryDependencies += ("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
+        commonSettings
     )
     .enablePlugins(JacocoCoverallsPlugin)
     .dependsOn(utils)
@@ -58,8 +56,7 @@ lazy val controller = project
     .in(file("controller"))
     .settings(
         name := "controller",
-        commonSettings,
-        libraryDependencies += ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13)
+        commonSettings
     )
     .enablePlugins(JacocoCoverallsPlugin)
     .dependsOn(utils, persistence, legality)
@@ -68,8 +65,7 @@ lazy val ui = project
     .in(file("ui"))
     .settings(
         name := "ui",
-        commonSettings,
-        libraryDependencies += ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13)
+        commonSettings
     )
     .enablePlugins(JacocoCoverallsPlugin)
     .dependsOn(utils, persistence, legality, controller)

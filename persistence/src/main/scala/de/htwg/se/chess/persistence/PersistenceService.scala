@@ -1,5 +1,4 @@
 package de.htwg.se.chess
-package model
 package persistence 
 
 import akka.actor.typed.ActorSystem
@@ -11,7 +10,6 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.google.inject.Guice
 import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
 import scala.util.{Try,Success,Failure}
 import scala.quoted._
@@ -57,13 +55,13 @@ case class PersistenceService(
             .flatMap(_.unbind()) // trigger unbinding from the port
             .onComplete(_ => system.terminate()) // and shutdown when done
         
-object PersistenceService extends JsonHandlerService:
+object PersistenceService:
 
     val error500 = 
-        "Something went wrong while trying to compute legal moves"
+        "Something went wrong while trying to save the game"
 
     def apply(ip: String, port: Int): PersistenceService =
-        implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "LegalityComputerService")
+        implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "PersistenceService")
         implicit val executionContext: ExecutionContext = system.executionContext
         val fileIO = FileIOInterface()
         PersistenceService(Future.never, ip, port, fileIO)

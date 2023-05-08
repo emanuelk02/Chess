@@ -10,7 +10,7 @@
 
 
 package de.htwg.se.chess
-package model
+package persistence
 package fileIOComponent
 
 import util.data.Piece
@@ -25,4 +25,4 @@ trait FileIOInterface:
 
 object FileIOInterface:
     def apply(): FileIOInterface =
-        fileIoFenXmlImpl.FileIO()
+        fileIoFenXmlImpl.FileIO().asInstanceOf[FileIOInterface]

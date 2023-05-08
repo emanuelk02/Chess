@@ -18,6 +18,8 @@ object dependencies {
     val slf4j     = "org.slf4j" % "slf4j-simple" % "2.0.7"
     val sprayJson = "io.spray" %%  "spray-json" % "1.3.6"
     val playJson  = ("com.typesafe.play" %% "play-json" % "2.9.3").cross(CrossVersion.for3Use2_13)
+    val swing     = ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13)
+    val xml       = ("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
 
     val commonDependency = Seq(
         scalactic,
@@ -30,6 +32,8 @@ object dependencies {
         akkaSprayJson,
         slf4j,
         sprayJson,
-        playJson
+        playJson,
+        swing,
+        xml
     )
 }

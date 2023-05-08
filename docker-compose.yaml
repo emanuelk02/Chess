@@ -1,0 +1,113 @@
+services:
+
+  legality:
+    image: chess-legality
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        - PROJECT=legality
+        - PROJECT_API_PORT=8082
+      cache_from:
+        - chess-legality
+    ports:
+      - "8082:8082"
+    networks:
+      chess-network:
+        aliases:
+          - legality
+    tty: true
+    stdin_open: true
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 0s
+      timeout: 0s
+      retries: 1
+      start_period: 10s
+
+  persistence:
+    image: chess-persistence
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        - PROJECT=persistence
+        - PROJECT_API_PORT=8083
+      cache_from:
+        - chess-persistence
+    ports:
+      - "8083:8083"
+    volumes:
+      - "chess-persistence-volume:/opt/chess/persistence/saves"
+    networks:
+      chess-network:
+        aliases:
+          - persistence
+    tty: true
+    stdin_open: true
+
+  controller:
+    image: chess-controller
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        - PROJECT=controller
+        - PROJECT_API_PORT=8081
+      cache_from:
+        - chess-controller
+    depends_on:
+      legality:
+        condition: service_healthy
+      persistence:
+        condition: service_started
+    ports:
+      - "8081:8081"
+    networks:
+      chess-network:
+        aliases:
+          - controller
+    tty: true
+    stdin_open: true
+    environment:
+      - LEGALITY_API_HOST=legality
+      - LEGALITY_API_PORT=8082
+      - PERSISTENCE_API_HOST=persistence
+      - PERSISTENCE_API_PORT=8083
+
+  chess:
+    image: chess
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        - PROJECT=chess
+        - PROJECTSRC=.
+        - PROJECT_API_PORT=8080
+      cache_from:
+        - chess
+    depends_on:
+      - legality
+      - persistence
+      - controller
+    ports:
+      - "8080:8080"
+    networks:
+      chess-network:
+        aliases:
+          - chess
+    tty: true
+    stdin_open: true
+    environment:
+      - CONTROLLER_API_HOST=controller
+      - CONTROLLER_API_PORT=8081
+      - LEGALITY_API_HOST=legality
+      - LEGALITY_API_PORT=8082
+      - PERSISTENCE_API_HOST=persistence
+      - PERSISTENCE_API_PORT=8083
+
+networks:
+  chess-network:
+
+volumes:
+  chess-persistence-volume:

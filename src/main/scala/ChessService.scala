@@ -42,26 +42,24 @@ case class ChessService(
     var bind: Future[ServerBinding],
     ip: String,
     port: Int,
-    var controller: Option[Uri] = None,
-    legality: Uri = Uri("http://localhost:8082")
+    controller: Uri = Uri(
+        s"http://${sys.env.get("CONTROLLER_API_HOST").getOrElse("localhost")}:${sys.env.get("CONTROLLER_API_PORT").getOrElse("8081")}/controller"
+    ),
+    legality: Uri = Uri(
+        s"http://${sys.env.get("LEGALITY_API_HOST").getOrElse("localhost")}:${sys.env.get("LEGALITY_API_PORT").getOrElse("8082")}"
+    ),
+    persistence: Uri = Uri(
+        s"http://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}"
+    )
 )(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
-
-    var controllerService: Option[ControllerService] = None
+    println(s"Chess API running. Please navigate to http://" + ip + ":" + port)
 
     val rejectionUrl = Uri(s"http://$ip:$port/rejection")
 
     val controllerRoute = concat(
-        path("controller") {
-            post {
-                controller = Some(Uri(s"http://localhost:8081"))
-                controllerService = Some(new ControllerService(Future.never, "localhost", 8081))
-                controllerService.get.run
-                complete(HttpResponse(OK, entity = "Controller created."))
-            }
-        },
         path("controller" / RemainingPath) { query =>
             extractRequest { req =>
-                onSuccess(redirectToControllor(query, req)) { res =>
+                onSuccess(redirectTo(controller, query, req)) { res =>
                     complete(res)
                 }
             }
@@ -71,7 +69,16 @@ case class ChessService(
     val legalityRoute =
         path("legality" / RemainingPath) { query =>
             extractRequest { req =>
-                onSuccess(redirectToLegality(query, req)) { res =>
+                onSuccess(redirectTo(legality, query, req)) { res =>
+                    complete(res)
+                }
+            }
+        }
+
+    val persistenceRoute =
+        path("persistence" / RemainingPath) { query =>
+            extractRequest { req =>
+                onSuccess(redirectTo(persistence, query, req)) { res =>
                     complete(res)
                 }
             }
@@ -96,28 +103,17 @@ case class ChessService(
         }
     )
   
+    def redirectTo(service: Uri, query: Path, req: HttpRequest): Future[HttpResponse] =
+        Http().singleRequest(req.copy(
+            uri = service.withPath(Path("/") ++ query)
+        ))
 
-    def redirectToControllor(query: Path, req: HttpRequest): Future[HttpResponse] =
-        Http().singleRequest(req.copy(
-            uri = if controller.isDefined 
-                then controller.get
-                               .withPath(Path("/controller/") ++ query)
-                               .withQuery(Query(req.uri.rawQueryString.getOrElse(""))) 
-                else rejectionUrl
-        ))
-    
-    def redirectToLegality(query: Path, req: HttpRequest): Future[HttpResponse] =
-        Http().singleRequest(req.copy(
-            uri = legality.withPath(Path("/") ++ query)
-        ))
 
     def run: Unit =
         println(s"Chess API running. Please navigate to http://" + ip + ":" + port)
         bind = Http().newServerAt(ip, port).bind(route)
 
     def terminate: Unit =
-        if controllerService.isDefined then
-            controllerService.get.terminate
         bind
             .flatMap(_.unbind()) // trigger unbinding from the port
             .onComplete(_ => system.terminate()) // and shutdown when done

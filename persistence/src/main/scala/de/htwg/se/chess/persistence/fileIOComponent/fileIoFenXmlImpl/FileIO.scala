@@ -10,12 +10,10 @@
 
 
 package de.htwg.se.chess
-package model
+package persistence
 package fileIOComponent
 package fileIoFenXmlImpl
 
-import com.google.inject.{ Guice, Inject }
-import net.codingwell.scalaguice.InjectorExtensions._
 import scala.xml.{ NodeSeq, PrettyPrinter }
 
 import util.data.Piece

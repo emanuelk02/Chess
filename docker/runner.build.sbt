@@ -3,7 +3,7 @@ import dependencies._
 lazy val root = project
     .in(file("."))
     .settings(
-        name := "legality",
+        name := sys.env.get("PROJECT").getOrElse("Chess"),
         scalaVersion := sys.env.get("SCALA_VERSION").getOrElse("3.2.2"),
         libraryDependencies ++= commonDependency,
         ThisBuild / assemblyMergeStrategy := {   

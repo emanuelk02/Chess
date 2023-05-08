@@ -21,7 +21,6 @@ import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.google.inject.Guice
 import scala.concurrent.{Future, ExecutionContextExecutor, ExecutionContext}
 import scala.util.{Try, Success, Failure}
 import scala.quoted._
@@ -50,6 +49,8 @@ case class ControllerService(
     executionContext: ExecutionContext
 ) extends SubscricableService
   with Reactor:
+
+  println(s"Controller running. Please navigate to http://" + ip + ":" + port)
 
   val route = pathPrefix("controller") {
     concat(

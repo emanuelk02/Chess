@@ -18,6 +18,7 @@ package gameDataCommunicationImpl
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.model.Uri
+import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import scala.util.Try
@@ -41,6 +42,7 @@ import gameDataBaseImpl.ChessField
 import util.client.BlockingClient._
 import akka.http.scaladsl.model.HttpEntity
 import spray.json._
+import akka.http.scaladsl.model.HttpResponse
 
 given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "CommunicatingChessField")
 given executionContext: ExecutionContextExecutor = system.executionContext
@@ -52,13 +54,14 @@ class CommunicatingChessField (
   inCheck: Boolean = false, 
   attackedTiles: List[Tile] = Nil, 
   gameState: GameState = RUNNING,
-  val forwarder: ChessFieldForwarder = ChessFieldForwarder(Uri("http://localhost:8082"))
+  val forwarder: ChessFieldForwarder = ChessFieldForwarder()
 ) extends ChessField(field, state, inCheck, attackedTiles, gameState):
 
-  override val legalMoves: Map[Tile, List[Tile]] = blockingReceive(
-    forwarder.deserializeLegalMoves(blockingReceive(
-        forwarder.getLegalMoves(toFen)
-    )))
+  override val legalMoves: Map[Tile, List[Tile]] = 
+    val response = blockingReceive(forwarder.getLegalMoves(toFen))
+    response match
+      case HttpResponse(OK, _, _, _) => blockingReceive(forwarder.deserializeLegalMoves(response))
+      case res => throw Error(res.toString + " " + res.entity.httpEntity.toString)
 
 
   override def isAttacked(tile: Tile): Boolean = blockingReceive(
@@ -75,7 +78,16 @@ object CommunicatingChessField:
     )
 
   def apply(field: Matrix[Option[Piece]], state: ChessState): CommunicatingChessField =
-    CommunicatingChessField(field, state, Uri("http://localhost:8082"))
+    val tmpField = new CommunicatingChessField( field, state )
+    new CommunicatingChessField(
+      field,
+      state,
+      tmpField.getKingSquare match
+        case Some(kingSq) => tmpField.isAttacked(kingSq)
+        case None => false,
+      tmpField.legalMoves.flatMap( entry => entry._2).toList.sorted,
+      forwarder = ChessFieldForwarder()
+    )
 
   def apply(field: Matrix[Option[Piece]], state: ChessState, legalityServiceUri: Uri): CommunicatingChessField =
     val tmpField = new CommunicatingChessField( field, state )
