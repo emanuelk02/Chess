@@ -13,17 +13,15 @@ services:
     ports:
       - "8082:8082"
     networks:
-      chess-network:
-        aliases:
-          - legality
+      - chess-network
     tty: true
     stdin_open: true
     healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
-      interval: 0s
-      timeout: 0s
-      retries: 1
-      start_period: 10s
+      test: ["CMD-SHELL", "curl -X GET -H \"Content-type: application/json\" -H \"Accept: application/json\" -d '{\"fen\": \"8/8/8/8/8/8/8/8 w KQ - 0 1\"}' http://localhost:8082/moves"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
 
   persistence:
     image: chess-persistence
@@ -40,9 +38,7 @@ services:
     volumes:
       - "chess-persistence-volume:/opt/chess/persistence/saves"
     networks:
-      chess-network:
-        aliases:
-          - persistence
+      - chess-network
     tty: true
     stdin_open: true
 
@@ -64,9 +60,7 @@ services:
     ports:
       - "8081:8081"
     networks:
-      chess-network:
-        aliases:
-          - controller
+      - chess-network
     tty: true
     stdin_open: true
     environment:
@@ -92,9 +86,7 @@ services:
     ports:
       - "8080:8080"
     networks:
-      chess-network:
-        aliases:
-          - chess
+      - chess-network
     tty: true
     stdin_open: true
     environment:

@@ -12,7 +12,7 @@
 ARG SCALA_VERSION=3.2.2
 ARG SBT_VERSION=1.8.2
 ARG JAVA_VERSION=17.0.5_8
-ARG JDK_BASE=eclipse-temurin-focal
+ARG JDK_BASE=eclipse-temurin
 # This needs to be set to the name of the service, e.g. controller, persistence, etc.
 # make sure it matches the name of the folder for the service
 ARG SERVICE
@@ -26,7 +26,7 @@ ARG SERVICE_API_PORT=8080
 #======================================================================================#
 # SERVICE JAR ASSEMBLER
 #======================================================================================#
-FROM sbtscala/scala-sbt:${JDK_BASE}-${JAVA_VERSION}_${SBT_VERSION}_${SCALA_VERSION} as builder
+FROM sbtscala/scala-sbt:${JDK_BASE}-focal-${JAVA_VERSION}_${SBT_VERSION}_${SCALA_VERSION} as builder
 
 ARG SERVICE
 ARG SERVICESRC
@@ -41,11 +41,9 @@ COPY project/dependencies.scala project/build.properties project/plugins.sbt pro
 # Copy service source code dependencies
 COPY ./ ./
 
-RUN : \
-    && rm -rf docker \
-    && mkdir chess \
-    && mv ./src chess/ \
-    && :
+RUN rm -rf docker \
+ && mkdir chess \
+ && mv ./src chess/
 
 # Copy module runner code
 COPY docker/runner.build.sbt build.sbt
@@ -58,7 +56,7 @@ RUN sbt assembly
 #======================================================================================#
 # RUNNER
 #======================================================================================#
-FROM eclipse-temurin:17.0.7_7-jre-alpine as runner
+FROM ${JDK_BASE}:17.0.7_7-jre-alpine as runner
 
 ARG SERVICE
 ARG SERVICEDIR
@@ -77,5 +75,7 @@ ENV SERVICE_API_PORT=${SERVICE_API_PORT}
 EXPOSE ${SERVICE_API_PORT}
 
 COPY --link --from=builder ${SERVICEDIR}/target/scala-*/${SERVICE}-*.jar lib/
+RUN apk update \
+ && apk add --clean-protected curl
 
 ENTRYPOINT exec /opt/java/openjdk/bin/java -Duser.dir=${SERVICEDIR} -classpath ${SERVICEDIR}/lib/${SERVICE}-*.jar de.htwg.se.chess.Main
