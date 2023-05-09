@@ -16,20 +16,6 @@ lazy val commonSettings = Seq(
     }
 )
 
-/*val dependencyList = sys.env.get("SERVICE_DEPENDENCIES").getOrElse("utils").split(",").toList
-val dependencyProjects = dependencyList.map(x => 
-    x match {
-        case "utils" => utils
-        case "legality" => legality
-        case "persistence" => persistence
-        case "controller" => controller
-        case "ui" => ui
-    }
-)
-val dependencyMap: Map[String, Project] = Map(
-    dependencyList.zip(dependencyProjects).map(x => x._1 -> x._2): _*
-)*/
-
 lazy val utils = project
     .in(file("utils"))
     .settings(
@@ -77,24 +63,6 @@ lazy val chess = project
     )
     .dependsOn(utils, persistence, legality, controller, ui)
 
-
-/*def resolveDependencies(deps: List[String], proj: Project, dependencyMap: Map[String, Project]): Project = {
-    deps match {
-        case Nil => proj
-        case head :: tail => resolveDependencies(tail, proj.dependsOn(dependencyMap.get(head).get), dependencyMap)
-    }
-}
-
-lazy val service = project
-    .in(file(sys.env.get("SERVICE").getOrElse("service")))
-    .settings(
-        name := "service",
-        commonSettings
-    ).configure( proj => resolveDependencies(
-        dependencyList,
-        proj,
-        dependencyMap
-    ))*/
 
 lazy val root = project
     .in(file("."))
