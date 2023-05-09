@@ -69,6 +69,14 @@ lazy val ui = project
     )
     .dependsOn(utils, persistence, legality, controller)
 
+lazy val chess = project
+    .in(file("chess"))
+    .settings(
+        name := "chess",
+        commonSettings
+    )
+    .dependsOn(utils, persistence, legality, controller, ui)
+
 
 /*def resolveDependencies(deps: List[String], proj: Project, dependencyMap: Map[String, Project]): Project = {
     deps match {
@@ -100,4 +108,5 @@ lazy val root = project
         case "persistence" => persistence
         case "controller" => controller
         case "ui" => ui
+        case "chess" => chess
     })

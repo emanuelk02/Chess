@@ -42,7 +42,7 @@ object starter:
     chessApi.run
   }
 
-object Main extends App:
+object MainApi extends App:
     starter.runApi
 object MainTUI extends App:
     val tui = TUI(controller)
