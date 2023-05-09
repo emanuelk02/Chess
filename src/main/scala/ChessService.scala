@@ -43,7 +43,7 @@ case class ChessService(
     ip: String,
     port: Int,
     controller: Uri = Uri(
-        s"http://${sys.env.get("CONTROLLER_API_HOST").getOrElse("localhost")}:${sys.env.get("CONTROLLER_API_PORT").getOrElse("8081")}/controller"
+        s"http://${sys.env.get("CONTROLLER_API_HOST").getOrElse("localhost")}:${sys.env.get("CONTROLLER_API_PORT").getOrElse("8081")}"
     ),
     legality: Uri = Uri(
         s"http://${sys.env.get("LEGALITY_API_HOST").getOrElse("localhost")}:${sys.env.get("LEGALITY_API_PORT").getOrElse("8082")}"
@@ -57,9 +57,9 @@ case class ChessService(
     val rejectionUrl = Uri(s"http://$ip:$port/rejection")
 
     val controllerRoute = concat(
-        path("controller" / RemainingPath) { query =>
+        path("controller" / Remaining) { path =>
             extractRequest { req =>
-                onSuccess(redirectTo(controller, query, req)) { res =>
+                onSuccess(redirectToController(path, req)) { res =>
                     complete(res)
                 }
             }
@@ -67,18 +67,18 @@ case class ChessService(
     )
 
     val legalityRoute =
-        path("legality" / RemainingPath) { query =>
+        path("legality" / Remaining) { path =>
             extractRequest { req =>
-                onSuccess(redirectTo(legality, query, req)) { res =>
+                onSuccess(redirectTo(legality, path, req)) { res =>
                     complete(res)
                 }
             }
         }
 
     val persistenceRoute =
-        path("persistence" / RemainingPath) { query =>
+        path("persistence" / Remaining) { path =>
             extractRequest { req =>
-                onSuccess(redirectTo(persistence, query, req)) { res =>
+                onSuccess(redirectTo(persistence, path, req)) { res =>
                     complete(res)
                 }
             }
@@ -103,15 +103,20 @@ case class ChessService(
         }
     )
   
-    def redirectTo(service: Uri, query: Path, req: HttpRequest): Future[HttpResponse] =
+    def redirectTo(service: Uri, path: String, req: HttpRequest): Future[HttpResponse] =
+        println(s"Original req: $req")
+        println(s"New uri: ${service.withPath(Path("/" + path)).withQuery(Query(req.uri.rawQueryString))}")
         Http().singleRequest(req.copy(
-            uri = service.withPath(Path("/") ++ query)
+            uri = service.withPath(Path("/" + path)).withQuery(Query(req.uri.rawQueryString))
         ))
+    
+    def redirectToController(path: String, req: HttpRequest): Future[HttpResponse] =
+        redirectTo(controller, "controller/" + path, req)
 
 
     def run: Unit =
-        println(s"Chess API running. Please navigate to http://" + ip + ":" + port)
         bind = Http().newServerAt(ip, port).bind(route)
+        println(s"Chess API running. Please navigate to http://" + ip + ":" + port)
 
     def terminate: Unit =
         bind
