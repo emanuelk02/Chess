@@ -32,20 +32,18 @@ case class PersistenceService(
     println("PersistenceService started. Please navigate to http://" + ip + ":" + port)
        
        
-        val route = concat(
-            path("load") {
+        val route = 
+            path("saves") {concat(
                 get {
                     complete(fileIO.load)
-                }
-            },
-            path("save") {
+                },
                 post {
                     entity(as[String]) { fen =>
                         fileIO.save(fen)
                         complete("saved")
                     }
                 }
-            })
+            )}
 
         def run: Unit =
             bind = Http().newServerAt(ip, port).bind(route)
