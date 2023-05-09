@@ -53,8 +53,6 @@ case class ChessService(
     )
 )(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
 
-    val rejectionUrl = Uri(s"http://$ip:$port/rejection")
-
     val controllerRoute = concat(
         path("controller" / Remaining) { path =>
             extractRequest { req =>
@@ -90,16 +88,14 @@ case class ChessService(
         pathPrefix("chess") { concat(
             controllerRoute,
             legalityRoute,
+            persistenceRoute,
             path("exit") {
                 post {
                     terminate
                     complete(HttpResponse(OK, entity = "Chess API terminated."))
                 }
             }
-        )},
-        path("rejection") {
-            complete(HttpResponse(NotFound, entity = "No controller created yet. Get one at /controller"))
-        }
+        )}
     )
   
     def redirectTo(service: Uri, path: String, req: HttpRequest): Future[HttpResponse] =
