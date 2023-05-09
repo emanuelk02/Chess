@@ -52,7 +52,6 @@ case class ChessField(
 
   private val specialMoveChain = ChainHandler[Tuple3[Tile, Tile, ChessField], ChessField] (List[Tuple3[Tile, Tile, ChessField] => Option[ChessField]]
    (
-      // in(0): tile1 (source);    in(1): tile2 (dest);    in(2): ChessField
       ( (src, dest, field) => if !playing then Some(field) else None ),
       ( (src, dest, field) => if (cell(src).get.getType == King && castleTiles.contains(dest)) // Castling
         then Some(ChessField(
@@ -217,7 +216,6 @@ case class ChessField(
 
   override def toFenPart: String = field.toFen
 
-  // Fen could also be extracted into a persistence service
   override def toFen: String = toFenPart + " " + state.toFen
 
 object ChessField:
@@ -238,8 +236,6 @@ object ChessField:
       tmpField.setColor(state.color.invert).legalMoves.flatMap( entry => entry._2).toList.sorted
     )
   
-  // If Fen is moved into persistence service this would move with it and instead create a matrix
-  // ChessField would then call that service to create a matrix and instantiate itself
   def fromFen(fen: String, fieldSize: Int = 8): ChessField =
     val newMatrix = FenParser.matrixFromFen(fen)
     val newState: ChessState = ChessState(size = fieldSize).evaluateFen(fen)
