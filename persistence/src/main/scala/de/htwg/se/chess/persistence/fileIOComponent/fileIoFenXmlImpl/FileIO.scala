@@ -28,7 +28,7 @@ class FileIO extends FileIOInterface:
         loadFile match
             case (matr, state) => matr.toFen + " " + state.toFen
     def loadFile: Tuple2[Matrix[Option[Piece]], ChessState] =
-        val file = scala.xml.XML.loadFile("field.xml")
+        val file = scala.xml.XML.loadFile("saves/field.xml")
         val fen = (file \\ "fen").text
         (matrixFromFen(fen), stateFromFen(fen))
 
@@ -37,7 +37,7 @@ class FileIO extends FileIOInterface:
 
     private def saveString(field: Matrix[Option[Piece]], state: ChessState) =
         import java.io._
-        val pw = PrintWriter(File("field.xml"))
+        val pw = PrintWriter(File("saves/field.xml"))
         val prettyPrinter = PrettyPrinter(120, 4)
         val xml = prettyPrinter.format(fieldToXml(field, state))
         pw.write(xml)

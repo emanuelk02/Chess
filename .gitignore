@@ -10,6 +10,7 @@
 metals.sbt
 
 # exlude class and binaries
+**/saves
 project/target
 **/target
 project/project

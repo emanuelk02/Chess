@@ -15,7 +15,7 @@
 **/.scalafmt.conf
 **/codecov*
 **/coverage*
-**/field.xml
+**/saves*
 **/pom.xml
 **/LICENSE
 **/LICENSE.txt
