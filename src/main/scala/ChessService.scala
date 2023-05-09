@@ -52,7 +52,6 @@ case class ChessService(
         s"http://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}"
     )
 )(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
-    println(s"Chess API running. Please navigate to http://" + ip + ":" + port)
 
     val rejectionUrl = Uri(s"http://$ip:$port/rejection")
 
@@ -104,8 +103,6 @@ case class ChessService(
     )
   
     def redirectTo(service: Uri, path: String, req: HttpRequest): Future[HttpResponse] =
-        println(s"Original req: $req")
-        println(s"New uri: ${service.withPath(Path("/" + path)).withQuery(Query(req.uri.rawQueryString))}")
         Http().singleRequest(req.copy(
             uri = service.withPath(Path("/" + path)).withQuery(Query(req.uri.rawQueryString))
         ))
