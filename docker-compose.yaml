@@ -41,6 +41,12 @@ services:
       - chess-network
     tty: true
     stdin_open: true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/saves"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
 
   controller:
     image: chess-controller
@@ -56,7 +62,7 @@ services:
       legality:
         condition: service_healthy
       persistence:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "8081:8081"
     networks:
@@ -68,6 +74,12 @@ services:
       - LEGALITY_API_PORT=8082
       - PERSISTENCE_API_HOST=persistence
       - PERSISTENCE_API_PORT=8083
+    healthcheck:
+      test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8081/controller/fen"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
 
   chess:
     image: chess
@@ -80,9 +92,8 @@ services:
       cache_from:
         - chess
     depends_on:
-      - legality
-      - persistence
-      - controller
+      controller:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
@@ -96,6 +107,12 @@ services:
       - LEGALITY_API_PORT=8082
       - PERSISTENCE_API_HOST=persistence
       - PERSISTENCE_API_PORT=8083
+    healthcheck:
+      test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/chess/controller/fen"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
 
 networks:
   chess-network:
