@@ -70,9 +70,8 @@ case class ControllerService(
           pathEnd{
             parameter("tile".as[Tile]) { tile =>
               controller.cell(tile) match {
-                case None => complete(HttpResponse(NotFound))
-                case Some(t) =>
-                  complete(HttpResponse(OK, entity = t.toJson.toString))
+                case None => complete(HttpResponse(OK, entity = None.toString))
+                case Some(t) => complete(HttpResponse(OK, entity = t.toJson.toString))
               }
             }
           },
