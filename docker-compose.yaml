@@ -100,7 +100,7 @@ services:
       - PERSISTENCE_API_HOST=persistence
       - PERSISTENCE_API_PORT=8083
     healthcheck:
-      test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/chess/controller/fen"]
+      test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8080/chess/controller/fen"]
       interval: 5s
       timeout: 30s
       retries: 10
