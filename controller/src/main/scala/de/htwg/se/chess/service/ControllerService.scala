@@ -66,43 +66,31 @@ case class ControllerService(
         path("fen") {
           complete(HttpResponse(OK, entity = controller.fieldToFen))
         },
-        path("cells") { concat(
-          pathEnd{
-            parameter("tile".as[Tile]) { tile =>
+        path("cells") {
+          parameter("tile".as[Tile]) { tile =>
+            complete {
               controller.cell(tile) match {
-                case None => complete(HttpResponse(OK, entity = None.toString))
-                case Some(t) => complete(HttpResponse(OK, entity = t.toJson.toString))
+                case None => HttpResponse(OK, entity = "None")
+                case Some(t) => HttpResponse(OK, entity = t.toJson.toString)
               }
             }
-          },
-          path("king-squares") {
-            controller.getKingSquare match {
-              case None => complete(HttpResponse(NotFound))
-              case Some(sq) =>
-                complete(HttpResponse(OK, entity = sq.toJson.toString))
-            }
           }
-        )},
+        },
         path("states") {
-          concat(
-            parameter("query".as[String]) { query =>
-              query match
-                case "check" =>
-                  complete(
-                    HttpResponse(OK, entity = controller.inCheck.toString)
-                  )
-                case "playing" =>
-                  complete(
-                    HttpResponse(OK, entity = controller.isPlaying.toString)
-                  )
-                case "size" =>
-                  complete(HttpResponse(OK, entity = controller.size.toString))
-                case "selected" =>
-                  complete(HttpResponse(OK,entity = controller.selected.toJson.toString)
-                  )
-                case _ => complete(HttpResponse(NotFound))
-            }
-          )
+          parameter("query".as[String]) { query =>
+            query match
+              case "check" =>
+                complete(HttpResponse(OK, entity = controller.inCheck.toString))
+              case "playing" =>
+                complete(HttpResponse(OK, entity = controller.isPlaying.toString))
+              case "size" =>
+                complete(HttpResponse(OK, entity = controller.size.toString))
+              case "selected" =>
+                complete(HttpResponse(OK,entity = controller.selected.toJson.toString))
+              case "king" =>
+                complete(HttpResponse(OK, entity = controller.getKingSquare.getOrElse("None").toString))
+              case _ => complete(HttpResponse(NotFound))
+          }
         },
         path("moves") {
           parameter("tile".as[Tile]) { tile =>
@@ -118,7 +106,7 @@ case class ControllerService(
       )
     }
 
-  val commandPath = concat(
+  val commandPath =
     put {
       concat(
         path("moves") {
@@ -217,7 +205,6 @@ case class ControllerService(
         }
       )
     }
-  )
 
   reactions += {
     case e: CommandExecuted => notifySubscribers(JsString(controller.fieldToFen).toString)
