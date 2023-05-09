@@ -14,8 +14,6 @@ services:
       - "8082:8082"
     networks:
       - chess-network
-    tty: true
-    stdin_open: true
     healthcheck:
       test: ["CMD-SHELL", "curl -X GET -H \"Content-type: application/json\" -H \"Accept: application/json\" -d '{\"fen\": \"8/8/8/8/8/8/8/8 w KQ - 0 1\"}' http://localhost:8082/moves"]
       interval: 5s
@@ -39,8 +37,6 @@ services:
       - "chess-persistence-volume:/opt/chess/persistence/saves"
     networks:
       - chess-network
-    tty: true
-    stdin_open: true
     healthcheck:
       test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/saves"]
       interval: 5s
@@ -67,8 +63,6 @@ services:
       - "8081:8081"
     networks:
       - chess-network
-    tty: true
-    stdin_open: true
     environment:
       - LEGALITY_API_HOST=legality
       - LEGALITY_API_PORT=8082
@@ -98,8 +92,6 @@ services:
       - "8080:8080"
     networks:
       - chess-network
-    tty: true
-    stdin_open: true
     environment:
       - CONTROLLER_API_HOST=controller
       - CONTROLLER_API_PORT=8081
