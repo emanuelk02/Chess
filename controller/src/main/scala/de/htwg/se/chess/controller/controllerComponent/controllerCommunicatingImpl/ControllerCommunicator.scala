@@ -43,7 +43,7 @@ case class ControllerCommunicator(
     def save(fen: String): Future[HttpResponse] =
         Http().singleRequest(
             Post(
-                persistenceService.withPath(Path("/save")),
+                persistenceService.withPath(Path("/saves")),
                 JsObject(Map("fen" -> JsString(fen)))
             )
         )
@@ -51,7 +51,7 @@ case class ControllerCommunicator(
     def load: Try[String] =
         blockingReceiveRequest[Try[String]](
             Http().singleRequest(
-                Get(persistenceService.withPath(Path("/load")))
+                Get(persistenceService.withPath(Path("/saves")))
             ), {
                 case HttpResponse(OK, _, entity, _) =>
                     Success(Await.result(Unmarshal(entity).to[String], Duration.Inf))
