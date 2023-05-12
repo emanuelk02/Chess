@@ -20,6 +20,9 @@ object dependencies {
     val playJson  = ("com.typesafe.play" %% "play-json" % "2.9.3").cross(CrossVersion.for3Use2_13)
     val swing     = ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13)
     val xml       = ("org.scala-lang.modules" %% "scala-xml" % "2.0.1")
+    val slick     =  ("com.typesafe.slick" %% "slick" % "3.4.1").cross(CrossVersion.for3Use2_13)
+    val slickHikari = ("com.typesafe.slick" %% "slick-hikaricp" % "3.4.1").cross(CrossVersion.for3Use2_13)
+    val postgresql = "org.postgresql" % "postgresql" % "42.5.4"
 
     val commonDependency = Seq(
         scalactic,
@@ -34,6 +37,9 @@ object dependencies {
         sprayJson,
         playJson,
         swing,
-        xml
+        xml,
+        slick,
+        slickHikari,
+        postgresql
     )
 }
