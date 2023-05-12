@@ -37,7 +37,10 @@ class FileIO extends FileIOInterface:
 
     private def saveString(field: Matrix[Option[Piece]], state: ChessState) =
         import java.io._
-        val pw = PrintWriter(File("saves/field.xml"))
+        val saveDir = new File("saves")
+        saveDir.mkdirs()
+        val file = File(saveDir.getPath() + "/field.xml")
+        val pw = PrintWriter(file)
         val prettyPrinter = PrettyPrinter(120, 4)
         val xml = prettyPrinter.format(fieldToXml(field, state))
         pw.write(xml)
