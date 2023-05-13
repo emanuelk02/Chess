@@ -22,6 +22,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json._
 import play.api.libs.json.Json
 
+import FenParser._
+
 
 object ChessJsonProtocol extends DefaultJsonProtocol:
     implicit object TileStringFormat extends RootJsonFormat[Tile]:
@@ -46,6 +48,18 @@ object ChessJsonProtocol extends DefaultJsonProtocol:
                     case Some(p) => p
                     case None => throw DeserializationException("Piece expected")
             case _ => throw DeserializationException("Piece expected")
+
+    implicit object UserStringFormat extends RootJsonFormat[User]:
+        def write(u: User): JsValue = JsObject(Map("id" -> JsNumber(u.id), "name" -> JsString(u.name)))
+        def read(value: JsValue): User = value match
+            case JsObject(fields) => User(fields("id").convertTo[Int], fields("name").convertTo[String])
+            case _ => throw DeserializationException("User expected")
+
+    implicit object SessionStringFormat extends RootJsonFormat[GameSession]:
+        def write(s: GameSession): JsValue = JsString(s.toFen)
+        def read(value: JsValue): GameSession = value match
+            case JsString(fen) => sessionFromFen(fen)
+            case _ => throw DeserializationException("Session expected")
 
     implicit val um:Unmarshaller[HttpEntity, JsObject] = {
         Unmarshaller.byteStringUnmarshaller.mapWithCharset { (data, charset) =>
