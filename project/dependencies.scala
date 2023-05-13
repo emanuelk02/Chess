@@ -23,6 +23,7 @@ object dependencies {
     val slick     =  ("com.typesafe.slick" %% "slick" % "3.4.1").cross(CrossVersion.for3Use2_13)
     val slickHikari = ("com.typesafe.slick" %% "slick-hikaricp" % "3.4.1").cross(CrossVersion.for3Use2_13)
     val postgresql = "org.postgresql" % "postgresql" % "42.5.4"
+    val testcontainer  = "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.15"
 
     val commonDependency = Seq(
         scalactic,
@@ -40,6 +41,7 @@ object dependencies {
         xml,
         slick,
         slickHikari,
-        postgresql
+        postgresql,
+        testcontainer
     )
 }

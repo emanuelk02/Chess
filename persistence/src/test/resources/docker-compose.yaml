@@ -1,0 +1,14 @@
+# docker-compose for testing DAOs
+# contains a postgres container
+
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:11.1-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
