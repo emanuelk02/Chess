@@ -26,8 +26,8 @@ case class SlickUserDao(databseHost: Uri, databasePort: Int) {
 
     def readUser(id: Int): Future[Try[User]] = ???
     def readUser(name: String): Future[Try[User]] = ???
-    def verifyPass(id: Int, checkHash: String): Future[Try[Boolean]] = ???
-    def verifyPass(name: String, checkHash: String): Future[Try[Boolean]] = ???
+    def readHash(id: Int): Future[Try[String]] = ???
+    def readHash(name: String): Future[Try[String]] = ???
 
     def updateUser(id: Int, newName: String): Future[Try[User]] = ???
     def updateUser(name: String, newName: String): Future[Try[User]] = ???

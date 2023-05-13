@@ -22,8 +22,10 @@ import com.dimafeng.testcontainers.DockerComposeContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.dimafeng.testcontainers.ExposedService
 import org.testcontainers.containers.wait.strategy.Wait
-
 import java.io.File
+
+import util.data.FenParser._
+import util.data.GameSession
 
 
 class SessionDAOSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll:
@@ -61,13 +63,103 @@ class SessionDAOSpec extends AnyWordSpec with ScalaFutures with TestContainerFor
                 }
             }
         }
-        "allow to store a game session specified by a FEN string" in {
+        val fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        val fen2 = "8/8/8/8/8/8/8/RNBQKBNR b Kq A1 10 15"
+        "allow to store a game session specified by a FEN string and assigned to a user by id or name" in {
             withContainers { composedContainers =>
+                
                 val sessionDao = SlickSessionDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
-                val session = sessionDao.createSession(1, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+                val session = sessionDao.createSession(1, fen)
                 whenReady(session) { result =>
                     result.isSuccess shouldBe true
-                    result.get shouldBe "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+                    result.get shouldBe (1, sessionFromFen(fen))
+
+                    val check = sessionDao.readSession(1)
+                    whenReady(check) { result =>
+                        result.isSuccess shouldBe true
+                        result.get shouldBe sessionFromFen(fen)
+                    }
+                }
+                val session2 = sessionDao.createSession("test", fen2)
+                whenReady(session2) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe (2, sessionFromFen(fen2))
+                }
+                val session3 = sessionDao.createSession(1, sessionFromFen(fen2))
+                whenReady(session3) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe (3, sessionFromFen(fen2))
+                }
+            }
+        }
+        "allow to get all stored sessions for a user" in {
+            withContainers { composedContainers =>
+                val sessionDao = SlickSessionDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val sessions = sessionDao.readAllSessionsForUser(1)
+                whenReady(sessions) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe Seq(1, 3)
+
+                    val check = sessionDao.readSession(1)
+                    whenReady(check) { result =>
+                        result.isSuccess shouldBe true
+                        result.get shouldBe sessionFromFen(fen)
+                    }
+                    val check3 = sessionDao.readSession(3)
+                    whenReady(check3) { result =>
+                        result.isSuccess shouldBe true
+                        result.get shouldBe sessionFromFen(fen2)
+                    }
+                }
+                val sessions2 = sessionDao.readAllSessionsForUser("test2")
+                whenReady(sessions2) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe Seq(2)
+                }
+                val nonexistent = sessionDao.readAllSessionsForUser(3)
+                whenReady(nonexistent) { result =>
+                    result.isFailure shouldBe true
+                }
+            }
+        }
+        "allow to get session data for one specific game" in {
+            withContainers { composedContainers =>
+                val sessionDao = SlickSessionDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val session2 = sessionDao.readSession(2)
+                whenReady(session2) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe sessionFromFen(fen2)
+                }
+            }
+        }
+        "allow to update a session" in {
+            withContainers { composedContainers =>
+                val sessionDao = SlickSessionDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val session = sessionDao.updateSession(1, fen2)
+                whenReady(session) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe sessionFromFen(fen2)
+
+                    val check = sessionDao.readSession(1)
+                    whenReady(check) { result =>
+                        result.isSuccess shouldBe true
+                        result.get shouldBe sessionFromFen(fen2)
+                    }
+                }
+            }
+        }
+        "allow to delete sessions" in {
+            withContainers { composedContainers =>
+                val sessionDao = SlickSessionDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val session = sessionDao.deleteSession(1)
+                whenReady(session) { result =>
+                    result.isSuccess shouldBe true
+                    result.get shouldBe sessionFromFen(fen2)
+
+                    val check = sessionDao.readSession(1)
+                    whenReady(check) { result =>
+                        result.isFailure shouldBe true
+                    }
                 }
             }
         }
