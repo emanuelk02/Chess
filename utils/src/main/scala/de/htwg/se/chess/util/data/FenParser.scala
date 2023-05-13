@@ -28,6 +28,9 @@ object FenParser:
         val fieldSize = fen.count(c => c == '/') + 1
         ChessState(fen, fieldSize)
 
+    def sessionFromFen(fen: String): GameSession =
+        GameSession(matrixFromFen(fen), stateFromFen(fen))
+
     def checkFen(check: String): Boolean =
         val size = check.count(c => c == '/') + 1
 
@@ -63,6 +66,9 @@ object FenParser:
 
     extension (matrix: Matrix[Option[Piece]])
       def toFen: String = fenFromMatrix(matrix)
+
+    extension (session: GameSession)
+      def toFen: String = session.matrix.toFen + " " + session.state.toFen
     
     def fenFromMatrix(matrix: Matrix[Option[Piece]]): String =
       matrix.rows

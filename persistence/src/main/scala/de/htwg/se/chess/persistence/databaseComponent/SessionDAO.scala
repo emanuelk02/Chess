@@ -20,19 +20,20 @@ import akka.http.scaladsl.model.Uri
 import util.data.Piece
 import util.data.Matrix
 import util.data.ChessState
+import util.data.GameSession
 
 
 trait SessionDao(databseHost: Uri, databasePort: Int) {
-    def createSession(userid: Int, fen: String): Future[Try[Tuple3[Int, Matrix[Option[Piece]], ChessState]]]
-    def createSession(username: String, fen: String): Future[Try[Tuple3[Int, Matrix[Option[Piece]], ChessState]]]
-    def createSession(userid: Int, matr: Matrix[Option[Piece]], state: ChessState): Future[Try[Tuple3[Int, Matrix[Option[Piece]], ChessState]]]
-    def createSession(username: String, matr: Matrix[Option[Piece]], state: ChessState): Future[Try[Tuple3[Int, Matrix[Option[Piece]], ChessState]]]
+    def createSession(userid: Int, fen: String): Future[Try[Tuple2[Int, GameSession]]]
+    def createSession(username: String, fen: String): Future[Try[Tuple2[Int, GameSession]]]
+    def createSession(userid: Int, sess: GameSession): Future[Try[Tuple2[Int, GameSession]]]
+    def createSession(username: String, sess: GameSession): Future[Try[Tuple2[Int, GameSession]]]
 
     def readAllSessionsForUser(userid: Int): Future[Try[Seq[Int]]]
     def readAllSessionsForUser(username: String): Future[Try[Seq[Int]]]
-    def readSession(sessionid: Int): Future[Try[Tuple2[Matrix[Option[Piece]], ChessState]]]
+    def readSession(sessionid: Int): Future[Try[GameSession]]
 
-    def updateSession(sessionid: Int, fen: String): Future[Try[Tuple2[Matrix[Option[Piece]], ChessState]]]
+    def updateSession(sessionid: Int, fen: String): Future[Try[GameSession]]
 
-    def deleteSession(sessionid: Int): Future[Try[Tuple2[Matrix[Option[Piece]], ChessState]]]
+    def deleteSession(sessionid: Int): Future[Try[GameSession]]
 }

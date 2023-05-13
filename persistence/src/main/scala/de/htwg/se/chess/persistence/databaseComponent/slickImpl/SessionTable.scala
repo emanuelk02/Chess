@@ -20,17 +20,18 @@ import util.data.Piece
 import util.data.Matrix
 import util.data.ChessState
 import util.data.FenParser._
+import util.data.GameSession
 
 
-class SessionTable(tag: Tag) extends Table[(Int, String, Int, Tuple2[Matrix[Option[Piece]], ChessState])](tag, "session") {
+class SessionTable(tag: Tag) extends Table[(Int, String, Int, GameSession)](tag, "session") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def displayName = column[String]("display_name")
     def userId = column[Int]("user_id")
     def sessionFen = column[String]("session_fen", O.Length(91, true))
     override def * = (id, displayName, userId, sessionFen)
         <> (
-            (id, displayName, userId, sessionFen) => (id, displayName, userId, (matrixFromFen(sessionFen), stateFromFen(sessionFen))),
-            (id, displayName, userId, matrState) => Some((id, displayName, userId, matrState(0).toFen + matrState(1).toFen))
+            (id, displayName, userId, sessionFen) => (id, displayName, userId, sessionFromFen(sessionFen)),
+            (id, displayName, userId, session) => Some((id, displayName, userId, session.toFen))
         )
 
     def user = foreignKey("user_fk", userId, TableQuery(UsersTable(_)))
