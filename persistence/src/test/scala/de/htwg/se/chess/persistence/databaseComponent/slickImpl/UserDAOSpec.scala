@@ -22,7 +22,6 @@ import com.dimafeng.testcontainers.ExposedService
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.concurrent.ScalaFutures
-import org.mindrot.jbcrypt.BCrypt
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
 import scala.util.Try
@@ -66,9 +65,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         "create users with a given username and password hash" in {
             withContainers { composedContainers =>
                 val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
-                // Note, that the hashing is usually handled by the service placed on top of the DAO, so we have to do it here
-                // since the DAO expects a proper hash in the methods for verifying the password later
-                val user = userDao.createUser("test", BCrypt.hashpw("test", BCrypt.gensalt()))
+                val user = userDao.createUser("test", "test")
                 whenReady(user) { result =>
                     result.isSuccess shouldBe true
                     result.get.id shouldBe 1
@@ -76,7 +73,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
 
                     checkForUser(userDao, result, result.get)
                 }
-                val userWithHash = userDao.createUser("test2", BCrypt.hashpw("test2", BCrypt.gensalt()))
+                val userWithHash = userDao.createUser("test2", "test2")
                 whenReady(userWithHash) { result =>
                     result.isSuccess shouldBe true
                     result.get.id shouldBe 2
@@ -105,36 +102,25 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
                 }
             }
         }
-        "allow to check if a given password is valid" in {
+        "allow to get the password hash to check if a given password is valid" in {
             withContainers { composedContainers =>
                 val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
-                val user1succ = userDao.verifyPass(1, "test")
+                val user1succ = userDao.readHash(1)
                 whenReady(user1succ) { result =>
                     result.isSuccess shouldBe true
-                    
-                    result.get shouldBe true
+                    result.get shouldBe "test"
                 }
-                val user1succ2 = userDao.verifyPass("test", "test")
+                val user1succ2 = userDao.readHash("test")
                 whenReady(user1succ2) { result =>
                     result.isSuccess shouldBe true
-                    result.get shouldBe true
+                    result.get shouldBe "test"
                 }
-                val user1fail = userDao.verifyPass("test", "test2")
-                whenReady(user1fail) { result =>
-                    result.isSuccess shouldBe true
-                    result.get shouldBe false
-                }
-                val user2fail = userDao.verifyPass(2, "test")
+                val user2fail = userDao.readHash(2)
                 whenReady(user2fail) { result =>
                     result.isSuccess shouldBe true
-                    result.get shouldBe false
+                    result.get shouldBe "test2"
                 }
-                val user2succ = userDao.verifyPass("test2", "test2")
-                whenReady(user2succ) { result =>
-                    result.isSuccess shouldBe true
-                    result.get shouldBe true
-                }
-                val nonexistent = userDao.verifyPass("nonexistent", "test")
+                val nonexistent = userDao.readHash("nonexistent")
                 whenReady(nonexistent) { result =>
                     result.isFailure shouldBe true
                 }
