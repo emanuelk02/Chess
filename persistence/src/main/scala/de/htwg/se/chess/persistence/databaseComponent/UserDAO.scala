@@ -25,8 +25,8 @@ trait UserDao(databseHost: Uri, databasePort: Int) {
 
     def readUser(id: Int): Future[Try[User]]
     def readUser(name: String): Future[Try[User]]
-    def verifyPass(id: Int, checkPass: String): Future[Try[Boolean]]
-    def verifyPass(name: String, checkPass: String): Future[Try[Boolean]]
+    def readHash(id: Int): Future[Try[String]]
+    def readHash(name: String): Future[Try[String]]
 
     def updateUser(id: Int, newName: String): Future[Try[User]]
     def updateUser(name: String, newName: String): Future[Try[User]]
