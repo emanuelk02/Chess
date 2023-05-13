@@ -15,11 +15,12 @@ package databaseComponent
 
 import scala.concurrent.Future
 import scala.util.Try
+import akka.http.scaladsl.model.Uri
 
 import util.data.User
 
 
-trait UserDAO {
+trait UserDao(databseHost: Uri, databasePort: Int) {
     def createUser(name: String, passHash: String): Future[Try[User]]
 
     def readUser(id: Int): Future[Try[User]]
@@ -29,4 +30,7 @@ trait UserDAO {
 
     def updateUser(id: Int, newName: String): Future[Try[User]]
     def updateUser(name: String, newName: String): Future[Try[User]]
+
+    def deleteUser(id: Int): Future[Try[User]]
+    def deleteUser(name: String): Future[Try[User]]
 }
