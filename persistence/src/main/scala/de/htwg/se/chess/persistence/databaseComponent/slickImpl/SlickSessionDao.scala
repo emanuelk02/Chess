@@ -23,7 +23,7 @@ import util.data.Matrix
 import util.data.GameSession
 
 
-case class SlickSessionDao(databseHost: Uri, databasePort: Int) {
+case class SlickSessionDao(databaseHost: Uri, databasePort: Int) extends SessionDao(databaseHost, databasePort) {
     def createSession(userid: Int, fen: String): Future[Try[Tuple2[Int, GameSession]]] = ???
     def createSession(username: String, fen: String): Future[Try[Tuple2[Int, GameSession]]] = ???
     def createSession(userid: Int, sess: GameSession): Future[Try[Tuple2[Int, GameSession]]] = ???

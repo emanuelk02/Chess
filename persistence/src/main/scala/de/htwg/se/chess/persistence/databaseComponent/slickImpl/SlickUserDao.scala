@@ -21,7 +21,7 @@ import util.data.User
 import akka.http.scaladsl.model.Uri
 
 
-case class SlickUserDao(databseHost: Uri, databasePort: Int) {
+case class SlickUserDao(databaseHost: Uri, databasePort: Int) extends UserDao(databaseHost, databasePort) {
     def createUser(name: String, passHash: String): Future[Try[User]] = ???
 
     def readUser(id: Int): Future[Try[User]] = ???
