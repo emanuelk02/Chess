@@ -24,6 +24,7 @@ object dependencies {
     val slickHikari = ("com.typesafe.slick" %% "slick-hikaricp" % "3.4.1").cross(CrossVersion.for3Use2_13)
     val postgresql = "org.postgresql" % "postgresql" % "42.5.4"
     val testcontainer  = "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.15"
+    val jbcrypt   = "org.mindrot" % "jbcrypt" % "0.4"
 
     val commonDependency = Seq(
         scalactic,
@@ -42,6 +43,7 @@ object dependencies {
         slick,
         slickHikari,
         postgresql,
-        testcontainer
+        testcontainer,
+        jbcrypt
     )
 }
