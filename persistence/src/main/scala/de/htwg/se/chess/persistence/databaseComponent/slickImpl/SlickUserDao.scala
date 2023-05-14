@@ -14,24 +14,92 @@ package persistence
 package databaseComponent
 package slickImpl
 
-import scala.concurrent.Future
-import scala.util.Try
+import akka.http.scaladsl.model.Uri
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.Config
+import scala.concurrent.{Await, Future, ExecutionContext}
+import scala.concurrent.duration.Duration
+import scala.util.{Try, Success, Failure}
+import slick.jdbc.PostgresProfile.api._
 
 import util.data.User
-import akka.http.scaladsl.model.Uri
 
 
-case class SlickUserDao(databaseHost: Uri, databasePort: Int) extends UserDao(databaseHost, databasePort) {
-    def createUser(name: String, passHash: String): Future[Try[User]] = ???
+case class SlickUserDao(config: Config = ConfigFactory.load())
+    (implicit ec: ExecutionContext)
+    extends UserDao(config) {
+    val db = Database.forConfig("slick.dbs.postgres", config)
+    val users = new TableQuery(UserTable(_))
 
-    def readUser(id: Int): Future[Try[User]] = ???
-    def readUser(name: String): Future[Try[User]] = ???
-    def readHash(id: Int): Future[Try[String]] = ???
-    def readHash(name: String): Future[Try[String]] = ???
+    val setup = DBIO.seq(users.schema.createIfNotExists)
 
-    def updateUser(id: Int, newName: String): Future[Try[User]] = ???
-    def updateUser(name: String, newName: String): Future[Try[User]] = ???
+    def createTables(tries: Int = 0): Future[Try[Unit]] = {
+        db.run(setup.asTry).andThen {
+            case Success(_) => println("Created tables")
+            case Failure(e) => 
+                if (tries < 5) {
+                    wait(1000)
+                    println("Failed to create tables, retrying...")
+                    createTables(tries + 1)
+                } else {
+                    println("Failed to create tables, giving up...")
+                    throw e
+                }
+        }
+    }
 
-    def deleteUser(id: Int): Future[Try[User]] = ???
-    def deleteUser(name: String): Future[Try[User]] = ???
+    Await.result(createTables(), Duration.Inf)
+
+    override def createUser(name: String, passHash: String): Future[Try[Boolean]] =
+        db.run((users += (User(0, name), passHash)).asTry).map {
+            case Success(_) => Success(true)
+            case Failure(e) => Failure(e)
+        }
+
+    override def readUser(id: Int): Future[Try[User]] =
+        db.run(users.filter(_.id === id).result.headOption.asTry).map {
+            case Success(Some(user, _)) => Success(user)
+            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with id: $id"))
+            case Failure(e) => Failure(e)
+        }
+    override def readUser(name: String): Future[Try[User]] =
+        db.run(users.filter(_.name === name).result.headOption.asTry).map {
+            case Success(Some(user, _)) => Success(user)
+            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with name: $name"))
+            case Failure(e) => Failure(e)
+        }
+    override def readHash(id: Int): Future[Try[String]] =
+        db.run(users.filter(_.id === id).map(_.passHash).result.headOption.asTry).map {
+            case Success(Some(hash)) => Success(hash)
+            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with id: $id"))
+            case Failure(e) => Failure(e)
+        }
+    override def readHash(name: String): Future[Try[String]] =
+        db.run(users.filter(_.name === name).map(_.passHash).result.headOption.asTry).map {
+            case Success(Some(hash)) => Success(hash)
+            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with name: $name"))
+            case Failure(e) => Failure(e)
+        }
+
+    override def updateUser(id: Int, newName: String): Future[Try[User]] =
+        db.run(users.filter(_.id === id).map(_.name).update(newName).asTry).map {
+            case Success(_) => Success(User(id, newName))
+            case Failure(e) => Failure(e)
+        }
+    override def updateUser(name: String, newName: String): Future[Try[User]] =
+        readUser(name).flatMap {
+            case Success(user) => updateUser(user.id, newName)
+            case Failure(e) => Future(Failure(e))
+        }
+
+    override def deleteUser(id: Int): Future[Try[User]] =
+        db.run(users.filter(_.id === id).delete.asTry).map {
+            case Success(_) => Success(User(id, ""))
+            case Failure(e) => Failure(e)
+        }
+    override def deleteUser(name: String): Future[Try[User]] =
+        readUser(name).flatMap {
+            case Success(user) => deleteUser(user.id)
+            case Failure(e) => Future(Failure(e))
+        }
 }
