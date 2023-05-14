@@ -13,15 +13,16 @@ package de.htwg.se.chess
 package persistence
 package databaseComponent
 
+import com.typesafe.config.Config
+import akka.http.scaladsl.model.Uri
 import scala.concurrent.Future
 import scala.util.Try
-import akka.http.scaladsl.model.Uri
 
 import util.data.User
 
 
-trait UserDao(databaseHost: Uri, databasePort: Int) {
-    def createUser(name: String, passHash: String): Future[Try[User]]
+trait UserDao(config: Config) {
+    def createUser(name: String, passHash: String): Future[Try[Boolean]]
 
     def readUser(id: Int): Future[Try[User]]
     def readUser(name: String): Future[Try[User]]

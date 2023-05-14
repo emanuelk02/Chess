@@ -20,7 +20,7 @@ import persistence.databaseComponent._
 
 
 object PersistenceModule:
-  given UserDao = slickImpl.SlickUserDao("localhost", 5432)
-  given SessionDao = slickImpl.SlickSessionDao("localhost", 5432)
-  given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "ControllerService")
+  given UserDao = new slickImpl.SlickUserDao
+  given SessionDao = new slickImpl.SlickSessionDao
+  given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "PersistenceService")
   given executionContext: ExecutionContext = system.executionContext
