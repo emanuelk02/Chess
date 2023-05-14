@@ -29,7 +29,7 @@ object FenParser:
         ChessState(fen, fieldSize)
 
     def sessionFromFen(fen: String): GameSession =
-        GameSession(matrixFromFen(fen), stateFromFen(fen))
+        new GameSession(fen)
 
     def checkFen(check: String): Boolean =
         val size = check.count(c => c == '/') + 1
