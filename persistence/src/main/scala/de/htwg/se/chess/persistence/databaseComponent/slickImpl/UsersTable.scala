@@ -19,7 +19,7 @@ import slick.jdbc.PostgresProfile.api._
 import util.data.User
 
 
-class UsersTable(tag: Tag) extends Table[(User, String)](tag, "user") {
+class UserTable(tag: Tag) extends Table[(User, String)](tag, "user") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name", O.Unique, O.Length(32, true))
     def passHash = column[String]("pass_hash")

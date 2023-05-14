@@ -21,8 +21,10 @@ import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.dimafeng.testcontainers.ExposedService
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
+import scala.concurrent.ExecutionContext
 import org.scalatest.concurrent.ScalaFutures
 import org.testcontainers.containers.wait.strategy.Wait
+import com.typesafe.config.ConfigFactory
 import java.io.File
 import scala.util.Try
 
@@ -41,18 +43,29 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         ),
     )
 
-    def checkForUser(userDao: SlickUserDao, expect: Try[User], test: User): Unit = {
-        whenReady(userDao.readUser(test.id)) { result =>
+    def checkForUser(userDao: SlickUserDao, user: User): Unit = {
+        whenReady(userDao.readUser(user.id)) { result =>
             result.isSuccess shouldBe true
-            result.get.id shouldBe expect.get.id
-            result.get.name shouldBe expect.get.name
+            result.get.id shouldBe user.id
+            result.get.name shouldBe user.name
         }
-        whenReady(userDao.readUser(test.name)) { result =>
+        whenReady(userDao.readUser(user.name)) { result =>
             result.isSuccess shouldBe true
-            result.get.id shouldBe expect.get.id
-            result.get.name shouldBe expect.get.name
+            result.get.id shouldBe user.id
+            result.get.name shouldBe user.name
         }
     }
+
+    implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
+
+    def getUserDao(composedContainers: Containers) = 
+        new SlickUserDao(ConfigFactory.load(ConfigFactory.parseString(
+          s"""
+          slick.dbs.postgres.db.url = "jdbc:postgresql://${composedContainers.getServiceHost(containerName, containerPort)}:${composedContainers.getServicePort(containerName, containerPort)}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true"
+          slick.dbs.postgres.db.user = "postgres"
+          slick.dbs.postgres.db.password = "postgres"
+          """
+    )))
 
     "UserDAO" should {
         "have a running postgres container" in {
@@ -64,22 +77,20 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         }
         "create users with a given username and password hash" in {
             withContainers { composedContainers =>
-                val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val userDao = getUserDao(composedContainers)
                 val user = userDao.createUser("test", "test")
                 whenReady(user) { result =>
                     result.isSuccess shouldBe true
-                    result.get.id shouldBe 1
-                    result.get.name shouldBe "test"
+                    result.get shouldBe true
 
-                    checkForUser(userDao, result, result.get)
+                    checkForUser(userDao, User(1, "test"))
                 }
                 val userWithHash = userDao.createUser("test2", "test2")
                 whenReady(userWithHash) { result =>
                     result.isSuccess shouldBe true
-                    result.get.id shouldBe 2
-                    result.get.name shouldBe "test2"
+                    result.get shouldBe true
 
-                    checkForUser(userDao, result, result.get)
+                    checkForUser(userDao, User(2, "test2"))
                 }
                 val alreadyExisting = userDao.createUser("test", "test")
                 whenReady(alreadyExisting) { result =>
@@ -95,7 +106,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         }
         "allow to read existing users" in {
             withContainers { composedContainers =>
-                val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val userDao = getUserDao(composedContainers)
                 val user = userDao.readUser(1)
                 whenReady(user) { result =>
                     result.isSuccess shouldBe true
@@ -111,7 +122,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         }
         "allow to get the password hash to check if a given password is valid" in {
             withContainers { composedContainers =>
-                val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val userDao = getUserDao(composedContainers)
                 val user1succ = userDao.readHash(1)
                 whenReady(user1succ) { result =>
                     result.isSuccess shouldBe true
@@ -136,14 +147,14 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         }
         "allow to update a users name" in {
             withContainers { composedContainers =>
-                val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val userDao = getUserDao(composedContainers)
                 val user1 = userDao.updateUser("test", "tested")
                 whenReady(user1) { result =>
                     result.isSuccess shouldBe true
                     result.get.id shouldBe 1
                     result.get.name shouldBe "tested"
 
-                    checkForUser(userDao, result, result.get)
+                    checkForUser(userDao, result.get)
                 }
                 val alreadyUsed = userDao.updateUser("tested", "test2")
                 whenReady(alreadyUsed) { result =>
@@ -154,7 +165,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
         }
         "allow to delete a user" in {
             withContainers { composedContainers =>
-                val userDao = new SlickUserDao(composedContainers.getServiceHost(containerName, containerPort), composedContainers.getServicePort(containerName, containerPort))
+                val userDao = getUserDao(composedContainers)
                 val user1 = userDao.deleteUser(1)
                 whenReady(user1) { result =>
                     result.isSuccess shouldBe true
