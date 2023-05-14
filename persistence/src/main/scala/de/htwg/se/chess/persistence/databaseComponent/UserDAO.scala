@@ -20,7 +20,7 @@ import akka.http.scaladsl.model.Uri
 import util.data.User
 
 
-trait UserDao(databseHost: Uri, databasePort: Int) {
+trait UserDao(databaseHost: Uri, databasePort: Int) {
     def createUser(name: String, passHash: String): Future[Try[User]]
 
     def readUser(id: Int): Future[Try[User]]

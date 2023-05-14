@@ -84,6 +84,12 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
                 val alreadyExisting = userDao.createUser("test", "test")
                 whenReady(alreadyExisting) { result =>
                     result.isFailure shouldBe true
+                    IllegalArgumentException("User with that name already exists") shouldBe thrownBy(result.get)
+                }
+                val nameTooLong = userDao.createUser("nameThatIsMoreThan32CharactersLong", "test")
+                whenReady(nameTooLong) { result =>
+                    result.isFailure shouldBe true
+                    IllegalArgumentException("Username must be 32 characters or less") shouldBe thrownBy(result.get)
                 }
             }
         }
@@ -99,6 +105,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
                 val user2 = userDao.readUser("nonexistent")
                 whenReady(user2) { result =>
                     result.isFailure shouldBe true
+                    IllegalArgumentException("There is no user with name: nonexistent") shouldBe thrownBy(result.get)
                 }
             }
         }
@@ -115,14 +122,15 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
                     result.isSuccess shouldBe true
                     result.get shouldBe "test"
                 }
-                val user2fail = userDao.readHash(2)
-                whenReady(user2fail) { result =>
+                val user2 = userDao.readHash(2)
+                whenReady(user2) { result =>
                     result.isSuccess shouldBe true
                     result.get shouldBe "test2"
                 }
-                val nonexistent = userDao.readHash("nonexistent")
+                val nonexistent = userDao.readHash(3)
                 whenReady(nonexistent) { result =>
                     result.isFailure shouldBe true
+                    IllegalArgumentException("There is no user with id: 3") shouldBe thrownBy(result.get)
                 }
             }
         }
@@ -140,6 +148,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
                 val alreadyUsed = userDao.updateUser("tested", "test2")
                 whenReady(alreadyUsed) { result =>
                     result.isFailure shouldBe true
+                    IllegalArgumentException("User with that name already exists") shouldBe thrownBy(result.get)
                 }
             }
         }
@@ -161,6 +170,7 @@ class UserDaoSpec extends AnyWordSpec with ScalaFutures with TestContainerForAll
                 val nonexistent = userDao.deleteUser("nonexistent")
                 whenReady(nonexistent) { result =>
                     result.isFailure shouldBe true
+                    IllegalArgumentException("There is no user with name: nonexistent") shouldBe thrownBy(result.get)
                 }
             }
         }
