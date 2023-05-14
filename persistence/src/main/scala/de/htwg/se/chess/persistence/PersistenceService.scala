@@ -106,8 +106,8 @@ case class PersistenceService(
                                 }
                             case None =>
                                 processRequest((sessId, fen)) { 
-                                sessionDao.updateSession(_, _)
-                            }
+                                    sessionDao.updateSession(_, _)
+                                }
                     }
                 }
             },      

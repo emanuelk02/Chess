@@ -93,9 +93,14 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
         }
 
     override def deleteUser(id: Int): Future[Try[User]] =
-        db.run(users.filter(_.id === id).delete.asTry).map {
-            case Success(_) => Success(User(id, ""))
-            case Failure(e) => Failure(e)
+        readUser(id).map {
+            case Success(user) => user
+            case Failure(e) => throw e
+        }.flatMap { user =>
+            db.run(users.filter(_.id === user.id).delete.asTry).map {
+                case Success(_) => Success(User(user.id, user.name))
+                case Failure(e) => Failure(e)
+            }
         }
     override def deleteUser(name: String): Future[Try[User]] =
         readUser(name).flatMap {
