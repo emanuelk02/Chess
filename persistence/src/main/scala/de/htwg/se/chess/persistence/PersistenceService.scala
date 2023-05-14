@@ -48,50 +48,55 @@ case class PersistenceService(
            sessionDao: SessionDao):
     println("PersistenceService started. Please navigate to http://" + ip + ":" + port)
 
-    def processRequest[I, O : JsonWriter](params: I, processing: I => Future[Try[O]]): StandardRoute =
-        Await.result(processing(params), Duration.Inf) match
+    def processRequest[I, O : JsonWriter](
+        params: I,
+        fallback: Failure[_] => StandardRoute = { 
+            case Failure(e) => complete(BadRequest, e.getMessage) 
+        })(process: I => Future[Try[O]]): StandardRoute =
+        Await.result(process(params), Duration.Inf) match {
             case Success(result) => complete(OK, result.toJson)
-            case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+            case f: Failure[_] => fallback(f)
+        }
     
     val route = concat(
         path("saves") {concat(
             post { concat(
                 parameter("user".as[String]) { user =>
                     entity(as[String]) { fen =>
-                        Await.result(sessionDao.createSession(user, fen), Duration.Inf) match
-                            case Success(session) => complete(OK, session.toJson)
-                            case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                        processRequest((user, fen)) { 
+                            sessionDao.createSession(_, _)
+                        }
                     }
                 },
                 parameter("user-id".as[Int]) { user =>
                     entity(as[String]) { fen =>
-                        Await.result(sessionDao.createSession(user, fen), Duration.Inf) match
-                            case Success(session) => complete(OK, session.toJson)
-                            case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                        processRequest((user, fen)) { 
+                            sessionDao.createSession(_, _)
+                        }
                     }
                 }
             )},
             get {
                 parameter("sessId".as[Int]) { sessId =>
-                    Await.result(sessionDao.readSession(sessId), Duration.Inf) match
-                        case Success(session) => complete(OK, session.toJson)
-                        case Failure(_) => complete(NotFound)
+                    processRequest(sessId, _ => complete(NotFound)) { 
+                            sessionDao.readSession(_)
+                        }
                 }
             },
             put {
                 parameter("sessId".as[Int]) { sessId =>
                     entity(as[String]) { fen =>
-                        Await.result(sessionDao.updateSession(sessId, fen), Duration.Inf) match
-                            case Success(session) => complete(OK, session.toJson)
-                            case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                        processRequest((sessId, fen)) { 
+                            sessionDao.updateSession(_, _)
+                        }
                     }
                 }
             },      
             delete {
                 parameter("sessId".as[Int]) { sessId =>
-                    Await.result(sessionDao.deleteSession(sessId), Duration.Inf) match
-                        case Success(session) => complete(OK, session.toJson)
-                        case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                    processRequest(sessId, _ => complete(NotFound)) { 
+                        sessionDao.deleteSession(_)
+                    }
                 }
             }
         )},
@@ -100,58 +105,58 @@ case class PersistenceService(
                 parameter("name".as[String]) { name =>
                     entity(as[String]) { password =>
                         val hash = BCrypt.hashpw(password, BCrypt.gensalt())
-                        Await.result(userDao.createUser(name, hash), Duration.Inf) match
-                            case Success(user) => complete(OK, user.toJson)
-                            case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                        processRequest((name, hash)) { 
+                            userDao.createUser(_, _)
+                        }
                     }
                 }
             },
             get { concat(
                 parameter("id".as[Int]) { id =>
-                    Await.result(userDao.readUser(id), Duration.Inf) match
-                        case Success(user) => complete(OK, user.toJson)
-                        case Failure(_) => complete(NotFound)
+                    processRequest(id, _ => complete(NotFound)) { 
+                        userDao.readUser(_)
+                    }
                 },
                 parameter("name".as[String]) { name =>
-                    Await.result(userDao.readUser(name), Duration.Inf) match
-                        case Success(user) => complete(OK, user.toJson)
-                        case Failure(_) => complete(NotFound)
+                    processRequest(name, _ => complete(NotFound)) { 
+                        userDao.readUser(_)
+                    }
                 })
             },
             put {
                 parameters("id".as[Int], "name".as[String]) { (id, name) =>
-                    Await.result(userDao.updateUser(id, name), Duration.Inf) match
-                        case Success(user) => complete(OK, user.toJson)
-                        case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                    processRequest((id, name)) { 
+                        userDao.updateUser(_, _)
+                    }
                 }
             },
             delete {
                 parameter("id".as[Int]) { id =>
-                    Await.result(userDao.deleteUser(id), Duration.Inf) match
-                        case Success(user) => complete(OK, user.toJson)
-                        case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                    processRequest(id, _ => complete(NotFound)) { 
+                        userDao.deleteUser(_)
+                    }
                 }
             },
             path(IntNumber) { id => concat(
                 path("saves") { concat(
                     post {
                         entity(as[String]) { fen =>
-                            Await.result(sessionDao.createSession(id, fen), Duration.Inf) match
-                                case Success(session) => complete(OK, session.toJson)
-                                case Failure(e) => complete(HttpResponse(BadRequest, entity = e.getMessage))
+                            processRequest((id, fen)) { 
+                                sessionDao.createSession(_, _)
+                            }
                         }
                     },
                     get {
                         parameter("sessId".as[Int].optional) { param =>
                             param match
                                 case Some(sessId) => 
-                                    Await.result(sessionDao.readAllSessionsForUser(sessId), Duration.Inf) match
-                                        case Success(sessions) => complete(OK, sessions.toJson)
-                                        case Failure(_) => complete(NotFound)
+                                    processRequest(sessId, _ => complete(NotFound)) { 
+                                        sessionDao.readSession(_)
+                                    }
                                 case None => 
-                                    Await.result(sessionDao.readAllSessionsForUser(id), Duration.Inf) match
-                                        case Success(sessions) => complete(OK, sessions.toJson)
-                                        case Failure(_) => complete(NotFound)
+                                    processRequest(id, _ => complete(NotFound)) { 
+                                        sessionDao.readAllSessionsForUser(_)
+                                    }
                         }
                     }
                 )},
