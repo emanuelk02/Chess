@@ -31,6 +31,7 @@ import spray.json._
 import util.data.Piece
 import util.data.Matrix
 import util.data.ChessState
+import util.data.GameSession
 import util.data.ChessJsonProtocol._
 import util.services.JsonHandlerService
 import persistence.databaseComponent.UserDao
@@ -61,18 +62,30 @@ case class PersistenceService(
     val route = concat(
         path("saves") {concat(
             post { concat(
-                parameter("user".as[String]) { user =>
+                parameters("user".as[String], "name".as[String].optional) { (user, displayName) =>
                     entity(as[String]) { fen =>
-                        processRequest((user, fen)) { 
-                            sessionDao.createSession(_, _)
-                        }
+                        displayName match
+                            case Some(name) => 
+                                processRequest((user, name, fen)) { 
+                                    (user, name, fen) => sessionDao.createSession(user, new GameSession(name, fen))
+                                }
+                            case None =>
+                                processRequest((user, fen)) { 
+                                sessionDao.createSession(_, _)
+                            }
                     }
                 },
-                parameter("user-id".as[Int]) { user =>
+                parameters("user-id".as[Int], "name".as[String].optional) { (user, displayName) =>
                     entity(as[String]) { fen =>
-                        processRequest((user, fen)) { 
-                            sessionDao.createSession(_, _)
-                        }
+                        displayName match
+                            case Some(name) => 
+                                processRequest((user, name, fen)) { 
+                                    (user, name, fen) => sessionDao.createSession(user, new GameSession(name, fen))
+                                }
+                            case None =>
+                                processRequest((user, fen)) { 
+                                sessionDao.createSession(_, _)
+                            }
                     }
                 }
             )},
@@ -84,11 +97,17 @@ case class PersistenceService(
                 }
             },
             put {
-                parameter("sessId".as[Int]) { sessId =>
+                parameters("sessId".as[Int], "name".as[String].optional) { (sessId, name) =>
                     entity(as[String]) { fen =>
-                        processRequest((sessId, fen)) { 
-                            sessionDao.updateSession(_, _)
-                        }
+                        name match
+                            case Some(name) => 
+                                processRequest((sessId, name, fen)) { 
+                                    (sessId, name, fen) => sessionDao.updateSession(sessId, new GameSession(name, fen))
+                                }
+                            case None =>
+                                processRequest((sessId, fen)) { 
+                                sessionDao.updateSession(_, _)
+                            }
                     }
                 }
             },      
@@ -146,18 +165,29 @@ case class PersistenceService(
                             }
                         }
                     },
-                    get {
+                    get { concat(
                         parameter("sessId".as[Int].optional) { param =>
                             param match
                                 case Some(sessId) => 
-                                    processRequest(sessId, _ => complete(NotFound)) { 
+                                    processRequest(sessId, _ => complete(NotFound)) {
                                         sessionDao.readSession(_)
                                     }
                                 case None => 
-                                    processRequest(id, _ => complete(NotFound)) { 
-                                        sessionDao.readAllSessionsForUser(_)
+                                    processRequest(id, _ => complete(NotFound)) {
+                                        sessionDao.readAllForUser(_)
                                     }
-                        }
+                        },
+                        parameter("name".as[String].optional) { param =>
+                            param match
+                                case Some(name) => 
+                                    processRequest((id, name), _ => complete(NotFound)) {
+                                        sessionDao.readAllForUserWithName(_, _)
+                                    }
+                                case None => 
+                                    processRequest(id, _ => complete(NotFound)) {
+                                        sessionDao.readAllForUser(_)
+                                    }
+                        })
                     }
                 )},
                 path("hash-checks") {
