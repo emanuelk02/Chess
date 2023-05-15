@@ -27,6 +27,8 @@ services:
       - "5432:5432"
     networks:
       - chess-network
+    volumes:
+      - chess-database:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -44,8 +46,6 @@ services:
         - chess-persistence
     ports:
       - "8083:8083"
-    volumes:
-      - "chess-persistence-volume:/opt/chess/persistence/saves"
     networks:
       - chess-network
     environment:
