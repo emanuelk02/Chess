@@ -90,14 +90,14 @@ case class PersistenceService(
                 }
             )},
             get {
-                parameter("sessId".as[Int]) { sessId =>
+                parameter("id".as[Int]) { sessId =>
                     processRequest(sessId) { 
                             sessionDao.readSession(_)
                         }
                 }
             },
             put {
-                parameters("sessId".as[Int], "name".as[String].optional) { (sessId, name) =>
+                parameters("id".as[Int], "name".as[String].optional) { (sessId, name) =>
                     entity(as[String]) { fen =>
                         name match
                             case Some(name) => 
@@ -112,100 +112,104 @@ case class PersistenceService(
                 }
             },      
             delete {
-                parameter("sessId".as[Int]) { sessId =>
+                parameter("id".as[Int]) { sessId =>
                     processRequest(sessId) { 
                         sessionDao.deleteSession(_)
                     }
                 }
             }
         )},
-        path("users") { concat(
-            post {
-                parameter("name".as[String]) { name =>
-                    entity(as[String]) { password =>
-                        val hash = BCrypt.hashpw(password, BCrypt.gensalt())
-                        processRequest((name, hash)) { 
-                            userDao.createUser(_, _)
-                        }
-                    }
-                }
-            },
-            get { concat(
-                parameter("id".as[Int]) { id =>
-                    processRequest(id) { 
-                        userDao.readUser(_)
-                    }
-                },
-                parameter("name".as[String]) { name =>
-                    processRequest(name) { 
-                        userDao.readUser(_)
-                    }
-                })
-            },
-            put {
-                parameters("id".as[Int], "name".as[String]) { (id, name) =>
-                    processRequest((id, name)) { 
-                        userDao.updateUser(_, _)
-                    }
-                }
-            },
-            delete {
-                parameter("id".as[Int]) { id =>
-                    processRequest(id) { 
-                        userDao.deleteUser(_)
-                    }
-                }
-            },
-            path(IntNumber) { id => concat(
-                path("saves") { concat(
-                    post {
-                        entity(as[String]) { fen =>
-                            processRequest((id, fen)) { 
-                                sessionDao.createSession(_, _)
+        path("users") {
+            pathEndOrSingleSlash { concat(
+                post {
+                    parameter("name".as[String]) { name =>
+                        entity(as[String]) { password =>
+                            val hash = BCrypt.hashpw(password, BCrypt.gensalt())
+                            processRequest((name, hash)) { 
+                                userDao.createUser(_, _)
                             }
                         }
-                    },
-                    get { concat(
-                        parameter("sessId".as[Int].optional) { param =>
-                            param match
-                                case Some(sessId) => 
-                                    processRequest(sessId) {
-                                        sessionDao.readSession(_)
-                                    }
-                                case None => 
-                                    processRequest(id) {
-                                        sessionDao.readAllForUser(_)
-                                    }
-                        },
-                        parameter("name".as[String].optional) { param =>
-                            param match
-                                case Some(name) => 
-                                    processRequest((id, name)) {
-                                        sessionDao.readAllForUserWithName(_, _)
-                                    }
-                                case None => 
-                                    processRequest(id) {
-                                        sessionDao.readAllForUser(_)
-                                    }
-                        })
                     }
-                )},
-                path("hash-checks") {
-                    get {
-                        entity(as[String]) { password =>
-                            Await.result(userDao.readHash(id), Duration.Inf) match
-                                case Success(hash) => 
-                                    if (BCrypt.checkpw(password, hash)) complete(OK)
-                                    else complete(Forbidden)
-                                case Failure(e) => if e.isInstanceOf[NoSuchElementException]
-                                    then complete(NotFound, e.getMessage)
-                                    else complete(InternalServerError, e.getMessage)
+                },
+                get { concat(
+                    parameter("id".as[Int]) { id =>
+                        processRequest(id) { 
+                            userDao.readUser(_)
+                        }
+                    },
+                    parameter("name".as[String]) { name =>
+                        processRequest(name) { 
+                            userDao.readUser(_)
+                        }
+                    })
+                },
+                put {
+                    parameters("id".as[Int], "name".as[String]) { (id, name) =>
+                        processRequest((id, name)) { 
+                            userDao.updateUser(_, _)
                         }
                     }
-                })
-            },
-        )}
+                },
+                delete {
+                    parameter("id".as[Int]) { id =>
+                        processRequest(id) { 
+                            userDao.deleteUser(_)
+                        }
+                    }
+                }
+            )}
+        },
+        pathPrefix("users" / IntNumber / "saves") { id => concat(
+                post {
+                    entity(as[String]) { fen =>
+                        processRequest((id, fen)) { 
+                            sessionDao.createSession(_, _)
+                        }
+                    }
+                },
+                get { concat(
+                    parameter("id".as[Int].optional) { param =>
+                        param match
+                            case Some(sessId) => 
+                                processRequest(sessId) {
+                                    sessionDao.readSession(_)
+                                }
+                            case None => 
+                                processRequest(id) {
+                                    sessionDao.readAllForUser(_)
+                                }
+                    },
+                    parameter("name".as[String].optional) { param =>
+                        param match
+                            case Some(name) => 
+                                processRequest((id, name)) {
+                                    sessionDao.readAllForUserWithName(_, _)
+                                }
+                            case None => 
+                                processRequest(id) {
+                                    sessionDao.readAllForUser(_)
+                                }
+                    })
+                }
+            )
+        },
+        path("hash-checks") {
+            get {
+                parameter("id".as[Int]) { id =>
+                    entity(as[String]) { password =>
+                        Await.result(userDao.readHash(id), Duration.Inf) match
+                            case Success(hash) => 
+                                if (BCrypt.checkpw(password, hash)) complete(OK)
+                                else complete(Forbidden)
+                            case Failure(e) => if e.isInstanceOf[NoSuchElementException]
+                                then complete(NotFound, e.getMessage)
+                                else complete(InternalServerError, e.getMessage)
+                    }
+                }
+            }
+        }
     )
+
 
     def run: Unit =
         bind = Http().newServerAt(ip, port).bind(route)
