@@ -12,8 +12,7 @@
 package de.htwg.se.chess
 
 import controller.controllerComponent.ControllerInterface
-import controller.controllerComponent.controllerBaseImpl.Controller
 
 
 object ChessModule:
-  given controller: ControllerInterface = new Controller()
+  given controller: ControllerInterface = BaseControllerModule.controller
