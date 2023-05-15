@@ -23,6 +23,7 @@ object dependencies {
     val slick     =  ("com.typesafe.slick" %% "slick" % "3.4.1").cross(CrossVersion.for3Use2_13)
     val slickHikari = ("com.typesafe.slick" %% "slick-hikaricp" % "3.4.1").cross(CrossVersion.for3Use2_13)
     val postgresql = "org.postgresql" % "postgresql" % "42.5.4"
+    val sqlite    = "org.xerial" % "sqlite-jdbc" % "3.41.2.1"
     val testcontainer  = "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.15"
     val jbcrypt   = "org.mindrot" % "jbcrypt" % "0.4"
 
@@ -44,6 +45,7 @@ object dependencies {
         slickHikari,
         postgresql,
         testcontainer,
-        jbcrypt
+        jbcrypt,
+        sqlite
     )
 }
