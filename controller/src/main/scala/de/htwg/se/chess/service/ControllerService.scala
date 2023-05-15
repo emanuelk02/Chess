@@ -56,7 +56,8 @@ case class ControllerService(
     concat(
       fieldPath,
       commandPath,
-      subscribeRoute
+      subscribeRoute,
+      persistenceRoute
     )
   }
 
@@ -205,6 +206,23 @@ case class ControllerService(
         }
       )
     }
+
+  val persistenceRoute = {
+    concat(
+      post {
+        path("users") {
+          parameter("name".as[String]) { (name) =>
+            entity(as[String]) { pass =>
+              complete {
+                controller.registerUser(name, pass)
+                HttpResponse(OK, entity="User registered")
+              }
+            }
+          }
+        }
+      }
+    )
+  }
 
   reactions += {
     case e: CommandExecuted => notifySubscribers(JsString(controller.fieldToFen).toString)

@@ -31,6 +31,7 @@ class MockController extends ControllerInterface:
   def putWithFen(args: String): CommandInterface = throw UnsupportedOperationException()
   def select(tile: Option[Tile]): CommandInterface = throw UnsupportedOperationException()
 
+  def registerUser(name: String, pass: String): Unit = { }
   def start: Unit = { }
   def stop: Unit = { }
 

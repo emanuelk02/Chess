@@ -106,6 +106,12 @@ trait ControllerInterface extends Publisher:
      * */
     def select(args: Option[Tile]): CommandInterface
 
+    /** 
+     * Creates a new user in the persistence layer.
+     * @param name     Name of the user to be created
+     * @param pass     Password of the user to be created
+     * */
+    def registerUser(name: String, pass: String): Unit
     /** Saves the game to "field.xml" file in the working directory */
     def save: Unit
     /** Loads the game from "field.xml" file in the working dircetory */

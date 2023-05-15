@@ -53,6 +53,7 @@ case class Controller (var field: GameField, val commandHandler: ChessCommandInv
   def load: Unit =
     field = field.loadFromFen(fileIO.load)
 
+  def registerUser(name: String, pass: String): Unit = ???
   def start: Unit = field = field.start
   def stop: Unit = field = field.stop
 

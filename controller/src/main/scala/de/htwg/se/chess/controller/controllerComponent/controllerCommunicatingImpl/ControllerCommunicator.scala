@@ -31,6 +31,8 @@ import scala.util.Success
 import scala.util.Failure
 import spray.json._
 
+import util.data.User
+import util.data.ChessJsonProtocol._
 import util.client.BlockingClient.blockingReceiveRequest
 
 
@@ -40,22 +42,45 @@ case class ControllerCommunicator(
     )
     (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 
-    def save(fen: String): Future[HttpResponse] =
+    def save(fen: String, user: User): Future[HttpResponse] =
         Http().singleRequest(
             Post(
-                persistenceService.withPath(Path("/saves")),
-                JsObject(Map("fen" -> JsString(fen)))
+                persistenceService.withPath(Path(s"/users/${user.id}/saves")),
+                fen
             )
         )
 
-    def load: Try[String] =
+    def load(user: User): Try[String] =
         blockingReceiveRequest[Try[String]](
             Http().singleRequest(
-                Get(persistenceService.withPath(Path("/saves")))
+                Get(persistenceService.withPath(Path(s"/users/${user.id}/saves")))
             ), {
                 case HttpResponse(OK, _, entity, _) =>
-                    Success(Await.result(Unmarshal(entity).to[String], Duration.Inf))
+                    val response = Await.result(Unmarshal(entity).to[JsValue], Duration.Inf)
+                    Success(response.convertTo[Seq[Tuple2[Int, String]]].head._2)
                 case HttpResponse(status, _, _, _) =>
                     Failure(new Exception(s"Unexpected status code: $status"))
             }
         )
+
+    def registerUser(name: String, pass: String): Future[HttpResponse] =
+        Http().singleRequest(
+            Post(
+                persistenceService.withPath(Path(s"/users?name=$name")),
+                pass
+            )
+        )
+
+    def getUser(name: String): Option[User] =
+        blockingReceiveRequest[Option[User]](
+            Http().singleRequest(
+                Get(persistenceService.withPath(Path(s"/users?name=$name")))
+            ), {
+                case HttpResponse(OK, _, entity, _) =>
+                    val response = Await.result(Unmarshal(entity).to[JsValue], Duration.Inf)
+                    Some(response.convertTo[User])
+                case HttpResponse(NotFound, _, _, _) =>
+                    None
+                case HttpResponse(status, _, _, _) =>
+                    throw new Exception(s"Unexpected status code: $status")
+            })
