@@ -34,7 +34,7 @@ enum OrderBy {
     case NAME
     case DATE
 }
-enum Ordering(order: Order, by: OrderBy) {
+enum Ordering(val order: Order, val by: OrderBy) {
     case ASC extends Ordering(Order.ASC, OrderBy.DATE)
     case ASC_ID extends Ordering(Order.ASC, OrderBy.ID)
     case ASC_NAME extends Ordering(Order.ASC, OrderBy.NAME)
@@ -58,11 +58,13 @@ trait SessionDao(config: Config) {
 
     def readAllForUser(userid: Int, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]]
     def readAllForUserInInterval(userid: Int, start: Date, end: Date, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]]
-    def readAllForUserWithName(userid: Int, name: String, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]]
+    def readAllForUserWithName(userid: Int, displayName: String, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]]
     def readSession(sessionid: Int): Future[Try[GameSession]]
 
     def updateSession(sessionid: Int, fen: String): Future[Try[GameSession]]
     def updateSession(sessionid: Int, session: GameSession): Future[Try[GameSession]]
 
     def deleteSession(sessionid: Int): Future[Try[GameSession]]
+
+    def close(): Unit
 }

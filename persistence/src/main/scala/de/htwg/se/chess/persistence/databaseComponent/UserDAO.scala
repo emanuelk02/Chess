@@ -34,4 +34,10 @@ trait UserDao(config: Config) {
 
     def deleteUser(id: Int): Future[Try[User]]
     def deleteUser(name: String): Future[Try[User]]
+
+    def close(): Unit
+}
+
+object UserDao {
+    val maxNameLength = 32
 }

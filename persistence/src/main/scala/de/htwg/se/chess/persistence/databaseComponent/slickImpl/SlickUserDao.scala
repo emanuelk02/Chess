@@ -23,6 +23,7 @@ import scala.util.{Try, Success, Failure}
 import slick.jdbc.PostgresProfile.api._
 
 import util.data.User
+import org.postgresql.util.PSQLException
 
 
 case class SlickUserDao(config: Config = ConfigFactory.load())
@@ -51,10 +52,17 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
     Await.result(createTables(), Duration.Inf)
 
     override def createUser(name: String, passHash: String): Future[Try[Boolean]] =
+        if name.length() > UserDao.maxNameLength then
+            Future(Failure(new IllegalArgumentException(s"Name is longer than ${UserDao.maxNameLength}")))
+        else
         db.run((users += (User(0, name), passHash)).asTry).map {
             case Success(_) => Success(true)
-            case Failure(e) => Failure(e)
+            case Failure(e) => if e.getMessage.contains("duplicate key value violates unique constraint") 
+                then Failure(new IllegalArgumentException(s"User with name \'$name\' already exists"))
+                else Failure(e)
         }
+        
+        
 
     override def readUser(id: Int): Future[Try[User]] =
         db.run(users.filter(_.id === id).result.headOption.asTry).map {
@@ -84,7 +92,9 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
     override def updateUser(id: Int, newName: String): Future[Try[User]] =
         db.run(users.filter(_.id === id).map(_.name).update(newName).asTry).map {
             case Success(_) => Success(User(id, newName))
-            case Failure(e) => Failure(e)
+            case Failure(e) => if e.getMessage.contains("duplicate key value violates unique constraint") 
+                then Failure(new IllegalArgumentException(s"User with name \'$newName\' already exists"))
+                else Failure(e)
         }
     override def updateUser(name: String, newName: String): Future[Try[User]] =
         readUser(name).flatMap {
@@ -107,4 +117,6 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
             case Success(user) => deleteUser(user.id)
             case Failure(e) => Future(Failure(e))
         }
+
+    override def close(): Unit = db.close()
 }
