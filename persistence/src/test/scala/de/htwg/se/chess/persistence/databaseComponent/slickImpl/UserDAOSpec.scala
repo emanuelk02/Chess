@@ -30,6 +30,7 @@ import scala.util.Try
 
 import util.data.User
 
+
 class UserDaoSpec
     extends AnyWordSpec
     with ScalaFutures
@@ -62,7 +63,6 @@ class UserDaoSpec
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  var userDao: SlickUserDao = null
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
@@ -70,41 +70,42 @@ class UserDaoSpec
     )
   )
 
-  override protected def afterAll(): Unit =
-    userDao.close()
-    super.afterAll()
+  def sqliteConfigString = s"""
+            slick.dbs.sqlite.url = "jdbc:sqlite::memory:"
+            slick.dbs.sqlite.driver = org.sqlite.JDBC
+            """
 
-  def getUserDao(composedContainers: Containers) =
-    new SlickUserDao(
-      ConfigFactory
-        .load(
-          ConfigFactory.parseString(
-            s"""
-          slick.dbs.postgres.driver = "org.postgresql.Driver"
-          slick.dbs.postgres.url = "jdbc:postgresql://${composedContainers
-              .getServiceHost(
-                containerName,
-                containerPort
-              )}:${composedContainers.getServicePort(
-              containerName,
-              containerPort
-            )}/postgres?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true"
-          slick.dbs.postgres.jdbcUrl = "jdbc:postgresql://${composedContainers
-              .getServiceHost(
-                containerName,
-                containerPort
-              )}:${composedContainers.getServicePort(
-              containerName,
-              containerPort
-            )}/postgres?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true"
-          slick.dbs.postgres.user = "postgres"
-          slick.dbs.postgres.password = "postgres"
+  // Yes, this is a bit of a hack, but it works
+  // Since you cannot set env vars easily, I just use the config for sqlite
+  // since that is what it will be resolved to in the DAO classes
+  def postgresConfigString(composedContainers: Containers) = s"""
+          slick.dbs.sqlite.driver = "org.postgresql.Driver"
+          slick.dbs.sqlite.url = "jdbc:postgresql://${composedContainers
+    .getServiceHost(containerName, containerPort)}:${composedContainers
+    .getServicePort(containerName, containerPort)}/postgres"
+          slick.dbs.sqlite.jdbcUrl = """ + "${slick.dbs.sqlite.url}" + """
+          slick.dbs.sqlite.user = "postgres"
+          slick.dbs.sqlite.password = "postgres"
           """
-          )
-        )
-    )
 
-  "UserDAO" should {
+  "A UserDAO " when {
+    "running postgres" should {
+      given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.PostgresProfile
+      daoTests(None)
+    }
+    "running sqlite" should {
+      given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
+      val userDao = new SlickUserDao(
+        ConfigFactory.load(
+          ConfigFactory.parseString(sqliteConfigString)
+        )
+      )
+      //daoTests(Some(userDao))
+    }
+  }
+
+  def daoTests(optUserDao: Option[SlickUserDao])(using jdbcProfile: slick.jdbc.JdbcProfile) = {
+    var userDao = optUserDao.getOrElse(null)
     "have a running postgres container" in {
       withContainers { composedContainers =>
         assert(
@@ -120,7 +121,12 @@ class UserDaoSpec
           composedContainers.getServicePort(containerName, containerPort) > 0
         )
 
-        userDao = getUserDao(composedContainers)
+        if (optUserDao.isEmpty) then
+            userDao = new SlickUserDao(
+                ConfigFactory.load(
+                    ConfigFactory.parseString(postgresConfigString(composedContainers))
+                )
+            )
       }
     }
     "create users with a given username and password hash" in {
@@ -160,7 +166,7 @@ class UserDaoSpec
       val user2 = userDao.readUser("nonexistent")
       whenReady(user2) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a [NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     "allow to get the password hash to check if a given password is valid" in {
@@ -182,7 +188,7 @@ class UserDaoSpec
       val nonexistent = userDao.readHash(3)
       whenReady(nonexistent) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a [NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     "allow to update a users name" in {
@@ -216,7 +222,7 @@ class UserDaoSpec
       val nonexistent = userDao.deleteUser("nonexistent")
       whenReady(nonexistent) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a [NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
   }

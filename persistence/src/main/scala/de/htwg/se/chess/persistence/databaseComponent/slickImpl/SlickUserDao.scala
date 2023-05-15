@@ -20,26 +20,39 @@ import com.typesafe.config.Config
 import scala.concurrent.{Await, Future, ExecutionContext}
 import scala.concurrent.duration.Duration
 import scala.util.{Try, Success, Failure}
-import slick.jdbc.PostgresProfile.api._
 
 import util.data.User
-import org.postgresql.util.PSQLException
 
 
 case class SlickUserDao(config: Config = ConfigFactory.load())
-    (implicit ec: ExecutionContext)
+    (using ec: ExecutionContext, jdbcProfile: slick.jdbc.JdbcProfile)
     extends UserDao(config) {
-    val db = Database.forConfig("slick.dbs.postgres", config)
-    val users = new TableQuery(UserTable(_))
 
-    val setup = DBIO.seq(users.schema.createIfNotExists)
+    import jdbcProfile.api._
 
-    def createTables(tries: Int = 0): Future[Try[Unit]] = {
+    private class UserTable(tag: Tag) extends Table[(User, String)](tag, "user") {
+
+      def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+      def name = column[String]("name", O.Unique, O.Length(32, true))
+      def passHash = column[String]("pass_hash")
+      override def * = (id, name, passHash) 
+          <> (
+              (id: Int, name: String, hash: String) => (User(id, name), hash),
+              (user, hash) => Some((user.id, user.name, hash))
+          )
+    }
+
+    private val db = Database.forConfig("slick.dbs."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite"), config)
+    private val users = new TableQuery(UserTable(_))
+
+    private val setup = DBIO.seq(users.schema.createIfNotExists)
+
+    private def createTables(tries: Int = 0): Future[Try[Unit]] = {
         db.run(setup.asTry).andThen {
             case Success(_) => println("Created tables")
-            case Failure(e) => 
+            case Failure(e) =>
                 if (tries < 5) {
-                    wait(1000)
+                    Thread.sleep(1000)
                     println("Failed to create tables, retrying...")
                     createTables(tries + 1)
                 } else {
@@ -61,31 +74,29 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
                 then Failure(new IllegalArgumentException(s"User with name \'$name\' already exists"))
                 else Failure(e)
         }
-        
-        
 
     override def readUser(id: Int): Future[Try[User]] =
         db.run(users.filter(_.id === id).result.headOption.asTry).map {
             case Success(Some(user, _)) => Success(user)
-            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with id: $id"))
+            case Success(None) => Failure(new NoSuchElementException(s"There is no user with id: $id"))
             case Failure(e) => Failure(e)
         }
     override def readUser(name: String): Future[Try[User]] =
         db.run(users.filter(_.name === name).result.headOption.asTry).map {
             case Success(Some(user, _)) => Success(user)
-            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with name: $name"))
+            case Success(None) => Failure(new NoSuchElementException(s"There is no user with name: $name"))
             case Failure(e) => Failure(e)
         }
     override def readHash(id: Int): Future[Try[String]] =
         db.run(users.filter(_.id === id).map(_.passHash).result.headOption.asTry).map {
             case Success(Some(hash)) => Success(hash)
-            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with id: $id"))
+            case Success(None) => Failure(new NoSuchElementException(s"There is no user with id: $id"))
             case Failure(e) => Failure(e)
         }
     override def readHash(name: String): Future[Try[String]] =
         db.run(users.filter(_.name === name).map(_.passHash).result.headOption.asTry).map {
             case Success(Some(hash)) => Success(hash)
-            case Success(None) => Failure(new IllegalArgumentException(s"There is no user with name: $name"))
+            case Success(None) => Failure(new NoSuchElementException(s"There is no user with name: $name"))
             case Failure(e) => Failure(e)
         }
 

@@ -29,9 +29,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.sql.Date
 import java.sql.Timestamp
+import java.sql.DriverManager
+import scala.collection.JavaConverters._
 
 import util.data.FenParser._
 import util.data.GameSession
+import org.checkerframework.checker.units.qual.s
+import scala.util.Success
+
 
 class SessionDAOSpec
     extends AnyWordSpec
@@ -52,29 +57,23 @@ class SessionDAOSpec
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def configString(composedContainers: Containers) = s"""
-          slick.dbs.postgres.driver = "org.postgresql.Driver"
-          slick.dbs.postgres.url = "jdbc:postgresql://${composedContainers.getServiceHost(containerName, containerPort)}:${composedContainers.getServicePort(containerName, containerPort)}/postgres?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true"
-          slick.dbs.postgres.jdbcUrl = "jdbc:postgresql://${composedContainers.getServiceHost(containerName, containerPort)}:${composedContainers.getServicePort(containerName, containerPort)}/postgres?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true"
-          slick.dbs.postgres.user = "postgres"
-          slick.dbs.postgres.password = "postgres"
+  def sqliteConfigString = s"""
+            slick.dbs.sqlite.url = "jdbc:sqlite::memory:"
+            slick.dbs.sqlite.driver = org.sqlite.JDBC
+            """
+
+  // Yes, this is a bit of a hack, but it works
+  // Since you cannot set env vars easily, I just use the config for sqlite
+  // since that is what it will be resolved to in the DAO classes
+  def postgresConfigString(composedContainers: Containers) = s"""
+          slick.dbs.sqlite.driver = "org.postgresql.Driver"
+          slick.dbs.sqlite.url = "jdbc:postgresql://${composedContainers
+    .getServiceHost(containerName, containerPort)}:${composedContainers
+    .getServicePort(containerName, containerPort)}/postgres"
+          slick.dbs.sqlite.jdbcUrl = """ + "${slick.dbs.sqlite.url}" + """
+          slick.dbs.sqlite.user = "postgres"
+          slick.dbs.sqlite.password = "postgres"
           """
-
-  def getUserDao(composedContainers: Containers) =
-    new SlickUserDao(
-      ConfigFactory.load(
-        ConfigFactory.parseString(configString(composedContainers))
-      )
-    )
-
-  def getSessDao(composedContainers: Containers) =
-    new SlickSessionDao(
-      ConfigFactory.load(
-        ConfigFactory.parseString(configString(composedContainers))
-      )
-    )
-
-  var sessionDao: SlickSessionDao = null
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
@@ -82,21 +81,57 @@ class SessionDAOSpec
     )
   )
 
-  override protected def afterAll(): Unit =
-    sessionDao.close()
-    super.afterAll()
+  "A SessionDAO " when {
+    "running postgres" should {
+      given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.PostgresProfile
+      var sessionDao: SlickSessionDao = null
+      "have a running postgres container" in {
+        withContainers { containers =>
+          assert(containers.getContainerByServiceName(containerName).isDefined)
+          assert(
+            containers.getContainerByServiceName(containerName).get.isRunning()
+          )
+          assert(containers.getServicePort(containerName, containerPort) > 0)
 
-  "A SessionDAO " should {
-    "have a running postgres container" in {
-      withContainers { containers =>
-        assert(containers.getContainerByServiceName(containerName).isDefined)
-        assert(
-          containers.getContainerByServiceName(containerName).get.isRunning()
+          // Fill database with users, since session table has a foreign key constraint on users
+          val userDao = new SlickUserDao(
+            ConfigFactory.load(
+              ConfigFactory.parseString(postgresConfigString(containers))
+            )
+          )
+          val user = userDao.createUser("test", "test")
+          whenReady(user) { result =>
+            result.isSuccess shouldBe true
+            result.get shouldBe true
+          }
+          val user2 = userDao.createUser("test2", "test2")
+          whenReady(user2) { result =>
+            result.isSuccess shouldBe true
+            result.get shouldBe true
+          }
+          userDao.close()
+        }
+      }
+      daoTests(None)
+    }
+    "running sqlite" should {
+      given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
+      val userDao = new SlickUserDao(
+        ConfigFactory.load(
+          ConfigFactory.parseString(sqliteConfigString)
         )
-        assert(containers.getServicePort(containerName, containerPort) > 0)
-
-        // Fill database with users, since session table has a foreign key constraint on users
-        val userDao = getUserDao(containers)
+      )
+      val sessionDao = new SlickSessionDao(
+        ConfigFactory.load(
+          ConfigFactory.parseString(sqliteConfigString)
+        )
+      )
+      val fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      val fen2 = "8/8/8/8/8/8/8/RNBQKBNR b Kq A1 10 15"
+      val session1 = new GameSession("save1", fen)
+      val session3 =
+        new GameSession(Date.valueOf(LocalDate.now().plusDays(1)), fen2)
+      "initialize db" in {
         val user = userDao.createUser("test", "test")
         whenReady(user) { result =>
           result.isSuccess shouldBe true
@@ -108,15 +143,30 @@ class SessionDAOSpec
           result.get shouldBe true
         }
         userDao.close()
-        sessionDao = getSessDao(containers)
       }
+      //daoTests(Some(sessionDao))
     }
+  }
+
+  def daoTests(
+      optSessionDao: Option[SlickSessionDao]
+  )(using jdbcProfile: slick.jdbc.JdbcProfile) = {
     val fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     val fen2 = "8/8/8/8/8/8/8/RNBQKBNR b Kq A1 10 15"
     val session1 = new GameSession("save1", fen)
     val session3 =
       new GameSession(Date.valueOf(LocalDate.now().plusDays(1)), fen2)
+    var sessionDao: SlickSessionDao = null
     "allow to store a game session specified by a FEN string and assigned to a user by id or name" in {
+      withContainers { containers =>
+        if optSessionDao.isEmpty then
+          sessionDao = new SlickSessionDao(
+            ConfigFactory.load(
+              ConfigFactory.parseString(postgresConfigString(containers))
+            )
+          )
+        else sessionDao = optSessionDao.get
+      }
       val user1sess1 = sessionDao.createSession(1, session1)
       whenReady(user1sess1) { result =>
         result.isSuccess shouldBe true
@@ -159,7 +209,7 @@ class SessionDAOSpec
       val nonexistent = sessionDao.readAllForUser(3)
       whenReady(nonexistent) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a[NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     var session4: GameSession = null
@@ -282,7 +332,7 @@ class SessionDAOSpec
       )
       whenReady(invalidUser) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a[NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     "allow to get all sessions of a user which contain a given string in their display name" in {
@@ -320,19 +370,27 @@ class SessionDAOSpec
       val nonexistent = sessionDao.readSession(5)
       whenReady(nonexistent) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a[NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     "allow to update a session" in {
       val session = sessionDao.updateSession(1, fen2)
       whenReady(session) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe new GameSession(session1.displayName, session1.date, fen2)
+        result.get shouldBe new GameSession(
+          session1.displayName,
+          session1.date,
+          fen2
+        )
 
         val check = sessionDao.readSession(1)
         whenReady(check) { result =>
           result.isSuccess shouldBe true
-          result.get shouldBe new GameSession(session1.displayName, session1.date, fen2)
+          result.get shouldBe new GameSession(
+            session1.displayName,
+            session1.date,
+            fen2
+          )
         }
       }
       val session2 = sessionDao.updateSession(2, session4)
@@ -353,20 +411,27 @@ class SessionDAOSpec
       val nonexistent = sessionDao.updateSession(5, fen2)
       whenReady(nonexistent) { result =>
         result.isFailure shouldBe true
-        a [IllegalArgumentException] shouldBe thrownBy(result.get)
+        a[NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     "allow to delete sessions" in {
       val session = sessionDao.deleteSession(1)
       whenReady(session) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe new GameSession(session1.displayName, session1.date, fen2)
+        result.get shouldBe new GameSession(
+          session1.displayName,
+          session1.date,
+          fen2
+        )
 
         val check = sessionDao.readSession(1)
         whenReady(check) { result =>
           result.isFailure shouldBe true
-          a [IllegalArgumentException] shouldBe thrownBy(result.get)
+          a[NoSuchElementException] shouldBe thrownBy(result.get)
         }
       }
+    }
+    "close" in {
+      sessionDao.close()
     }
   }

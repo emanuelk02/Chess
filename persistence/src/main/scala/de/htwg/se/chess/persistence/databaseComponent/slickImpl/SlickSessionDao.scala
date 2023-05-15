@@ -27,39 +27,70 @@ import scala.concurrent.duration.Duration
 import slick.dbio.DBIOAction
 import slick.dbio.Effect
 import slick.dbio.Effect._
-import slick.jdbc.PostgresProfile.api._
-import slick.lifted.TableQuery
 
+import util.data.User
 import util.data.Piece
 import util.data.Matrix
 import util.data.GameSession
 import util.data.FenParser._
 
 
-extension (ord: Ordering)
-    def toSqlOrder(tbl: SessionTable): slick.lifted.ColumnOrdered[_] =
-        ord.by match
-            case OrderBy.DATE => ord.order match
-                case Order.ASC => tbl.creationDate.asc
-                case Order.DESC => tbl.creationDate.desc
-            case OrderBy.NAME => ord.order match
-                case Order.ASC => tbl.displayName.asc
-                case Order.DESC => tbl.displayName.desc
-            case OrderBy.ID => ord.order match
-                case Order.ASC => tbl.id.asc
-                case Order.DESC => tbl.id.desc
-
-
 case class SlickSessionDao(config: Config = ConfigFactory.load())
-    (implicit ec: ExecutionContext)
+    (using ec: ExecutionContext, jdbcProfile: slick.jdbc.JdbcProfile)
     extends SessionDao(config) {
-    val db = Database.forConfig("slick.dbs.postgres", config)
-    val users = new TableQuery(UserTable(_))
-    val sessions = new TableQuery(SessionTable(_))
 
-    val setup = DBIO.seq((users.schema ++ sessions.schema).createIfNotExists)
+    import jdbcProfile.api._
 
-    def createTables(tries: Int = 0): Future[Try[Unit]] = {
+    private class SessionTable(tag: Tag) extends Table[(Int, Int, GameSession)](tag, "session") {
+        def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+        def userId = column[Int]("user_id")
+        def displayName = column[String]("display_name", O.Default("auto-save_"+Timestamp.valueOf(LocalDateTime.now()).toString()))
+        def creationDate  = column[Date]("create", O.Default(Date.valueOf(LocalDate.now())))
+        def sessionFen = column[String]("session_fen", O.Length(91, true))
+        override def * = (id, userId, displayName, creationDate, sessionFen)
+            <> (
+                (id: Int, userId: Int, displayName: String, creationDate: Date, sessionFen: String) => 
+                    (id, userId, new GameSession(displayName, creationDate, sessionFen)),
+                (id: Int, userId: Int, session: GameSession) =>
+                    Some((id, userId, session.displayName, session.date, session.toFen))
+            )
+
+        def user = foreignKey("user_fk", userId, TableQuery(UserTable(_)))
+            (targetColumns = _.id, onUpdate = ForeignKeyAction.Cascade, onDelete = ForeignKeyAction.Cascade)
+    }
+
+    private class UserTable(tag: Tag) extends Table[(User, String)](tag, "user") {
+
+      def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+      def name = column[String]("name", O.Unique, O.Length(32, true))
+      def passHash = column[String]("pass_hash")
+      override def * = (id, name, passHash) 
+          <> (
+              (id: Int, name: String, hash: String) => (User(id, name), hash),
+              (user, hash) => Some((user.id, user.name, hash))
+          )
+    }
+
+    private val db = Database.forConfig("slick.dbs."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite"), config)
+    private val users = new TableQuery(UserTable(_))
+    private val sessions = new TableQuery(SessionTable(_))
+
+    private val setup = DBIO.seq((users.schema ++ sessions.schema).createIfNotExists)
+
+    extension (ord: Ordering)
+        private def toSqlOrder(tbl: SessionTable): slick.lifted.ColumnOrdered[_] =
+            ord.by match
+                case OrderBy.DATE => ord.order match
+                    case Order.ASC => tbl.creationDate.asc
+                    case Order.DESC => tbl.creationDate.desc
+                case OrderBy.NAME => ord.order match
+                    case Order.ASC => tbl.displayName.asc
+                    case Order.DESC => tbl.displayName.desc
+                case OrderBy.ID => ord.order match
+                    case Order.ASC => tbl.id.asc
+                    case Order.DESC => tbl.id.desc
+
+    private def createTables(tries: Int = 0): Future[Try[Unit]] = {
         db.run(setup.asTry).andThen {
             case Success(_) => println("Created tables")
             case Failure(e) => 
@@ -79,7 +110,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
     private def checkForUserAndThen[T <: Effect](userid: Int)(andThen: => DBIOAction[Try[Seq[Tuple3[Int, Int, GameSession]]], NoStream, T]) =
         db.run((users.filter(_.id === userid).result.headOption.asTry).flatMap {
             case Success(Some(entry)) => andThen
-            case Success(None) => DBIO.failed(new IllegalArgumentException(s"There is no user with id: $userid")).asTry
+            case Success(None) => DBIO.failed(new NoSuchElementException(s"There is no user with id: $userid")).asTry
             case Failure(e) => DBIO.failed(e).asTry
         }).map {
             case Success(seq) => Success(seq.collect((id, _, sess) => (id, sess)))
@@ -89,7 +120,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
     private def checkForUserAndThen[T <: Effect](username: String)(andThen: => DBIOAction[Try[Seq[Tuple3[Int, Int, GameSession]]], NoStream, T]) =
         db.run((users.filter(_.name === username).result.headOption.asTry).flatMap {
             case Success(Some(entry)) => andThen
-            case Success(None) => DBIO.failed(new IllegalArgumentException(s"There is no user with name: $username")).asTry
+            case Success(None) => DBIO.failed(new NoSuchElementException(s"There is no user with name: $username")).asTry
             case Failure(e) => DBIO.failed(e).asTry
         }).map {
             case Success(seq) => Success(seq.collect((id, _, sess) => (id, sess)))
@@ -104,7 +135,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
     override def createSession(username: String, sess: GameSession): Future[Try[GameSession]] =
         db.run((users.filter(_.name === username).map(_.id).result.headOption.asTry).flatMap {
             case Success(Some(userid)) => (sessions += (0, userid, sess)).asTry
-            case Success(None) => DBIO.failed(new IllegalArgumentException(s"There is no user with name: $username")).asTry
+            case Success(None) => DBIO.failed(new NoSuchElementException(s"There is no user with name: $username")).asTry
             case Failure(e) => DBIO.failed(e).asTry
         }).map {
             case Success(_) => Success(sess)
@@ -148,7 +179,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
     override def readSession(sessionid: Int): Future[Try[GameSession]] =
         db.run(sessions.filter(_.id === sessionid).result.headOption.asTry).map {
             case Success(Some((_, _, sess))) => Success(sess)
-            case Success(None) => Failure(new IllegalArgumentException(s"There is no session with id: $sessionid"))
+            case Success(None) => Failure(new NoSuchElementException(s"There is no session with id: $sessionid"))
             case Failure(e) => Failure(e)
         }
 
