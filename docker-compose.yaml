@@ -21,6 +21,17 @@ services:
       retries: 10
       start_period: 5s
 
+  postgres:
+    image: postgres:15.3-alpine
+    ports:
+      - "5432:5432"
+    networks:
+      - chess-network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
   persistence:
     image: chess-persistence
     build:
@@ -37,12 +48,20 @@ services:
       - "chess-persistence-volume:/opt/chess/persistence/saves"
     networks:
       - chess-network
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_CONFIG=postgres
     healthcheck:
       test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/saves"]
       interval: 5s
       timeout: 30s
       retries: 10
       start_period: 5s
+    depends_on:
+      - postgres
 
   controller:
     image: chess-controller
