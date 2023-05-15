@@ -27,7 +27,6 @@ import aview.TUI
 import aview.gui.SwingGUI
 
 import ChessModule.given
-import de.htwg.se.chess.controller.controllerComponent.ControllerInterface
 
 
 object starter:
