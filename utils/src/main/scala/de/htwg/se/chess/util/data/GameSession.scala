@@ -37,7 +37,7 @@ case class GameSession(displayName: String, date: Date, matrix: Matrix[Option[Pi
     this(displayName, date, matrixFromFen(fen), stateFromFen(fen))
 
   def this(date: Date, fen: String) =
-    this("auto-save_"+date.toString(), date, matrixFromFen(fen), stateFromFen(fen))
+    this("auto-save_"+Timestamp.valueOf(LocalDateTime.now()).toString(), date, matrixFromFen(fen), stateFromFen(fen))
 
   def tupled: (Matrix[Option[Piece]], ChessState) = (matrix, state)
 
