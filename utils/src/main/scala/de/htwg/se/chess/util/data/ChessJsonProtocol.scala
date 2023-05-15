@@ -19,7 +19,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import java.sql.Timestamp
+import java.sql.Date
 import play.api.libs.json.Json
 import spray.json._
 
@@ -57,9 +57,9 @@ object ChessJsonProtocol extends DefaultJsonProtocol:
             case _ => throw DeserializationException("User expected")
 
     implicit object SessionStringFormat extends RootJsonFormat[GameSession]:
-        def write(s: GameSession): JsValue = JsObject(Map("name" -> JsString(s.displayName), "time" -> JsString(s.time.toString), "fen" -> JsString(s.toFen)))
+        def write(s: GameSession): JsValue = JsObject(Map("name" -> JsString(s.displayName), "date" -> JsString(s.date.toString), "fen" -> JsString(s.toFen)))
         def read(value: JsValue): GameSession = value match
-            case JsObject(fields) => new GameSession(fields("name").convertTo[String], Timestamp.valueOf(fields("time").convertTo[String]), fields("fen").convertTo[String])
+            case JsObject(fields) => new GameSession(fields("name").convertTo[String], Date.valueOf(fields("date").convertTo[String]), fields("fen").convertTo[String])
             case _ => throw DeserializationException("Session expected")
 
     implicit val um:Unmarshaller[HttpEntity, JsObject] = {
