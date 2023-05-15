@@ -49,14 +49,14 @@ case class PersistenceService(
            sessionDao: SessionDao):
     println("PersistenceService started. Please navigate to http://" + ip + ":" + port)
 
-    def processRequest[I, O : JsonWriter](
-        params: I,
-        fallback: Failure[_] => StandardRoute = { 
-            case Failure(e) => complete(BadRequest, e.getMessage) 
-        })(process: I => Future[Try[O]]): StandardRoute =
+    def processRequest[I, O : JsonWriter](params: I)(process: I => Future[Try[O]]): StandardRoute =
         Await.result(process(params), Duration.Inf) match {
             case Success(result) => complete(OK, result.toJson)
-            case f: Failure[_] => fallback(f)
+            case Failure(e) => if e.isInstanceOf[NoSuchElementException]
+                then complete(NotFound, e.getMessage)
+                else if e.isInstanceOf[IllegalArgumentException]
+                    then complete(BadRequest, e.getMessage)
+                    else complete(InternalServerError, e.getMessage)
         }
     
     val route = concat(
@@ -91,7 +91,7 @@ case class PersistenceService(
             )},
             get {
                 parameter("sessId".as[Int]) { sessId =>
-                    processRequest(sessId, _ => complete(NotFound)) { 
+                    processRequest(sessId) { 
                             sessionDao.readSession(_)
                         }
                 }
@@ -113,7 +113,7 @@ case class PersistenceService(
             },      
             delete {
                 parameter("sessId".as[Int]) { sessId =>
-                    processRequest(sessId, _ => complete(NotFound)) { 
+                    processRequest(sessId) { 
                         sessionDao.deleteSession(_)
                     }
                 }
@@ -132,12 +132,12 @@ case class PersistenceService(
             },
             get { concat(
                 parameter("id".as[Int]) { id =>
-                    processRequest(id, _ => complete(NotFound)) { 
+                    processRequest(id) { 
                         userDao.readUser(_)
                     }
                 },
                 parameter("name".as[String]) { name =>
-                    processRequest(name, _ => complete(NotFound)) { 
+                    processRequest(name) { 
                         userDao.readUser(_)
                     }
                 })
@@ -151,7 +151,7 @@ case class PersistenceService(
             },
             delete {
                 parameter("id".as[Int]) { id =>
-                    processRequest(id, _ => complete(NotFound)) { 
+                    processRequest(id) { 
                         userDao.deleteUser(_)
                     }
                 }
@@ -169,22 +169,22 @@ case class PersistenceService(
                         parameter("sessId".as[Int].optional) { param =>
                             param match
                                 case Some(sessId) => 
-                                    processRequest(sessId, _ => complete(NotFound)) {
+                                    processRequest(sessId) {
                                         sessionDao.readSession(_)
                                     }
                                 case None => 
-                                    processRequest(id, _ => complete(NotFound)) {
+                                    processRequest(id) {
                                         sessionDao.readAllForUser(_)
                                     }
                         },
                         parameter("name".as[String].optional) { param =>
                             param match
                                 case Some(name) => 
-                                    processRequest((id, name), _ => complete(NotFound)) {
+                                    processRequest((id, name)) {
                                         sessionDao.readAllForUserWithName(_, _)
                                     }
                                 case None => 
-                                    processRequest(id, _ => complete(NotFound)) {
+                                    processRequest(id) {
                                         sessionDao.readAllForUser(_)
                                     }
                         })
@@ -197,7 +197,9 @@ case class PersistenceService(
                                 case Success(hash) => 
                                     if (BCrypt.checkpw(password, hash)) complete(OK)
                                     else complete(Forbidden)
-                                case Failure(_) => complete(NotFound)
+                                case Failure(e) => if e.isInstanceOf[NoSuchElementException]
+                                    then complete(NotFound, e.getMessage)
+                                    else complete(InternalServerError, e.getMessage)
                         }
                     }
                 })
