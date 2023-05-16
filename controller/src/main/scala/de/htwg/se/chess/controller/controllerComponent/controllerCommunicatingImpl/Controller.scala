@@ -53,8 +53,7 @@ class Controller (
     communicator.getUser(name) match
       case some: Some[User] => this.user = some; println("user already exists"); println(this.user)
       case None =>
-        println(communicator.registerUser(name, pass))
-        this.user = communicator.getUser(name)
+        this.user = communicator.registerUser(name, pass)
         println("user registered"); println(this.user)
 
   override def save: Unit =

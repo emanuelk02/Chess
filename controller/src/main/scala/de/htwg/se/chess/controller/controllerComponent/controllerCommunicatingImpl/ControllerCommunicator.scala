@@ -65,13 +65,22 @@ case class ControllerCommunicator(
             }
         )
 
-    def registerUser(name: String, pass: String): Future[HttpResponse] =
-        Http().singleRequest(
-            Post(
-                persistenceService.withPath(Path("/users")).withQuery(Query("name" -> name)),
-                pass
-            )
-        )
+    def registerUser(name: String, pass: String): Option[User] =
+        blockingReceiveRequest[Option[User]](
+            Http().singleRequest(
+                Post(
+                    persistenceService.withPath(Path(s"/users")).withQuery(Query("name" -> name)),
+                    pass
+                )
+            ), {
+                case HttpResponse(OK, _, entity, _) =>
+                    val response = Await.result(Unmarshal(entity).to[JsValue], Duration.Inf)
+                    Some(response.convertTo[User])
+                case HttpResponse(NotFound, _, _, _) =>
+                    None
+                case HttpResponse(status, _, _, _) =>
+                    throw new Exception(s"Unexpected status code: $status")
+            })
 
     def getUser(name: String): Option[User] =
         blockingReceiveRequest[Option[User]](
