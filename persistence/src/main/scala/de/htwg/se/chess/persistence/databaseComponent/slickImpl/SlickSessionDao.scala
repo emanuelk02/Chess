@@ -96,7 +96,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
             case Success(_) => println("Created tables")
             case Failure(e) => 
                 if (tries < 10) {
-                    wait(3000)
+                    Thread.sleep(1000)
                     println("Failed to create tables, retrying...")
                     createTables(tries + 1)
                 } else {

@@ -35,8 +35,7 @@ import scala.collection.JavaConverters._
 
 import util.data.FenParser._
 import util.data.GameSession
-import org.checkerframework.checker.units.qual.s
-import scala.util.Success
+import util.data.User
 
 
 class SessionDAOSpec
@@ -105,12 +104,12 @@ class SessionDAOSpec
           val user = userDao.createUser("test", "test")
           whenReady(user) { result =>
             result.isSuccess shouldBe true
-            result.get shouldBe true
+            result.get shouldBe User(1, "test")
           }
           val user2 = userDao.createUser("test2", "test2")
           whenReady(user2) { result =>
             result.isSuccess shouldBe true
-            result.get shouldBe true
+            result.get shouldBe User(2, "test2")
           }
           userDao.close()
         }
@@ -147,12 +146,12 @@ class SessionDAOSpec
         val user = userDao.createUser("test", "test")
         whenReady(user) { result =>
           result.isSuccess shouldBe true
-          result.get shouldBe true
+          result.get shouldBe User(1, "test")
         }
         val user2 = userDao.createUser("test2", "test2")
         whenReady(user2) { result =>
           result.isSuccess shouldBe true
-          result.get shouldBe true
+          result.get shouldBe User(2, "test2")
         }
         userDao.close()
       }

@@ -52,7 +52,7 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
             case Success(_) => println("Created tables")
             case Failure(e) =>
                 if (tries < 10) {
-                    Thread.sleep(3000)
+                    Thread.sleep(1000)
                     println("Failed to create tables, retrying...")
                     createTables(tries + 1)
                 } else {
@@ -64,15 +64,15 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
 
     Await.result(createTables(), Duration.Inf)
 
-    override def createUser(name: String, passHash: String): Future[Try[Boolean]] =
+    override def createUser(name: String, passHash: String): Future[Try[User]] =
         if name.length() > UserDao.maxNameLength then
             Future(Failure(new IllegalArgumentException(s"Name is longer than ${UserDao.maxNameLength}")))
         else
-        db.run((users += (User(0, name), passHash)).asTry).map {
-            case Success(_) => Success(true)
+        db.run((users += (User(0, name), passHash)).asTry).flatMap {
+            case Success(_) => readUser(name)
             case Failure(e) => if e.getMessage().toLowerCase().contains("unique constraint")
-                then Failure(new IllegalArgumentException(s"Username \'$name\' is already taken"))
-                else Failure(e)
+                then Future.successful(Failure(new IllegalArgumentException(s"Username \'$name\' is already taken")))
+                else Future.successful(Failure(e))
         }
 
     override def readUser(id: Int): Future[Try[User]] =
