@@ -70,8 +70,8 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
         else
         db.run((users += (User(0, name), passHash)).asTry).map {
             case Success(_) => Success(true)
-            case Failure(e) => if e.getMessage.contains("duplicate key value violates unique constraint") 
-                then Failure(new IllegalArgumentException(s"User with name \'$name\' already exists"))
+            case Failure(e) => if e.getMessage().toLowerCase().contains("unique constraint")
+                then Failure(new IllegalArgumentException(s"Username \'$name\' is already taken"))
                 else Failure(e)
         }
 
@@ -103,8 +103,8 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
     override def updateUser(id: Int, newName: String): Future[Try[User]] =
         db.run(users.filter(_.id === id).map(_.name).update(newName).asTry).map {
             case Success(_) => Success(User(id, newName))
-            case Failure(e) => if e.getMessage.contains("duplicate key value violates unique constraint") 
-                then Failure(new IllegalArgumentException(s"User with name \'$newName\' already exists"))
+            case Failure(e) => if e.getMessage().toLowerCase().contains("unique constraint")
+                then Failure(new IllegalArgumentException(s"Username \'$newName\' is already taken"))
                 else Failure(e)
         }
     override def updateUser(name: String, newName: String): Future[Try[User]] =

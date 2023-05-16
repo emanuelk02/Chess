@@ -25,6 +25,7 @@ import com.dimafeng.testcontainers.ExposedService
 import com.typesafe.config.ConfigFactory
 import scala.concurrent.ExecutionContext
 import java.io.File
+import java.io.PrintWriter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.sql.Date
@@ -57,8 +58,10 @@ class SessionDAOSpec
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
+  val sqliteDbFilePath = "./saves/databases/sqlite/sessionDaoTests.db"
+
   def sqliteConfigString = s"""
-            slick.dbs.sqlite.url = "jdbc:sqlite::memory:"
+            slick.dbs.sqlite.url = "jdbc:sqlite:$sqliteDbFilePath"
             slick.dbs.sqlite.driver = org.sqlite.JDBC
             """
 
@@ -116,6 +119,15 @@ class SessionDAOSpec
     }
     "running sqlite" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
+
+      // Override existing database file
+      val dbFile = File(sqliteDbFilePath)
+      if (dbFile.exists()) then
+        dbFile.delete()
+      val writer = PrintWriter(dbFile)
+      writer.print("")
+      writer.close()
+
       val userDao = new SlickUserDao(
         ConfigFactory.load(
           ConfigFactory.parseString(sqliteConfigString)
@@ -144,7 +156,7 @@ class SessionDAOSpec
         }
         userDao.close()
       }
-      //daoTests(Some(sessionDao))
+      daoTests(Some(sessionDao))
     }
   }
 
@@ -176,6 +188,7 @@ class SessionDAOSpec
         whenReady(check) { result =>
           result.isSuccess shouldBe true
           // For some reason, after loading from database, the timestamp is slightly altered
+          // That's one of the reasons why GameSession uses Date instead of Timestamp now
           result.get shouldBe session1
         }
       }

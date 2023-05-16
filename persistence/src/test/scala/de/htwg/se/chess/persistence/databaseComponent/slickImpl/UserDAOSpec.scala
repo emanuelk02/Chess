@@ -26,9 +26,11 @@ import scala.concurrent.ExecutionContext
 import org.testcontainers.containers.wait.strategy.Wait
 import com.typesafe.config.ConfigFactory
 import java.io.File
+import java.io.PrintWriter
 import scala.util.Try
 
 import util.data.User
+import scala.util.Failure
 
 
 class UserDaoSpec
@@ -70,8 +72,10 @@ class UserDaoSpec
     )
   )
 
+  val sqliteDbFilePath = "./saves/databases/sqlite/userDaoTests.db"
+
   def sqliteConfigString = s"""
-            slick.dbs.sqlite.url = "jdbc:sqlite::memory:"
+            slick.dbs.sqlite.url = "jdbc:sqlite:$sqliteDbFilePath"
             slick.dbs.sqlite.driver = org.sqlite.JDBC
             """
 
@@ -91,45 +95,55 @@ class UserDaoSpec
   "A UserDAO " when {
     "running postgres" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.PostgresProfile
+      "have a running postgres container" in {
+          withContainers { composedContainers =>
+            assert(
+              composedContainers.getContainerByServiceName(containerName).isDefined
+            )
+            assert(
+              composedContainers
+                .getContainerByServiceName(containerName)
+                .get
+                .isRunning()
+            )
+            assert(
+              composedContainers.getServicePort(containerName, containerPort) > 0
+            )
+          }
+      }
       daoTests(None)
     }
     "running sqlite" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
+
+      // Override existing database file
+      val dbFile = File(sqliteDbFilePath)
+      if (dbFile.exists()) then
+        dbFile.delete()
+      val writer = PrintWriter(dbFile)
+      writer.print("")
+      writer.close()
+
       val userDao = new SlickUserDao(
         ConfigFactory.load(
           ConfigFactory.parseString(sqliteConfigString)
         )
       )
-      //daoTests(Some(userDao))
+      daoTests(Some(userDao))
     }
   }
 
   def daoTests(optUserDao: Option[SlickUserDao])(using jdbcProfile: slick.jdbc.JdbcProfile) = {
     var userDao = optUserDao.getOrElse(null)
-    "have a running postgres container" in {
-      withContainers { composedContainers =>
-        assert(
-          composedContainers.getContainerByServiceName(containerName).isDefined
-        )
-        assert(
-          composedContainers
-            .getContainerByServiceName(containerName)
-            .get
-            .isRunning()
-        )
-        assert(
-          composedContainers.getServicePort(containerName, containerPort) > 0
-        )
-
-        if (optUserDao.isEmpty) then
-            userDao = new SlickUserDao(
-                ConfigFactory.load(
-                    ConfigFactory.parseString(postgresConfigString(composedContainers))
-                )
-            )
-      }
-    }
     "create users with a given username and password hash" in {
+      withContainers { composedContainers =>
+        if optUserDao.isEmpty then
+          userDao = new SlickUserDao(
+            ConfigFactory.load(
+                ConfigFactory.parseString(postgresConfigString(composedContainers))
+            )
+          )
+      }
       val user = userDao.createUser("test", "test")
       whenReady(user) { result =>
         result.isSuccess shouldBe true
