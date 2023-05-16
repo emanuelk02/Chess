@@ -27,6 +27,11 @@ import scala.concurrent.{Await, Future,ExecutionContextExecutor,ExecutionContext
 import scala.util.{Try,Success,Failure}
 import scala.quoted._
 import spray.json._
+import java.io.InputStream
+import java.security.{SecureRandom, KeyStore}
+import javax.net.ssl.{SSLContext, KeyManagerFactory, TrustManagerFactory}   
+import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
+
 
 import util.data.Piece
 import util.data.Matrix
@@ -38,6 +43,7 @@ import persistence.databaseComponent.UserDao
 import persistence.databaseComponent.SessionDao
 
 import PersistenceModule.given
+import org.checkerframework.checker.units.qual.K
 
 
 case class PersistenceService(
@@ -209,10 +215,33 @@ case class PersistenceService(
             }
         }
     )
+    
+    def readPasswordFromFile: Array[Char] = {
+        val source = scala.io.Source.fromFile("password.txt")
+        val password = source.mkString.toCharArray
+        source.close()
+        password
+    }
 
+    val ks: KeyStore = KeyStore.getInstance("PKCS12")
+    val keystore: InputStream = getClass.getClassLoader.getResourceAsStream("keystore.p12")
+    val password: Array[Char] = readPasswordFromFile
+
+    require(keystore != null, "Keystore required!")
+    ks.load(keystore, password)
+
+    val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(ks, password)
+
+    val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
+    tmf.init(ks)
+
+    val sslContext: SSLContext = SSLContext.getInstance("TLS")
+    sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
+    val https: HttpsConnectionContext = ConnectionContext.https(sslContext)
 
     def run: Unit =
-        bind = Http().newServerAt(ip, port).bind(route)
+        bind = Http().newServerAt(ip, port).enableHttps(https).bind(route)
 
     def terminate: Unit =
         bind
