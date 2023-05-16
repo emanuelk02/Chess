@@ -72,6 +72,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
     }
 
     private val db = Database.forConfig("slick.dbs."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite"), config)
+        
     private val users = new TableQuery(UserTable(_))
     private val sessions = new TableQuery(SessionTable(_))
 
@@ -94,8 +95,8 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
         db.run(setup.asTry).andThen {
             case Success(_) => println("Created tables")
             case Failure(e) => 
-                if (tries < 5) {
-                    wait(1000)
+                if (tries < 10) {
+                    wait(3000)
                     println("Failed to create tables, retrying...")
                     createTables(tries + 1)
                 } else {

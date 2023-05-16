@@ -1,6 +1,7 @@
 **/test*
 **/target*
 
+**/secrets*
 **/.bloop*
 **/.metals*
 **/.github*

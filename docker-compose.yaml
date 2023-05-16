@@ -29,10 +29,8 @@ services:
       - chess-network
     volumes:
       - chess-database:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+    env_file:
+      - ./docker/secrets/postgres.env
 
   persistence:
     image: chess-persistence
@@ -48,12 +46,12 @@ services:
       - "8083:8083"
     networks:
       - chess-network
+    env_file:
+      - ./docker/secrets/postgres.env
     environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
-      - DATABASE_CONFIG=postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_CONFIG: postgres
     healthcheck:
       test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/saves"]
       interval: 5s
@@ -129,4 +127,4 @@ networks:
   chess-network:
 
 volumes:
-  chess-persistence-volume:
+  chess-database:
