@@ -202,17 +202,30 @@ case class PersistenceService(
     pathPrefix("users" / IntNumber / "saves") { id =>
       concat(
         post {
-          entity(as[String]) { fen =>
-            processRequest((id, fen)) {
-              sessionDao.createSession(_, _)
-            }
-          }
+          parameter("name".as[String].optional) { param =>
+            param match
+              case Some(name) =>
+                entity(as[String]) { fen =>
+                  processRequest((id, name, fen)) { (id, name, fen) =>
+                    sessionDao.createSession(
+                      id,
+                      new GameSession(name, fen)
+                    )
+                  }
+                }
+              case None =>
+                entity(as[String]) { fen =>
+                  processRequest((id, fen)) {
+                    sessionDao.createSession(_, _)
+                  }
+                }
+              }
+            
         },
         get {
-          parameter("ordering".as[String].optional) { order =>
             concat(
-              parameter("id".as[Int].optional) { param =>
-                param match
+              parameters("id".as[Int].optional, "ordering".as[String].optional) { (optId, order) =>
+                optId match
                   case Some(sessId) =>
                     processRequest(sessId) {
                       sessionDao.readSession(_)
@@ -225,8 +238,8 @@ case class PersistenceService(
                       )
                     }
               },
-              parameter("name".as[String].optional) { param =>
-                param match
+              parameters("name".as[String].optional, "ordering".as[String].optional) { (optname, order) =>
+                optname match
                   case Some(name) =>
                     processRequest((id, name)) {
                       sessionDao.readAllForUserWithName(
@@ -243,9 +256,7 @@ case class PersistenceService(
                       )
                     }
               }
-            )
-          }
-        }
+        )}
       )
     },
     path("hash-checks") {
