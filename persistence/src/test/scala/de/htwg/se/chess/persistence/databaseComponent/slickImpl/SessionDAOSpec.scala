@@ -123,9 +123,9 @@ class SessionDAOSpec
       val dbFile = File(sqliteDbFilePath)
       if (dbFile.exists()) then
         dbFile.delete()
-      val writer = PrintWriter(dbFile)
-      writer.print("")
-      writer.close()
+      else
+        dbFile.getParentFile.mkdirs()
+        dbFile.createNewFile()
 
       val userDao = new SlickUserDao(
         ConfigFactory.load(
