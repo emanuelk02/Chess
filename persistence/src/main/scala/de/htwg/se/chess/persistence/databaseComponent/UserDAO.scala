@@ -22,7 +22,7 @@ import util.data.User
 
 
 trait UserDao(config: Config) {
-    def createUser(name: String, passHash: String): Future[Try[Boolean]]
+    def createUser(name: String, passHash: String): Future[Try[User]]
 
     def readUser(id: Int): Future[Try[User]]
     def readUser(name: String): Future[Try[User]]

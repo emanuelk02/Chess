@@ -147,14 +147,14 @@ class UserDaoSpec
       val user = userDao.createUser("test", "test")
       whenReady(user) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe true
+        result.get shouldBe User(1, "test")
 
         checkForUser(userDao, User(1, "test"))
       }
       val userWithHash = userDao.createUser("test2", "test2")
       whenReady(userWithHash) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe true
+        result.get shouldBe User(2, "test2")
 
         checkForUser(userDao, User(2, "test2"))
       }
