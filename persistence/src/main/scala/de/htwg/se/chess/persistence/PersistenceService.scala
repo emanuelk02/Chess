@@ -43,6 +43,7 @@ import util.data.ChessJsonProtocol._
 import util.services.JsonHandlerService
 import persistence.databaseComponent.UserDao
 import persistence.databaseComponent.SessionDao
+import persistence.databaseComponent.Ordering
 
 import PersistenceModule.given
 
@@ -174,7 +175,7 @@ case class PersistenceService(
                         }
                     }
                 },
-                get { concat(
+                get { parameter("ordering".as[String].optional) { order => concat(
                     parameter("id".as[Int].optional) { param =>
                         param match
                             case Some(sessId) => 
@@ -183,21 +184,21 @@ case class PersistenceService(
                                 }
                             case None => 
                                 processRequest(id) {
-                                    sessionDao.readAllForUser(_)
+                                    sessionDao.readAllForUser(_, Ordering.fromString(order.getOrElse("")))
                                 }
                     },
                     parameter("name".as[String].optional) { param =>
                         param match
                             case Some(name) => 
                                 processRequest((id, name)) {
-                                    sessionDao.readAllForUserWithName(_, _)
+                                    sessionDao.readAllForUserWithName(_, _, Ordering.fromString(order.getOrElse("")))
                                 }
                             case None => 
                                 processRequest(id) {
-                                    sessionDao.readAllForUser(_)
+                                    sessionDao.readAllForUser(_, Ordering.fromString(order.getOrElse("")))
                                 }
                     })
-                }
+                }}
             )
         },
         path("hash-checks") {

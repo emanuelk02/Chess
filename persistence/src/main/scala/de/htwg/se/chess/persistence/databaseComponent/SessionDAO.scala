@@ -39,16 +39,32 @@ enum Ordering(val order: Order, val by: OrderBy) {
     case ASC_ID extends Ordering(Order.ASC, OrderBy.ID)
     case ASC_NAME extends Ordering(Order.ASC, OrderBy.NAME)
     case ASC_DATE extends Ordering(Order.ASC, OrderBy.DATE)
-
     case DESC extends Ordering(Order.DESC, OrderBy.DATE)
     case DESC_ID extends Ordering(Order.DESC, OrderBy.ID)
     case DESC_NAME extends Ordering(Order.DESC, OrderBy.NAME)
     case DESC_DATE extends Ordering(Order.DESC, OrderBy.DATE)
-
     case ID extends Ordering(Order.DESC, OrderBy.ID)
     case NAME extends Ordering(Order.DESC, OrderBy.NAME)
     case DATE extends Ordering(Order.DESC, OrderBy.DATE)
 }
+
+object Ordering:
+    def fromString(str: String): Ordering = str match {
+        case s"ASC$rest" => rest.toUpperCase() match {
+            case "_ID" => Ordering.ASC_ID
+            case "_NAME" => Ordering.ASC_NAME
+            case "_DATE" => Ordering.ASC_DATE
+            case _ => Ordering.ASC
+        }
+        case s"DESC$rest" => rest.toUpperCase() match {
+            case "_ID" => Ordering.DESC_ID
+            case "_NAME" => Ordering.DESC_NAME
+            case "_DATE" => Ordering.DESC_DATE
+            case _ => Ordering.DESC
+        }
+        case _ => Ordering.DESC
+    }
+
 
 trait SessionDao(config: Config) {
     def createSession(userid: Int, fen: String): Future[Try[GameSession]]
