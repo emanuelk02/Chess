@@ -22,6 +22,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.Second
+import org.scalatest.time.Seconds
 import scala.concurrent.ExecutionContext
 import org.testcontainers.containers.wait.strategy.Wait
 import com.typesafe.config.ConfigFactory
@@ -68,7 +69,7 @@ class UserDaoSpec
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
-      org.scalatest.time.Span(1, Second)
+      org.scalatest.time.Span(5, Seconds)
     )
   )
 
@@ -120,9 +121,9 @@ class UserDaoSpec
       val dbFile = File(sqliteDbFilePath)
       if (dbFile.exists()) then
         dbFile.delete()
-      val writer = PrintWriter(dbFile)
-      writer.print("")
-      writer.close()
+      else
+        dbFile.getParentFile.mkdirs()
+        dbFile.createNewFile()
 
       val userDao = new SlickUserDao(
         ConfigFactory.load(

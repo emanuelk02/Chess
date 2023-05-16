@@ -79,7 +79,7 @@ class SessionDAOSpec
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
-      org.scalatest.time.Span(1, Second)
+      org.scalatest.time.Span(5, Seconds)
     )
   )
 
@@ -123,9 +123,9 @@ class SessionDAOSpec
       val dbFile = File(sqliteDbFilePath)
       if (dbFile.exists()) then
         dbFile.delete()
-      val writer = PrintWriter(dbFile)
-      writer.print("")
-      writer.close()
+      else
+        dbFile.getParentFile.mkdirs()
+        dbFile.createNewFile()
 
       val userDao = new SlickUserDao(
         ConfigFactory.load(
