@@ -21,11 +21,17 @@ import slick.lifted.TableQuery
 
 
 object PersistenceModule:
+  val sqliteDbFile = java.io.File("./saves/databases/sqlite/chess-persistence.db")
+    if !sqliteDbFile.exists then 
+        sqliteDbFile.getParentFile.mkdirs()
+        sqliteDbFile.createNewFile()
+  
+  given jdbcProfile: slick.jdbc.JdbcProfile = if sys.env.getOrElse("DATABASE_CONFIG", "sqlite") == "sqlite"
+    then slick.jdbc.SQLiteProfile
+    else slick.jdbc.PostgresProfile
+        
   given UserDao = new slickImpl.SlickUserDao
   given SessionDao = new slickImpl.SlickSessionDao
   given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "PersistenceService")
   given executionContext: ExecutionContext = system.executionContext
 
-  given jdbcProfile: slick.jdbc.JdbcProfile = if sys.env.getOrElse("DATABASE_CONFIG", "sqlite") == "sqlite"
-    then slick.jdbc.SQLiteProfile
-    else slick.jdbc.PostgresProfile

@@ -29,6 +29,7 @@ import util.data.User
 import util.data.Tile
 import util.data.Piece
 import util.patterns.Command
+import util.data.FenParser._
 
 import ControllerModule.given
 
@@ -48,16 +49,18 @@ class Controller (
     this.field = field.loadFromFen(startingFen)
 
   override def registerUser(name: String, pass: String): Unit =
+    println("registering user "+name)
     communicator.getUser(name) match
-      case u: Some[User] => this.user = user
+      case some: Some[User] => this.user = some; println("user already exists"); println(this.user)
       case None =>
-        communicator.registerUser(name, pass)
+        println(communicator.registerUser(name, pass))
         this.user = communicator.getUser(name)
+        println("user registered"); println(this.user)
 
   override def save: Unit =
     communicator.save(field.toFen, user.get)
 
   override def load: Unit =
     communicator.load(user.get) match
-        case Success(fen) => field = field.loadFromFen(fen)
+        case Success(sess) => field = field.loadFromFen(sess.toFen)
         case Failure(err) => publish(ErrorEvent(err.getMessage))

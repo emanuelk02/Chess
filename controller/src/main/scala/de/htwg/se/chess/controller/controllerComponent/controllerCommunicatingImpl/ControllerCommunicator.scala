@@ -20,6 +20,7 @@ import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -34,11 +35,12 @@ import spray.json._
 import util.data.User
 import util.data.ChessJsonProtocol._
 import util.client.BlockingClient.blockingReceiveRequest
+import de.htwg.se.chess.util.data.GameSession
 
 
 case class ControllerCommunicator(
     persistenceService: Uri = 
-        Uri(s"http://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}")
+        Uri(s"https://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}")
     )
     (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 
@@ -50,14 +52,14 @@ case class ControllerCommunicator(
             )
         )
 
-    def load(user: User): Try[String] =
-        blockingReceiveRequest[Try[String]](
+    def load(user: User): Try[GameSession] =
+        blockingReceiveRequest[Try[GameSession]](
             Http().singleRequest(
                 Get(persistenceService.withPath(Path(s"/users/${user.id}/saves")))
             ), {
                 case HttpResponse(OK, _, entity, _) =>
                     val response = Await.result(Unmarshal(entity).to[JsValue], Duration.Inf)
-                    Success(response.convertTo[Seq[Tuple2[Int, String]]].head._2)
+                    Success(response.convertTo[Seq[Tuple2[Int, GameSession]]].head._2)
                 case HttpResponse(status, _, _, _) =>
                     Failure(new Exception(s"Unexpected status code: $status"))
             }
@@ -66,7 +68,7 @@ case class ControllerCommunicator(
     def registerUser(name: String, pass: String): Future[HttpResponse] =
         Http().singleRequest(
             Post(
-                persistenceService.withPath(Path(s"/users?name=$name")),
+                persistenceService.withPath(Path("/users")).withQuery(Query("name" -> name)),
                 pass
             )
         )
@@ -74,7 +76,7 @@ case class ControllerCommunicator(
     def getUser(name: String): Option[User] =
         blockingReceiveRequest[Option[User]](
             Http().singleRequest(
-                Get(persistenceService.withPath(Path(s"/users?name=$name")))
+                Get(persistenceService.withPath(Path(s"/users")).withQuery(Query("name" -> name)))
             ), {
                 case HttpResponse(OK, _, entity, _) =>
                     val response = Await.result(Unmarshal(entity).to[JsValue], Duration.Inf)

@@ -14,7 +14,6 @@ package persistence
 package databaseComponent
 package slickImpl
 
-import akka.http.scaladsl.model.Uri
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
 import scala.concurrent.{Await, Future, ExecutionContext}

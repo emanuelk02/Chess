@@ -21,6 +21,11 @@ import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.ConnectionContext
+import javax.net.ssl.SSLContext
+import java.security.KeyStore
+import javax.net.ssl.TrustManagerFactory
+import java.security.cert.CertificateFactory
 import scala.concurrent.{Future, ExecutionContextExecutor, ExecutionContext}
 import scala.util.{Try, Success, Failure}
 import scala.quoted._
@@ -233,8 +238,32 @@ case class ControllerService(
     case _ => ???
   }
 
+  val certFactory = CertificateFactory.getInstance("X.509")
+  val trustStore = KeyStore.getInstance("PKCS12")
+  trustStore.load(null)
+  trustStore.setEntry(
+      sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost"),
+      new KeyStore.TrustedCertificateEntry(
+          certFactory.generateCertificate(
+              java.io.FileInputStream(java.io.File("certs/persistence.cer"))
+          )
+      ),
+      null
+  )
+
+  val tmf = TrustManagerFactory.getInstance("SunX509")
+  tmf.init(trustStore)
+  val trustManagers = tmf.getTrustManagers
+
+  val sslContext = SSLContext.getInstance("TLS")
+  sslContext.init(null, trustManagers, null)
+  val httpsConnectionContext = ConnectionContext.httpsClient(
+      context = sslContext
+  )
+
   def run: Unit =
     listenTo(controller)
+    Http().setDefaultClientHttpsContext(httpsConnectionContext)
     bind = Http().newServerAt(ip, port).bind(route)
 
   def terminate: Unit =

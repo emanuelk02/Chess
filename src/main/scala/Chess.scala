@@ -34,7 +34,7 @@ object starter:
   implicit val sys: ActorSystem[Any] = ActorSystem(Behaviors.empty, "Main-Api")
   implicit val ex: ExecutionContext = sys.executionContext
   
-  def runApi: Unit = { 
+  def runApi: Unit = {
     val persistenceApi = PersistenceService("localhost", 8083)
     persistenceApi.run
     val chessApi = ChessService("localhost", 8080)

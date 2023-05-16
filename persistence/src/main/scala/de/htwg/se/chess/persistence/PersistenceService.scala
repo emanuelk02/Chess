@@ -224,8 +224,8 @@ case class PersistenceService(
         password
     }
 
-    val ks: KeyStore = KeyStore.getInstance("PKCS12")
-    val keystore: InputStream = FileInputStream(java.io.File("keystore.jks"))
+    val ks: KeyStore = KeyStore.getInstance("JKS")
+    val keystore: InputStream = FileInputStream(java.io.File("persistence/src/main/resources/persistence.jks"))
     val password: Array[Char] = readPasswordFromFile
 
     require(keystore != null, "Keystore required!")
