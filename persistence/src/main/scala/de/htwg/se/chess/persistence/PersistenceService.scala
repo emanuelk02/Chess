@@ -28,6 +28,8 @@ import scala.util.{Try,Success,Failure}
 import scala.quoted._
 import spray.json._
 import java.io.InputStream
+import java.io.FileInputStream
+import java.io.BufferedInputStream
 import java.security.{SecureRandom, KeyStore}
 import javax.net.ssl.{SSLContext, KeyManagerFactory, TrustManagerFactory}   
 import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
@@ -43,7 +45,6 @@ import persistence.databaseComponent.UserDao
 import persistence.databaseComponent.SessionDao
 
 import PersistenceModule.given
-import org.checkerframework.checker.units.qual.K
 
 
 case class PersistenceService(
@@ -224,7 +225,7 @@ case class PersistenceService(
     }
 
     val ks: KeyStore = KeyStore.getInstance("PKCS12")
-    val keystore: InputStream = getClass.getClassLoader.getResourceAsStream("keystore.p12")
+    val keystore: InputStream = FileInputStream(java.io.File("keystore.jks"))
     val password: Array[Char] = readPasswordFromFile
 
     require(keystore != null, "Keystore required!")
