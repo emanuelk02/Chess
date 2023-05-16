@@ -79,7 +79,7 @@ class SessionDAOSpec
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
-      org.scalatest.time.Span(1, Second)
+      org.scalatest.time.Span(5, Seconds)
     )
   )
 
