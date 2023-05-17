@@ -11,7 +11,6 @@
 package de.htwg.se.chess
 package persistence
 package databaseComponent
-package slickImpl
 
 import akka.http.scaladsl.model.Uri
 import com.dimafeng.testcontainers.DockerComposeContainer
@@ -33,6 +32,9 @@ import scala.util.Try
 import util.data.User
 import scala.util.Failure
 
+import slickImpl._
+import mongoImpl._
+
 
 class UserDaoSpec
     extends AnyWordSpec
@@ -51,7 +53,7 @@ class UserDaoSpec
       )
     )
 
-  def checkForUser(userDao: SlickUserDao, user: User): Unit = {
+  def checkForUser(userDao: UserDao, user: User): Unit = {
     whenReady(userDao.readUser(user.id)) { result =>
       result.isSuccess shouldBe true
       result.get.id shouldBe user.id
@@ -93,6 +95,8 @@ class UserDaoSpec
           slick.dbs.sqlite.password = "postgres"
           """
 
+  def mongoDbConfigString(composedContainers: Containers) = s""""""
+
   "A UserDAO " when {
     "running postgres" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.PostgresProfile
@@ -112,7 +116,15 @@ class UserDaoSpec
             )
           }
       }
-      daoTests(None)
+      daoTests(containers =>
+        new SlickUserDao(
+          ConfigFactory.load(
+            ConfigFactory.parseString(
+              postgresConfigString(containers)
+            )
+          )
+        )(using ec, jdbcProfile)
+      )
     }
     "running sqlite" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
@@ -129,21 +141,32 @@ class UserDaoSpec
         ConfigFactory.load(
           ConfigFactory.parseString(sqliteConfigString)
         )
+      )(using ec, jdbcProfile)
+      daoTests(_ => userDao)
+    }
+    "running mongoDb" should {
+      "have a running mongoDb container" in {
+        withContainers { composedContainers =>
+          // Check if container is up goes here (see postgres above) //
+        }
+      }
+      daoTests(containers =>
+        new MongoUserDao(
+          ConfigFactory.load(
+            ConfigFactory.parseString(
+              mongoDbConfigString(containers)
+            )
+          )
+        )(using ec)
       )
-      daoTests(Some(userDao))
     }
   }
 
-  def daoTests(optUserDao: Option[SlickUserDao])(using jdbcProfile: slick.jdbc.JdbcProfile) = {
-    var userDao = optUserDao.getOrElse(null)
+  def daoTests(getter: Containers => UserDao) = {
+    var userDao: UserDao = null
     "create users with a given username and password hash" in {
-      withContainers { composedContainers =>
-        if optUserDao.isEmpty then
-          userDao = new SlickUserDao(
-            ConfigFactory.load(
-                ConfigFactory.parseString(postgresConfigString(composedContainers))
-            )
-          )
+      withContainers { containers =>
+        userDao = getter(containers)
       }
       val user = userDao.createUser("test", "test")
       whenReady(user) { result =>

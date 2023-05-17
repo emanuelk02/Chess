@@ -11,7 +11,6 @@
 package de.htwg.se.chess
 package persistence
 package databaseComponent
-package slickImpl
 
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.wordspec.AnyWordSpec
@@ -36,6 +35,9 @@ import scala.collection.JavaConverters._
 import util.data.FenParser._
 import util.data.GameSession
 import util.data.User
+
+import slickImpl._
+import mongoImpl._
 
 
 class SessionDAOSpec
@@ -77,6 +79,8 @@ class SessionDAOSpec
           slick.dbs.sqlite.password = "postgres"
           """
 
+  def mongoDbConfigString(composedContainers: Containers) = s""""""
+
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
       org.scalatest.time.Span(5, Seconds)
@@ -114,7 +118,11 @@ class SessionDAOSpec
           userDao.close()
         }
       }
-      daoTests(None)
+      daoTests(containers => new SlickSessionDao(
+        ConfigFactory.load(
+          ConfigFactory.parseString(postgresConfigString(containers))
+        )
+      )(using ec, jdbcProfile))
     }
     "running sqlite" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
@@ -131,12 +139,12 @@ class SessionDAOSpec
         ConfigFactory.load(
           ConfigFactory.parseString(sqliteConfigString)
         )
-      )
+      )(using ec, jdbcProfile)
       val sessionDao = new SlickSessionDao(
         ConfigFactory.load(
           ConfigFactory.parseString(sqliteConfigString)
         )
-      )
+      )(using ec, jdbcProfile)
       val fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
       val fen2 = "8/8/8/8/8/8/8/RNBQKBNR b Kq A1 10 15"
       val session1 = new GameSession("save1", fen)
@@ -155,28 +163,55 @@ class SessionDAOSpec
         }
         userDao.close()
       }
-      daoTests(Some(sessionDao))
+      daoTests(_ => sessionDao)
+    }
+    "running MongoDb" should {
+        "have a running mongoDb container" in {
+            withContainers { containers =>
+                // Check if container is up goes here (see postgres above) //
+
+                val userDao = new MongoUserDao(
+                    ConfigFactory.load(
+                      ConfigFactory.parseString(mongoDbConfigString(containers))
+                    )
+                )
+                // Otehr DB preparation steps in here //
+                initializeDb(userDao)
+                userDao.close()
+            }
+        }
+        daoTests(containers => new MongoSessionDao(
+            ConfigFactory.load(
+              ConfigFactory.parseString(mongoDbConfigString(containers))
+            )
+        ))
     }
   }
 
-  def daoTests(
-      optSessionDao: Option[SlickSessionDao]
-  )(using jdbcProfile: slick.jdbc.JdbcProfile) = {
+  def initializeDb(userDao: UserDao) = {
+    val user = userDao.createUser("test", "test")
+    whenReady(user) { result =>
+      result.isSuccess shouldBe true
+      result.get shouldBe User(1, "test")
+    }
+    val user2 = userDao.createUser("test2", "test2")
+    whenReady(user2) { result =>
+      result.isSuccess shouldBe true
+      result.get shouldBe User(2, "test2")
+    }
+    userDao.close()
+  }
+
+  def daoTests(getter: Containers => SessionDao) = {
     val fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     val fen2 = "8/8/8/8/8/8/8/RNBQKBNR b Kq A1 10 15"
     val session1 = new GameSession("save1", fen)
     val session3 =
       new GameSession(Date.valueOf(LocalDate.now().plusDays(1)), fen2)
-    var sessionDao: SlickSessionDao = null
+    var sessionDao: SessionDao = null
     "allow to store a game session specified by a FEN string and assigned to a user by id or name" in {
       withContainers { containers =>
-        if optSessionDao.isEmpty then
-          sessionDao = new SlickSessionDao(
-            ConfigFactory.load(
-              ConfigFactory.parseString(postgresConfigString(containers))
-            )
-          )
-        else sessionDao = optSessionDao.get
+        sessionDao = getter(containers)
       }
       val user1sess1 = sessionDao.createSession(1, session1)
       whenReady(user1sess1) { result =>

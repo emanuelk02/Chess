@@ -13,7 +13,6 @@ package de.htwg.se.chess
 package persistence
 package databaseComponent
 
-import akka.http.scaladsl.model.Uri
 import com.typesafe.config.Config
 import scala.concurrent.Future
 import scala.util.Try
