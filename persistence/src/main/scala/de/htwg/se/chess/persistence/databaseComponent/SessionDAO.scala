@@ -49,7 +49,7 @@ enum Ordering(val order: Order, val by: OrderBy) {
 }
 
 object Ordering:
-    def fromString(str: String): Ordering = str match {
+    def fromString(str: String): Ordering = str.toUpperCase() match {
         case s"ASC$rest" => rest.toUpperCase() match {
             case "_ID" => Ordering.ASC_ID
             case "_NAME" => Ordering.ASC_NAME
@@ -62,6 +62,9 @@ object Ordering:
             case "_DATE" => Ordering.DESC_DATE
             case _ => Ordering.DESC
         }
+        case "ID" => Ordering.ID
+        case "NAME" => Ordering.NAME
+        case "DATE" => Ordering.DATE
         case _ => Ordering.DESC
     }
 
