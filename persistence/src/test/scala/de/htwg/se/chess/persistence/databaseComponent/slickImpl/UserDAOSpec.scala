@@ -240,4 +240,7 @@ class UserDaoSpec
         a [NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
+    "close" in {
+        userDao.close()
+    }
   }

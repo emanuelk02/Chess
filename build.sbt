@@ -56,7 +56,8 @@ lazy val persistence: Project = project
     .in(file("persistence"))
     .settings(
         name := "persistence",
-        commonSettings
+        commonSettings,
+        Test / parallelExecution := false
     )
     .enablePlugins(JacocoCoverallsPlugin)
     .dependsOn(utils)
