@@ -41,11 +41,6 @@ import util.data.GameSession
 case class MongoSessionDao(config: Config = ConfigFactory.load())
     (using ec: ExecutionContext)
     extends SessionDao(config) {
-    
-    private val mongoConfig = config.getConfig("mongodb")
-    private val databaseName = mongoConfig.getString("databaseName")
-    private val collectionName = mongoConfig.getString("collectionName")
-    private val connectionUrl = mongoConfig.getString("connectionUrl")
 
     val uri = config.getString("mongodb.connectionUrl")
     val client: MongoClient = MongoClient(uri)
@@ -93,40 +88,4 @@ case class MongoSessionDao(config: Config = ConfigFactory.load())
         // Höchste ID extrahieren und zurückgeben
         val result = Await.result(futureResult, Inf)
         result.flatMap(_.get("_id").map(_.asInt32().getValue.toHexString)).getOrElse("0").toInt
-    private def insertOne(insertObs: SingleObservable[InsertOneResult]): Unit =
-            insertObs.subscribe(new Observer[InsertOneResult] {
-            override def onNext(result: InsertOneResult): Unit =
-                println(s"Inserted: $result")
-
-            override def onError(e: Throwable): Unit =
-                println(s"Failed: $e")
-
-            override def onComplete(): Unit =
-                println("Completed")
-        })
-
-        private def updateOne(updateObs: SingleObservable[UpdateResult]): Unit =
-            updateObs.subscribe(new Observer[UpdateResult] {
-            override def onNext(result: UpdateResult): Unit =
-                println(s"Updated: $result")
-
-            override def onError(e: Throwable): Unit =
-                println(s"Failed: $e")
-
-            override def onComplete(): Unit =
-                println("Completed")
-        })
-
-        private def deleteOne(deleteObs: SingleObservable[DeleteResult]): Unit =
-            deleteObs.subscribe(new Observer[DeleteResult] {
-            override def onNext(result: DeleteResult): Unit =
-                println(s"Deleted: $result")
-
-            override def onError(e: Throwable): Unit =
-                println(s"Failed: $e")
-
-            override def onComplete(): Unit =
-                println("Completed")
-        })
-
 }
