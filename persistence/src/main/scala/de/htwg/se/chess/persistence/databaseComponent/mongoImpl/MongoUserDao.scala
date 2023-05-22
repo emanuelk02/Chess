@@ -28,11 +28,7 @@ import org.mongodb.scala.model.Sorts.*
 import org.mongodb.scala.result.{DeleteResult, InsertOneResult, UpdateResult}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, Observable, Observer, SingleObservable, SingleObservableFuture, result}
 
-
 import util.data.User
-import akka.http.scaladsl.server.RouteResult.Complete
-import de.htwg.se.chess.util.data.ChessJsonProtocol.PieceStringFormat.read
-import slick.collection.heterogeneous.Succ
 
 
 case class MongoUserDao(config: Config = ConfigFactory.load())
@@ -71,7 +67,7 @@ case class MongoUserDao(config: Config = ConfigFactory.load())
         val observable: SingleObservable[Document] = userCollection.find(equal("_id", id)).first()
         val futureResult: Future[Option[Document]] = observable.toFutureOption()
         val mappedResult: Future[Try[User]] = futureResult.map {
-            case Some(document) => Success(document.asInstanceOf[User])
+            case Some(document) => Success(User(document.get("_id").get.asInt32().getValue, document.get("name").get.asString().getValue))
             case None => Failure(new NoSuchElementException(s"User with id $id not found"))
         }
         mappedResult.recover {
@@ -82,7 +78,7 @@ case class MongoUserDao(config: Config = ConfigFactory.load())
         val observable: SingleObservable[Document] = userCollection.find(equal("name", name)).first()
         val futureResult: Future[Option[Document]] = observable.toFutureOption()
         val mappedResult: Future[Try[User]] = futureResult.map {
-            case Some(document) => Success(document.asInstanceOf[User])
+            case Some(document) => Success(User(document.get("_id").get.asInt32().getValue, document.get("name").get.asString().getValue))
             case None => Failure(new NoSuchElementException(s"User with name $name not found"))
         }
         mappedResult.recover {
