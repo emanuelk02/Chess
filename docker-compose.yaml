@@ -33,7 +33,7 @@ services:
       - ./docker/secrets/postgres.env
 
   mongodb:  
-    image: mongo
+    image: mongo:6.0.5
     restart: always
     container_name: mongodb
     ports:
@@ -41,7 +41,9 @@ services:
     networks:
       - chess-network
     volumes:
-      - mongodb-data:/data/db 
+      - mongodb-data:/data/db
+    env_file:
+      - ./docker/secrets/mongo.env
 
   persistence:
     image: chess-persistence

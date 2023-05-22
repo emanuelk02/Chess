@@ -42,7 +42,7 @@ case class MongoSessionDao(config: Config = ConfigFactory.load())
     (using ec: ExecutionContext)
     extends SessionDao(config) {
 
-    val uri = config.getString("mongodb.connectionUrl")
+    val uri = config.getString("dbs.mongodb.connectionUrl")
     val client: MongoClient = MongoClient(uri)
     val database: MongoDatabase = client.getDatabase("chess")
     val sessionCollection: MongoCollection[Document] = database.getCollection("session")

@@ -41,7 +41,7 @@ case class SlickUserDao(config: Config = ConfigFactory.load())
           )
     }
 
-    private val db = Database.forConfig("slick.dbs."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite"), config)
+    private val db = Database.forConfig("dbs.slick."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite"), config)
     private val users = new TableQuery(UserTable(_))
 
     private val setup = DBIO.seq(users.schema.createIfNotExists)

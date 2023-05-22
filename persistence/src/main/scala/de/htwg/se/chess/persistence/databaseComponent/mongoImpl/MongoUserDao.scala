@@ -39,7 +39,7 @@ case class MongoUserDao(config: Config = ConfigFactory.load())
     (using ec: ExecutionContext)
     extends UserDao(config) {
 
-    val uri = config.getString("mongodb.connectionUrl")
+    val uri = config.getString("dbs.mongodb.connectionUrl")
     val client: MongoClient = MongoClient(uri)
     val database: MongoDatabase = client.getDatabase("chess")
     val userCollection: MongoCollection[Document] = database.getCollection("user")

@@ -46,14 +46,17 @@ class SessionDAOSpec
     with TestContainerForAll
     with BeforeAndAfterAll:
 
-  val containerName = "postgres_1"
-  val containerPort = 5432
+  val postgresContainerName = "postgres_1"
+  val postgresContainerPort = 5432
+  val mongoDbContainerName = "mongodb_1"
+  val mongoDbContainerPort = 27017
   override val containerDef: DockerComposeContainer.Def =
     DockerComposeContainer.Def(
       new File("persistence/src/test/resources/docker-compose.yaml"),
       tailChildContainers = true,
       exposedServices = Seq(
-        ExposedService(containerName, containerPort, Wait.forListeningPort())
+        ExposedService(postgresContainerName, postgresContainerPort, Wait.forListeningPort()),
+        ExposedService(mongoDbContainerName, mongoDbContainerPort, Wait.forListeningPort())
       )
     )
 
@@ -62,24 +65,26 @@ class SessionDAOSpec
   val sqliteDbFilePath = "./saves/databases/sqlite/sessionDaoTests.db"
 
   def sqliteConfigString = s"""
-            slick.dbs.sqlite.url = "jdbc:sqlite:$sqliteDbFilePath"
-            slick.dbs.sqlite.driver = org.sqlite.JDBC
+            dbs.slick.sqlite.url = "jdbc:sqlite:$sqliteDbFilePath"
+            dbs.slick.sqlite.driver = org.sqlite.JDBC
             """
 
   // Yes, this is a bit of a hack, but it works
   // Since you cannot set env vars easily, I just use the config for sqlite
   // since that is what it will be resolved to in the DAO classes
   def postgresConfigString(composedContainers: Containers) = s"""
-          slick.dbs.sqlite.driver = "org.postgresql.Driver"
-          slick.dbs.sqlite.url = "jdbc:postgresql://${composedContainers
-    .getServiceHost(containerName, containerPort)}:${composedContainers
-    .getServicePort(containerName, containerPort)}/postgres"
-          slick.dbs.sqlite.jdbcUrl = """ + "${slick.dbs.sqlite.url}" + """
-          slick.dbs.sqlite.user = "postgres"
-          slick.dbs.sqlite.password = "postgres"
+          dbs.slick.sqlite.driver = "org.postgresql.Driver"
+          dbs.slick.sqlite.url = "jdbc:postgresql://${composedContainers
+    .getServiceHost(postgresContainerName, postgresContainerPort)}:${composedContainers
+    .getServicePort(postgresContainerName, postgresContainerPort)}/postgres"
+          dbs.slick.sqlite.jdbcUrl = """ + "${dbs.slick.sqlite.url}" + """
+          dbs.slick.sqlite.user = "postgres"
+          dbs.slick.sqlite.password = "postgres"
           """
 
-  def mongoDbConfigString(composedContainers: Containers) = s""""""
+  def mongoDbConfigString(composedContainers: Containers) = s"""
+        dbs.mongodb.connectionUrl = "mongodb://root:root@localhost:27017/?authSource=admin"
+  """
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(
@@ -93,11 +98,11 @@ class SessionDAOSpec
       var sessionDao: SlickSessionDao = null
       "have a running postgres container" in {
         withContainers { containers =>
-          assert(containers.getContainerByServiceName(containerName).isDefined)
+          assert(containers.getContainerByServiceName(postgresContainerName).isDefined)
           assert(
-            containers.getContainerByServiceName(containerName).get.isRunning()
+            containers.getContainerByServiceName(postgresContainerName).get.isRunning()
           )
-          assert(containers.getServicePort(containerName, containerPort) > 0)
+          assert(containers.getServicePort(postgresContainerName, postgresContainerPort) > 0)
 
           // Fill database with users, since session table has a foreign key constraint on users
           val userDao = new SlickUserDao(
@@ -105,17 +110,7 @@ class SessionDAOSpec
               ConfigFactory.parseString(postgresConfigString(containers))
             )
           )
-          val user = userDao.createUser("test", "test")
-          whenReady(user) { result =>
-            result.isSuccess shouldBe true
-            result.get shouldBe User(1, "test")
-          }
-          val user2 = userDao.createUser("test2", "test2")
-          whenReady(user2) { result =>
-            result.isSuccess shouldBe true
-            result.get shouldBe User(2, "test2")
-          }
-          userDao.close()
+          initializeDb(userDao)
         }
       }
       daoTests(containers => new SlickSessionDao(
@@ -151,33 +146,26 @@ class SessionDAOSpec
       val session3 =
         new GameSession(Date.valueOf(LocalDate.now().plusDays(1)), fen2)
       "initialize db" in {
-        val user = userDao.createUser("test", "test")
-        whenReady(user) { result =>
-          result.isSuccess shouldBe true
-          result.get shouldBe User(1, "test")
-        }
-        val user2 = userDao.createUser("test2", "test2")
-        whenReady(user2) { result =>
-          result.isSuccess shouldBe true
-          result.get shouldBe User(2, "test2")
-        }
-        userDao.close()
+        initializeDb(userDao)
       }
       daoTests(_ => sessionDao)
     }
     "running MongoDb" should {
         "have a running mongoDb container" in {
             withContainers { containers =>
-                // Check if container is up goes here (see postgres above) //
+                assert(containers.getContainerByServiceName(mongoDbContainerName).isDefined)
+                assert(
+                  containers.getContainerByServiceName(mongoDbContainerName).get.isRunning()
+                )
+                assert(containers.getServicePort(mongoDbContainerName, mongoDbContainerPort) > 0)
 
                 val userDao = new MongoUserDao(
                     ConfigFactory.load(
                       ConfigFactory.parseString(mongoDbConfigString(containers))
                     )
                 )
-                // Otehr DB preparation steps in here //
+
                 initializeDb(userDao)
-                userDao.close()
             }
         }
         daoTests(containers => new MongoSessionDao(
