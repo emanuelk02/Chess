@@ -39,6 +39,7 @@ import util.data.GameSession
 import util.data.FenParser._
 import util.data.User
 import java.time.LocalDate
+import de.htwg.se.chess.util.data.ChessJsonProtocol.PieceStringFormat.read
 
 
 
@@ -101,14 +102,36 @@ case class MongoSessionDao(config: Config = ConfigFactory.load())
 
     def readAllForUserWithName(userid: Int, displayName: String, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]] = ???
 
-    def readSession(sessionid: Int): Future[Try[GameSession]] = ???
+    def readSession(sessionid: Int): Future[Try[GameSession]] = 
+        val observable: SingleObservable[Document] = userCollection.find(equal("_id", sessionid)).first()
+        val futureResult: Future[Option[Document]] = observable.toFutureOption()
+        val mappedResult: Future[Try[GameSession]] = futureResult.map {
+            case Some(document) => Success(document.asInstanceOf[GameSession])
+            case None => Failure(new NoSuchElementException(s"GameSession with id $sessionid not found"))
+        }
+        mappedResult.recover {
+            case e: Throwable => Failure(e)
+        }
 
 
     def updateSession(sessionid: Int, fen: String): Future[Try[GameSession]] = ???
 
     def updateSession(sessionid: Int, session: GameSession): Future[Try[GameSession]] = ???
 
-    def deleteSession(sessionid: Int): Future[Try[GameSession]] = ???
+    def deleteSession(sessionid: Int): Future[Try[GameSession]] = 
+          readSession(sessionid).map{
+            case Success(session) => session
+            case Failure(e) => throw e
+        }.flatMap{
+            case session => 
+                val observable: SingleObservable[DeleteResult] = sessionCollection.deleteOne(equal("_id", sessionid))
+                val futureResult: Future[DeleteResult] = observable.toFuture()
+                futureResult.map {
+                    case result => Success(session)
+                }.recover {
+                    case e: Throwable => Failure(e)
+                }
+        }
 
     def close(): Unit = {
         client.close()
