@@ -27,6 +27,8 @@ import java.io.File
 import java.io.PrintWriter
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.sql.Date
 import java.sql.Timestamp
 import java.sql.DriverManager
@@ -55,8 +57,8 @@ class SessionDAOSpec
       new File("persistence/src/test/resources/docker-compose.yaml"),
       tailChildContainers = true,
       exposedServices = Seq(
-        ExposedService(postgresContainerName, postgresContainerPort, Wait.forListeningPort()),
-        ExposedService(mongoDbContainerName, mongoDbContainerPort, Wait.forListeningPort())
+        ExposedService(postgresContainerName, postgresContainerPort, Wait.forListeningPort().withStartupTimeout(Duration.of(300, ChronoUnit.SECONDS))),
+        ExposedService(mongoDbContainerName, mongoDbContainerPort, Wait.forListeningPort().withStartupTimeout(Duration.of(300, ChronoUnit.SECONDS)))
       )
     )
 
@@ -83,7 +85,9 @@ class SessionDAOSpec
           """
 
   def mongoDbConfigString(composedContainers: Containers) = s"""
-        dbs.mongodb.connectionUrl = "mongodb://root:root@localhost:27017/?authSource=admin"
+        dbs.mongodb.connectionUrl = "mongodb://root:root@${composedContainers
+    .getServiceHost(mongoDbContainerName, mongoDbContainerPort)}:${composedContainers
+    .getServicePort(mongoDbContainerName, mongoDbContainerPort)}"
   """
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(

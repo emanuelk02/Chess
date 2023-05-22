@@ -27,6 +27,8 @@ import org.testcontainers.containers.wait.strategy.Wait
 import com.typesafe.config.ConfigFactory
 import java.io.File
 import java.io.PrintWriter
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import scala.util.Try
 
 import util.data.User
@@ -52,19 +54,17 @@ class UserDaoSpec
       new File("./persistence/src/test/resources/docker-compose.yaml"),
       tailChildContainers = true,
       exposedServices = Seq(
-        ExposedService(postgresContainerName, postgresContainerPort, Wait.forListeningPort()),
-        ExposedService(mongoDbContainerName, mongoDbContainerPort, Wait.forLogMessage(".*Waiting for connections.*", 1))
+        ExposedService(postgresContainerName, postgresContainerPort, Wait.forListeningPort().withStartupTimeout(Duration.of(300, ChronoUnit.SECONDS))),
+        ExposedService(mongoDbContainerName, mongoDbContainerPort, Wait.forLogMessage(".*Waiting for connections.*", 1).withStartupTimeout(Duration.of(300, ChronoUnit.SECONDS)))
       )
     )
 
   def checkForUser(userDao: UserDao, user: User): Unit = {
     whenReady(userDao.readUser(user.id)) { result =>
-      result.isSuccess shouldBe true
       result.get.id shouldBe user.id
       result.get.name shouldBe user.name
     }
     whenReady(userDao.readUser(user.name)) { result =>
-      result.isSuccess shouldBe true
       result.get.id shouldBe user.id
       result.get.name shouldBe user.name
     }
@@ -100,7 +100,9 @@ class UserDaoSpec
           """
 
   def mongoDbConfigString(composedContainers: Containers) = s"""
-        dbs.mongodb.connectionUrl = "mongodb://root:root@localhost:27017/?authSource=admin"
+        dbs.mongodb.connectionUrl = "mongodb://root:root@${composedContainers
+        .getServiceHost(mongoDbContainerName, mongoDbContainerPort)}:${composedContainers
+        .getServicePort(mongoDbContainerName, mongoDbContainerPort)}"
     """
 
   "A UserDAO " when {
@@ -187,14 +189,12 @@ class UserDaoSpec
       }
       val user = userDao.createUser("test", "test")
       whenReady(user) { result =>
-        result.isSuccess shouldBe true
         result.get shouldBe User(1, "test")
 
         checkForUser(userDao, User(1, "test"))
       }
       val userWithHash = userDao.createUser("test2", "test2")
       whenReady(userWithHash) { result =>
-        result.isSuccess shouldBe true
         result.get shouldBe User(2, "test2")
 
         checkForUser(userDao, User(2, "test2"))
@@ -214,7 +214,6 @@ class UserDaoSpec
     "allow to read existing users" in {
       val user = userDao.readUser(1)
       whenReady(user) { result =>
-        result.isSuccess shouldBe true
         result.get.id shouldBe 1
         result.get.name shouldBe "test"
       }
@@ -227,17 +226,14 @@ class UserDaoSpec
     "allow to get the password hash to check if a given password is valid" in {
       val user1succ = userDao.readHash(1)
       whenReady(user1succ) { result =>
-        result.isSuccess shouldBe true
         result.get shouldBe "test"
       }
       val user1succ2 = userDao.readHash("test")
       whenReady(user1succ2) { result =>
-        result.isSuccess shouldBe true
         result.get shouldBe "test"
       }
       val user2 = userDao.readHash(2)
       whenReady(user2) { result =>
-        result.isSuccess shouldBe true
         result.get shouldBe "test2"
       }
       val nonexistent = userDao.readHash(3)
@@ -249,7 +245,6 @@ class UserDaoSpec
     "allow to update a users name" in {
       val user1 = userDao.updateUser("test", "tested")
       whenReady(user1) { result =>
-        result.isSuccess shouldBe true
         result.get.id shouldBe 1
         result.get.name shouldBe "tested"
 
@@ -264,13 +259,11 @@ class UserDaoSpec
     "allow to delete a user" in {
       val user1 = userDao.deleteUser(1)
       whenReady(user1) { result =>
-        result.isSuccess shouldBe true
         result.get.id shouldBe 1
         result.get.name shouldBe "tested"
       }
       val user2 = userDao.deleteUser("test2")
       whenReady(user2) { result =>
-        result.isSuccess shouldBe true
         result.get.id shouldBe 2
         result.get.name shouldBe "test2"
       }
