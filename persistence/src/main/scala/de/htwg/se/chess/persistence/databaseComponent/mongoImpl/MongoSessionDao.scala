@@ -36,6 +36,10 @@ import util.data.Piece
 import util.data.Matrix
 import util.data.ChessState
 import util.data.GameSession
+import util.data.FenParser._
+import util.data.User
+import java.time.LocalDate
+
 
 
 case class MongoSessionDao(config: Config = ConfigFactory.load())
@@ -46,6 +50,19 @@ case class MongoSessionDao(config: Config = ConfigFactory.load())
     val client: MongoClient = MongoClient(uri)
     val database: MongoDatabase = client.getDatabase("chess")
     val sessionCollection: MongoCollection[Document] = database.getCollection("session")
+    val userCollection: MongoCollection[Document] = database.getCollection("user")
+
+
+    private def convertToDocument(userid: Int, session: GameSession): Document = {
+    val doc = Document(
+      "_id" -> (getHighestId(sessionCollection) + 1),
+      "user_id" -> userid,
+      "display_name" -> session.displayName,
+      "creation_date" -> Date.valueOf(LocalDate.now()),
+      "session_fen" -> session.toFen
+    )
+    doc
+    }
 
     def createSession(userid: Int, fen: String): Future[Try[GameSession]] = 
         createSession(userid, new GameSession(fen))
@@ -53,9 +70,31 @@ case class MongoSessionDao(config: Config = ConfigFactory.load())
     def createSession(username: String, fen: String): Future[Try[GameSession]] = 
         createSession(username, new GameSession(fen))
 
-    def createSession(userid: Int, sess: GameSession): Future[Try[GameSession]] = ???
+    def createSession(userid: Int, sess: GameSession): Future[Try[GameSession]] = 
+        val sessionDoc = convertToDocument(userid, sess)
+        val observable: SingleObservable[InsertOneResult]= sessionCollection.insertOne(sessionDoc)
+        val futureResult = observable.toFuture()
+        
+        futureResult.map {
+            case result => Success(sess)
+        }.recover {
+            case e => Failure(e)
+        }
 
-    def createSession(username: String, sess: GameSession): Future[Try[GameSession]] = ???
+    def createSession(username: String, sess: GameSession): Future[Try[GameSession]] =  
+        val userDocumentFuture = userCollection.find(equal("name", username)).first().toFutureOption()
+        userDocumentFuture.flatMap {
+            case Some(userDocument) =>
+            val userId = userDocument.get("id").get.asInt32().getValue()
+            val sessionDocument = convertToDocument(userId, sess)
+            sessionCollection.insertOne(sessionDocument).toFuture().map(_ => Success(sess))
+            case None =>
+            Future.failed(new NoSuchElementException(s"There is no user with name: $username"))
+        }.recover {
+            case e: Throwable => Failure(e)
+        }
+      
+        
     def readAllForUser(userid: Int, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]] = ???
 
     def readAllForUserInInterval(userid: Int, start: Date, end: Date, order: Ordering = Ordering.DESC_DATE): Future[Try[Seq[Tuple2[Int, GameSession]]]] = ???
