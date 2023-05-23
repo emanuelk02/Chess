@@ -26,6 +26,7 @@ import org.mongodb.scala.model.Aggregates.*
 import org.mongodb.scala.model.Filters.*
 import org.mongodb.scala.model.Sorts.*
 import org.mongodb.scala.result.{DeleteResult, InsertOneResult, UpdateResult}
+import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, Observable, Observer, SingleObservable, SingleObservableFuture, result}
 
 import util.data.User
@@ -45,20 +46,25 @@ case class MongoUserDao(config: Config = ConfigFactory.load())
         val highestCurrentId = getHighestId(userCollection)
         val newUserId = highestCurrentId + 1
 
-        if (name.length() > UserDao.maxNameLength) then
+        if (name.length() > UserDao.maxNameLength)
             Future(Failure(new IllegalArgumentException(s"Name is longer than ${UserDao.maxNameLength}")))
-        else 
+        else
             val document = Document("_id" -> newUserId, "name" -> name, "passHash" -> passHash)
-            userCollection.createIndex(Document("name" -> 1), IndexOptions().unique(true))
-            val observable: SingleObservable[InsertOneResult] = userCollection.insertOne(document)
-            val futureResult: Future[InsertOneResult] = observable.toFuture()
-            futureResult.map {
-                case result => Success(User(newUserId, name))
-            }.recover {
-                case e: Throwable => if (e.getMessage.contains("E11000")) then
-                    Failure(new IllegalArgumentException(s"User with name $name already exists"))
-                else
+            val duplicateQuery = Document("name" -> name)
+            val duplicateCheckFuture = userCollection.countDocuments(duplicateQuery).toFuture()
+
+            duplicateCheckFuture.flatMap { count =>
+            if (count > 0) 
+                Future(Failure(new IllegalArgumentException(s"User with name $name already exists")))
+             else 
+                val observable: SingleObservable[InsertOneResult] = userCollection.insertOne(document)
+                val futureResult: Future[InsertOneResult] = observable.toFuture()
+                futureResult.map { _ =>
+                Success(User(newUserId, name))
+                }.recover {
+                case e: Throwable =>
                     Failure(e)
+                }
             }
             
                      
@@ -107,15 +113,21 @@ case class MongoUserDao(config: Config = ConfigFactory.load())
 
 
     def updateUser(id: Int, newName: String): Future[Try[User]] = 
-        val observable: SingleObservable[UpdateResult] = userCollection.updateOne(equal("_id", id), Updates.set("name", newName))
-        val futureResult: Future[UpdateResult] = observable.toFuture()
-        futureResult.map {
-            case result => Success(User(id, newName))
+        val duplicateQuery = Document("name" -> newName)
+        val duplicateCheckFuture = userCollection.countDocuments(duplicateQuery).toFuture()
+
+        duplicateCheckFuture.flatMap { count =>
+        if (count > 0) 
+            Future(Failure(new IllegalArgumentException(s"User with name $newName already exists")))
+        else 
+            val updateObservable: SingleObservable[UpdateResult] =
+            userCollection.updateOne(equal("_id", id), Updates.set("name", newName))
+            val updateFuture: Future[UpdateResult] = updateObservable.toFuture()
+            updateFuture.map { _ =>
+                Success(User(id, newName))
         }.recover {
-            case e: Throwable => if (e.getMessage.contains("E11000")) then
-                Failure(new IllegalArgumentException(s"User with name $newName already exists"))
-            else
-                Failure(e)
+            case e: Throwable => Failure(e)
+            }
         }
 
     def updateUser(name: String, newName: String): Future[Try[User]] = 
