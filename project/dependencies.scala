@@ -26,7 +26,7 @@ object dependencies {
     val sqlite    = "org.xerial" % "sqlite-jdbc" % "3.41.2.1"
     val testcontainer  = "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.15"
     val jbcrypt   = "org.mindrot" % "jbcrypt" % "0.4"
-    val mongodb = ("org.mongodb.scala" %% "mongo-scala-driver" % "4.6.0").cross(CrossVersion.for3Use2_13)
+    val mongodb   = ("org.mongodb.scala" %% "mongo-scala-driver" % "4.8.0").cross(CrossVersion.for3Use2_13)
 
     val commonDependency = Seq(
         scalactic,
