@@ -7,9 +7,15 @@ ignore:
   - "**/TileLabel.scala"
   - "**/Chess.scala"
   - "**/resources/"
-  - "**/**Module.scala"
-  - "**/**Communicating**/"
+  - "**/ChessModule.scala"
+  - "**/BaseControllerModule.scala"
+  - "**/ControllerModule.scala"
+  - "**/LegalityModule.scala"
+  - "**/PersistenceModule.scala"
+  - "**/*Communicating*/"
   - "**/**Service.scala"
+  - "**/**Interface.scala"
+  - "**/GameData.scala"
 
 coverage:
   status:
