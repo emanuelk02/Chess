@@ -7,6 +7,9 @@ ignore:
   - "**/TileLabel.scala"
   - "**/Chess.scala"
   - "**/resources/"
+  - "**/**Module.scala"
+  - "**/**communicating**/"
+  - "**/**Service.scala"
 
 coverage:
   status:
