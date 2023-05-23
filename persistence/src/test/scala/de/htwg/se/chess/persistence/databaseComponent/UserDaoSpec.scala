@@ -183,21 +183,25 @@ class UserDaoSpec
 
   def daoTests(getter: Containers => UserDao) = {
     var userDao: UserDao = null
+    var user1: User = null
+    var user2: User = null
     "create users with a given username and password hash" in {
       withContainers { containers =>
         userDao = getter(containers)
       }
       val user = userDao.createUser("test", "test")
       whenReady(user) { result =>
-        result.get shouldBe User(1, "test")
+        user1 = result.get
+        result.get shouldBe User(user1.id, "test")
 
-        checkForUser(userDao, User(1, "test"))
+        checkForUser(userDao, User(user1.id, "test"))
       }
-      val userWithHash = userDao.createUser("test2", "test2")
-      whenReady(userWithHash) { result =>
-        result.get shouldBe User(2, "test2")
+      val anotherUser = userDao.createUser("test2", "test2")
+      whenReady(anotherUser) { result =>
+        user2 = result.get
+        result.get shouldBe User(user2.id, "test2")
 
-        checkForUser(userDao, User(2, "test2"))
+        checkForUser(userDao, User(user2.id, "test2"))
       }
       val alreadyExisting = userDao.createUser("test", "test")
       whenReady(alreadyExisting) { result =>
@@ -212,19 +216,22 @@ class UserDaoSpec
       }
     }
     "allow to read existing users" in {
-      val user = userDao.readUser(1)
-      whenReady(user) { result =>
-        result.get.id shouldBe 1
-        result.get.name shouldBe "test"
+      val userById = userDao.readUser(user1.id)
+      whenReady(userById) { result =>
+        result.get shouldBe User(user1.id, "test")
       }
-      val user2 = userDao.readUser("nonexistent")
-      whenReady(user2) { result =>
+      val userByName = userDao.readUser("test2")
+      whenReady(userByName) { result =>
+        result.get shouldBe User(user2.id, "test2")
+      }
+      val nonExistent = userDao.readUser("nonexistent")
+      whenReady(nonExistent) { result =>
         result.isFailure shouldBe true
         a [NoSuchElementException] shouldBe thrownBy(result.get)
       }
     }
     "allow to get the password hash to check if a given password is valid" in {
-      val user1succ = userDao.readHash(1)
+      val user1succ = userDao.readHash(user1.id)
       whenReady(user1succ) { result =>
         result.get shouldBe "test"
       }
@@ -232,8 +239,8 @@ class UserDaoSpec
       whenReady(user1succ2) { result =>
         result.get shouldBe "test"
       }
-      val user2 = userDao.readHash(2)
-      whenReady(user2) { result =>
+      val user2succ = userDao.readHash(user2.id)
+      whenReady(user2succ) { result =>
         result.get shouldBe "test2"
       }
       val nonexistent = userDao.readHash(3)
@@ -243,10 +250,9 @@ class UserDaoSpec
       }
     }
     "allow to update a users name" in {
-      val user1 = userDao.updateUser("test", "tested")
-      whenReady(user1) { result =>
-        result.get.id shouldBe 1
-        result.get.name shouldBe "tested"
+      val user = userDao.updateUser("test", "tested")
+      whenReady(user) { result =>
+        result.get shouldBe User(user1.id,"tested")
 
         checkForUser(userDao, result.get)
       }
@@ -257,15 +263,13 @@ class UserDaoSpec
       }
     }
     "allow to delete a user" in {
-      val user1 = userDao.deleteUser(1)
-      whenReady(user1) { result =>
-        result.get.id shouldBe 1
-        result.get.name shouldBe "tested"
+      val delUser1 = userDao.deleteUser(user1.id)
+      whenReady(delUser1) { result =>
+        result.get shouldBe User(user1.id,"tested")
       }
-      val user2 = userDao.deleteUser("test2")
-      whenReady(user2) { result =>
-        result.get.id shouldBe 2
-        result.get.name shouldBe "test2"
+      val delUser2 = userDao.deleteUser("test2")
+      whenReady(delUser2) { result =>
+        result.get shouldBe User(user2.id,"test2")
       }
       val nonexistent = userDao.deleteUser("nonexistent")
       whenReady(nonexistent) { result =>
