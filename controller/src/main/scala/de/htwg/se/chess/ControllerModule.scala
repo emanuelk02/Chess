@@ -19,7 +19,7 @@ import controller.controllerComponent.ControllerInterface
 import controller.controllerComponent._
 import controller.controllerComponent.controllerBaseImpl.ChessCommandInvoker
 import model.gameDataComponent.GameField
-import model.gameDataComponent.gameDataCommunicationImpl.CommunicatingChessField
+import model.gameDataComponent.gameDataCommunicatingImpl.CommunicatingChessField
 
 
 object ControllerModule:

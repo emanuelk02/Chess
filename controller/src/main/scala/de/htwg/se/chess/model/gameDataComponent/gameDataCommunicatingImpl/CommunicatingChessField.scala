@@ -12,7 +12,7 @@
 package de.htwg.se.chess
 package model
 package gameDataComponent
-package gameDataCommunicationImpl
+package gameDataCommunicatingImpl
 
 
 import akka.actor.typed.ActorSystem
