@@ -8,7 +8,7 @@ ignore:
   - "**/Chess.scala"
   - "**/resources/"
   - "**/**Module.scala"
-  - "**/**communicating**/"
+  - "**/**Communicating**/"
   - "**/**Service.scala"
 
 coverage:
