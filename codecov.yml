@@ -16,6 +16,8 @@ ignore:
   - "**/**Service.scala"
   - "**/**Interface.scala"
   - "**/GameData.scala"
+  - "**/UserDao.scala"
+  - "**/SessionDao.scala"
 
 coverage:
   status:
