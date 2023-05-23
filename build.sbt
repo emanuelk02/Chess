@@ -25,7 +25,8 @@ lazy val commonSettings = Seq(
       "*aview.*",
       "*Chess.*",
       "*GameData.*",
-      "*ControllerInterface.*"
+      "*ControllerInterface.*",
+      "*Service*"
     ),
 
     jacocoCoverallsServiceName := "github-actions",

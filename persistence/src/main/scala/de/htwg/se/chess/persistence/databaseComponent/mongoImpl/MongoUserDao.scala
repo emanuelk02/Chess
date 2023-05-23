@@ -21,10 +21,10 @@ import scala.concurrent.duration.Duration
 import scala.util.{Try, Success, Failure}
 import scala.concurrent.duration.Duration.Inf
 import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.*
-import org.mongodb.scala.model.Aggregates.*
-import org.mongodb.scala.model.Filters.*
-import org.mongodb.scala.model.Sorts.*
+import org.mongodb.scala.model._
+import org.mongodb.scala.model.Updates._
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Sorts._
 import org.mongodb.scala.result.{DeleteResult, InsertOneResult, UpdateResult}
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, Observable, Observer, SingleObservable, SingleObservableFuture, result}
@@ -105,7 +105,7 @@ case class MongoUserDao(config: Config = ConfigFactory.load())
     
     override def updateUser(id: Int, newName: String): Future[Try[User]] = 
         userCollection
-            .updateOne(equal("_id", id), Updates.set("name", newName))
+            .updateOne(equal("_id", id), set("name", newName))
             .toFuture()
             .map { _ =>
                 Success(User(id, newName))

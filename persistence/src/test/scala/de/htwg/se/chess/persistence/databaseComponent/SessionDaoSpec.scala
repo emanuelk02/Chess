@@ -117,11 +117,18 @@ class SessionDAOSpec
           initializeDb(userDao)
         }
       }
-      daoTests(containers => new SlickSessionDao(
-        ConfigFactory.load(
-          ConfigFactory.parseString(postgresConfigString(containers))
-        )
-      )(using ec, jdbcProfile))
+      daoTests(containers => 
+        new SlickSessionDao(
+          ConfigFactory.load(
+            ConfigFactory.parseString(postgresConfigString(containers))
+          )
+        )(using ec, jdbcProfile), containers =>
+        new SlickUserDao(
+          ConfigFactory.load(
+            ConfigFactory.parseString(postgresConfigString(containers))
+          )
+        )(using ec, jdbcProfile)
+      )
     }
     "running sqlite" should {
       given jdbcProfile: slick.jdbc.JdbcProfile = slick.jdbc.SQLiteProfile
@@ -152,7 +159,7 @@ class SessionDAOSpec
       "initialize db" in {
         initializeDb(userDao)
       }
-      daoTests(_ => sessionDao)
+      daoTests(_ => sessionDao, _ => userDao)
     }
     "running MongoDb" should {
         "have a running mongoDb container" in {
@@ -170,13 +177,21 @@ class SessionDAOSpec
                 )
 
                 initializeDb(userDao)
+                userDao.close()
             }
         }
-        daoTests(containers => new MongoSessionDao(
-            ConfigFactory.load(
-              ConfigFactory.parseString(mongoDbConfigString(containers))
+        daoTests(containers => 
+            new MongoSessionDao(
+                ConfigFactory.load(
+                  ConfigFactory.parseString(mongoDbConfigString(containers))
+                )
+            ), containers => 
+            new MongoUserDao(
+                ConfigFactory.load(
+                  ConfigFactory.parseString(mongoDbConfigString(containers))
+                )
             )
-        ))
+        )
     }
   }
 
@@ -184,33 +199,56 @@ class SessionDAOSpec
     val user = userDao.createUser("test", "test")
     whenReady(user) { result =>
       result.isSuccess shouldBe true
-      result.get shouldBe User(1, "test")
+      result.get shouldBe User(result.get.id, "test")
     }
     val user2 = userDao.createUser("test2", "test2")
     whenReady(user2) { result =>
       result.isSuccess shouldBe true
-      result.get shouldBe User(2, "test2")
+      result.get shouldBe User(result.get.id, "test2")
     }
-    userDao.close()
   }
 
-  def daoTests(getter: Containers => SessionDao) = {
+  def daoTests(sessGetter: Containers => SessionDao, userGetter: Containers => UserDao) = {
     val fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     val fen2 = "8/8/8/8/8/8/8/RNBQKBNR b Kq A1 10 15"
     val session1 = new GameSession("save1", fen)
-    val session3 =
-      new GameSession(Date.valueOf(LocalDate.now().plusDays(1)), fen2)
+    var session2 : GameSession = null
+    val session3 = new GameSession(Date.valueOf(LocalDate.now().plusDays(1)), fen2)
+    var user1Id: Int = -1
+    var user2Id: Int = -1
+    var session1Id: Int = -1
+    var session2Id: Int = -1
+    var session3Id: Int = -1
+    var session4Id: Int = -1
     var sessionDao: SessionDao = null
+    var userDao: UserDao = null
+    var user1sessionIds: Seq[Int] = Seq.empty
+    var user1sessionMap: Map[Int, GameSession] = Map.empty
     "allow to store a game session specified by a FEN string and assigned to a user by id or name" in {
       withContainers { containers =>
-        sessionDao = getter(containers)
+        sessionDao = sessGetter(containers)
+        userDao = userGetter(containers)
+        whenReady(userDao.readUser("test")) { result =>
+          result.isSuccess shouldBe true
+          user1Id = result.get.id
+        }
+        whenReady(userDao.readUser("test2")) { result =>
+          result.isSuccess shouldBe true
+          user2Id = result.get.id
+        }
       }
-      val user1sess1 = sessionDao.createSession(1, session1)
+      val user1sess1 = sessionDao.createSession(user1Id, session1)
       whenReady(user1sess1) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe session1
 
-        val check = sessionDao.readSession(1)
+        whenReady(sessionDao.readAllForUserWithName(user1Id, "save1")) { sess =>
+            sess.isSuccess shouldBe true
+            session1Id = sess.get.head(0)
+            user1sessionIds = user1sessionIds :+ session1Id
+            user1sessionMap = user1sessionMap + (session1Id -> session1)
+        }
+        val check = sessionDao.readSession(session1Id)
         whenReady(check) { result =>
           result.isSuccess shouldBe true
           // For some reason, after loading from database, the timestamp is slightly altered
@@ -226,24 +264,35 @@ class SessionDAOSpec
           result.get.date,
           fen2
         )
+        session2 = result.get
+        whenReady(sessionDao.readAllForUserWithName(user2Id, result.get.displayName)) { sess =>
+            sess.isSuccess shouldBe true
+            session2Id = sess.get.head(0)
+        }
       }
-      val user1sess2 = sessionDao.createSession(1, session3)
+      val user1sess2 = sessionDao.createSession(user1Id, session3)
       whenReady(user1sess2) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe session3
+        whenReady(sessionDao.readAllForUserWithName(user1Id, result.get.displayName)) { sess =>
+            sess.isSuccess shouldBe true
+            session3Id = sess.get.head(0)
+            user1sessionIds = user1sessionIds :+ session3Id
+            user1sessionMap = user1sessionMap + (session3Id -> session3)
+        }
       }
     }
     "allow to get all stored sessions for a user" in {
-      val sessions = sessionDao.readAllForUser(1)
+      val sessions = sessionDao.readAllForUser(user1Id)
       whenReady(sessions) { result =>
         result.isSuccess shouldBe true
         // Default ordering is descending by timestamp
-        result.get shouldBe Vector((3, session3), (1, session1))
+        result.get shouldBe Vector((session3Id, session3), (session1Id, session1))
       }
-      val sessions2 = sessionDao.readAllForUser(2)
+      val sessions2 = sessionDao.readAllForUser(user2Id)
       whenReady(sessions2) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector(result.get(0))
+        result.get shouldBe Vector((session2Id, session2))
       }
       val nonexistent = sessionDao.readAllForUser(3)
       whenReady(nonexistent) { result =>
@@ -255,114 +304,157 @@ class SessionDAOSpec
     "allow to define an ordering when reading all sessions for a user" in {
       // add third session to have more scenarios
       session4 = new GameSession(fen)
-      val user1sess3 = sessionDao.createSession(1, session4)
+      val user1sess3 = sessionDao.createSession(user1Id, session4)
       whenReady(user1sess3) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe session4
+        whenReady(sessionDao.readAllForUserWithName(user1Id, result.get.displayName)) { sess =>
+            sess.isSuccess shouldBe true
+            session4Id = sess.get.head(0)
+            user1sessionIds = user1sessionIds :+ session4Id
+            user1sessionMap = user1sessionMap + (session4Id -> session4)
+        }
       }
-      val sesDateAsc = sessionDao.readAllForUser(1, Ordering.ASC_DATE)
+      val sesDateAsc = sessionDao.readAllForUser(user1Id, Ordering.ASC_DATE)
       whenReady(sesDateAsc) { result =>
         result.isSuccess shouldBe true
         // session4 was created after session3 but 3 has a timestamp of the day after
-        result.get shouldBe Vector((4, session4), (1, session1), (3, session3))
+        // since ids are randomly assigned in mongodb, we need to check which one is higher
+        result.get.toVector shouldBe (
+            (if session1Id > session4Id
+                then Vector((session1Id, session1), (session4Id, session4))
+                else Vector((session4Id, session4), (session1Id, session1)))
+            ++ Vector((session3Id, session3))
+        )
       }
-      val sesNameAsc = sessionDao.readAllForUser(1, Ordering.ASC_NAME)
+      val sesNameAsc = sessionDao.readAllForUser(user1Id, Ordering.ASC_NAME)
       whenReady(sesNameAsc) { result =>
         result.isSuccess shouldBe true
         // session 3 has auto-generated name which starts with "auto-save"
         // same with session 4 but 3 has a higher timestamp
         // while session 1 has name "save1"
-        result.get shouldBe Vector((3, session3), (4, session4), (1, session1))
+        result.get.toVector shouldBe Vector((session3Id, session3), (session4Id, session4), (session1Id, session1))
       }
-      val sesIdAsc = sessionDao.readAllForUser(1, Ordering.ASC_ID)
+      val sesIdAsc = sessionDao.readAllForUser(user1Id, Ordering.ASC_ID)
       whenReady(sesIdAsc) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((1, session1), (3, session3), (4, session4))
+        result.get.toVector shouldBe (
+            user1sessionIds.sortWith(_ < _).map(id => (id, user1sessionMap(id))).toVector
+        )
+        //Vector((session1Id, session1), (session3Id, session3), (session4Id, session4))
       }
-      val sesDateDesc = sessionDao.readAllForUser(1, Ordering.DESC_DATE)
+      val sesDateDesc = sessionDao.readAllForUser(user1Id, Ordering.DESC_DATE)
       whenReady(sesDateDesc) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3), (4, session4), (1, session1))
+        result.get.toVector shouldBe (
+            Vector((session3Id, session3)) ++ (if session1Id < session4Id 
+                then Vector((session4Id, session4), (session1Id, session1))
+                else Vector((session1Id, session1), (session4Id, session4)))
+        )
       }
-      val sesNameDesc = sessionDao.readAllForUser(1, Ordering.DESC_NAME)
+      val sesNameDesc = sessionDao.readAllForUser(user1Id, Ordering.DESC_NAME)
       whenReady(sesNameDesc) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((1, session1), (4, session4), (3, session3))
+        result.get.toVector shouldBe Vector((session1Id, session1), (session4Id, session4), (session3Id, session3))
       }
-      val sesIdDesc = sessionDao.readAllForUser(1, Ordering.DESC_ID)
+      val sesIdDesc = sessionDao.readAllForUser(user1Id, Ordering.DESC_ID)
       whenReady(sesIdDesc) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((4, session4), (3, session3), (1, session1))
+        result.get.toVector shouldBe (
+            user1sessionIds.sortWith(_ > _).map(id => (id, user1sessionMap(id))).toVector
+        )
       }
 
       // Default Ascending ordering (by Date)
-      val sesAsc = sessionDao.readAllForUser(1, Ordering.ASC)
+      val sesAsc = sessionDao.readAllForUser(user1Id, Ordering.ASC)
       whenReady(sesAsc) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((4, session4), (1, session1), (3, session3))
+        result.get.toVector shouldBe (
+            (if session1Id > session4Id
+                then Vector((session1Id, session1), (session4Id, session4))
+                else Vector((session4Id, session4), (session1Id, session1)))
+            ++ Vector((session3Id, session3))
+        )
       }
       // Default Descending ordering (by Date)
-      val sesDesc = sessionDao.readAllForUser(1, Ordering.DESC)
+      val sesDesc = sessionDao.readAllForUser(user1Id, Ordering.DESC)
       whenReady(sesDesc) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3), (4, session4), (1, session1))
+        result.get.toVector shouldBe (
+            Vector((session3Id, session3)) ++
+            (if session1Id > session4Id
+                then Vector((session1Id, session1), (session4Id, session4))
+                else Vector((session4Id, session4), (session1Id, session1)))
+        )
       }
 
       // Default ordering by Date (DESC)
-      val sesDate = sessionDao.readAllForUser(1, Ordering.DATE)
+      val sesDate = sessionDao.readAllForUser(user1Id, Ordering.DATE)
       whenReady(sesDate) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3), (4, session4), (1, session1))
+        result.get.toVector shouldBe (
+            Vector((session3Id, session3)) ++ (if session1Id < session4Id 
+                then Vector((session4Id, session4), (session1Id, session1))
+                else Vector((session1Id, session1), (session4Id, session4)))
+        )
       }
       // Default ordering by Name (DESC)
-      val sesName = sessionDao.readAllForUser(1, Ordering.NAME)
+      val sesName = sessionDao.readAllForUser(user1Id, Ordering.NAME)
       whenReady(sesName) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((1, session1), (4, session4), (3, session3))
+        result.get.toVector shouldBe Vector((session1Id, session1), (session4Id, session4), (session3Id, session3))
       }
       // Default ordering by ID (DESC)
-      val sesId = sessionDao.readAllForUser(1, Ordering.ID)
+      val sesId = sessionDao.readAllForUser(user1Id, Ordering.ID)
       whenReady(sesId) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((4, session4), (3, session3), (1, session1))
+        result.get.toVector shouldBe (
+            user1sessionIds.sortWith(_ > _).map(id => (id, user1sessionMap(id))).toVector
+        )
       }
     }
     "allow to get sessions within a given time interval (in days) for a user" in {
       val sessions = sessionDao.readAllForUserInInterval(
-        1,
+        user1Id,
         Date.valueOf(LocalDate.now().minusDays(1)),
         Date.valueOf(LocalDate.now().plusDays(1))
       )
       whenReady(sessions) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3), (4, session4), (1, session1))
+        result.get.toVector shouldBe (
+            Vector((session3Id, session3)) ++ (if session1Id < session4Id 
+                then Vector((session4Id, session4), (session1Id, session1))
+                else Vector((session1Id, session1), (session4Id, session4)))
+        )
       }
       val sessions2 = sessionDao.readAllForUserInInterval(
-        1,
+        user1Id,
         Date.valueOf(LocalDate.now().minusDays(1)),
         Date.valueOf(LocalDate.now())
       )
       whenReady(sessions2) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((4, session4), (1, session1))
+        result.get.toVector shouldBe (if session1Id < session4Id 
+                then Vector((session4Id, session4), (session1Id, session1))
+                else Vector((session1Id, session1), (session4Id, session4)))
       }
       val sessions3 = sessionDao.readAllForUserInInterval(
-        1,
+        user1Id,
         Date.valueOf(LocalDate.now().plusDays(1)),
         Date.valueOf(LocalDate.now().plusDays(1))
       )
       whenReady(sessions3) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3))
+        result.get.toVector shouldBe Vector((session3Id, session3))
       }
       val none = sessionDao.readAllForUserInInterval(
-        1,
+        user1Id,
         Date.valueOf(LocalDate.now().minusDays(2)),
         Date.valueOf(LocalDate.now().minusDays(2))
       )
       whenReady(none) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector()
+        result.get.toVector shouldBe Vector()
       }
       val invalidUser = sessionDao.readAllForUserInInterval(
         3,
@@ -375,29 +467,33 @@ class SessionDAOSpec
       }
     }
     "allow to get all sessions of a user which contain a given string in their display name" in {
-      val sessions = sessionDao.readAllForUserWithName(1, "save")
+      val sessions = sessionDao.readAllForUserWithName(user1Id, "save")
       whenReady(sessions) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3), (4, session4), (1, session1))
+        result.get.toVector shouldBe (
+            Vector((session3Id, session3)) ++ (if session1Id < session4Id 
+                then Vector((session4Id, session4), (session1Id, session1))
+                else Vector((session1Id, session1), (session4Id, session4)))
+        )
       }
-      val sessions2 = sessionDao.readAllForUserWithName(1, "auto")
+      val sessions2 = sessionDao.readAllForUserWithName(user1Id, "auto")
       whenReady(sessions2) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((3, session3), (4, session4))
+        result.get.toVector shouldBe Vector((session3Id, session3), (session4Id, session4))
       }
-      val sessions3 = sessionDao.readAllForUserWithName(1, "save1")
+      val sessions3 = sessionDao.readAllForUserWithName(user1Id, "save1")
       whenReady(sessions3) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector((1, session1))
+        result.get.toVector shouldBe Vector((session1Id, session1))
       }
-      val sessions4 = sessionDao.readAllForUserWithName(1, "save2")
+      val sessions4 = sessionDao.readAllForUserWithName(user1Id, "save2")
       whenReady(sessions4) { result =>
         result.isSuccess shouldBe true
-        result.get shouldBe Vector()
+        result.get.toVector shouldBe Vector()
       }
     }
     "allow to get session data for one specific game" in {
-      val session2 = sessionDao.readSession(2)
+      val session2 = sessionDao.readSession(session2Id)
       whenReady(session2) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe new GameSession(
@@ -413,7 +509,7 @@ class SessionDAOSpec
       }
     }
     "allow to update a session" in {
-      val session = sessionDao.updateSession(1, fen2)
+      val session = sessionDao.updateSession(session1Id, fen2)
       whenReady(session) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe new GameSession(
@@ -422,7 +518,7 @@ class SessionDAOSpec
           fen2
         )
 
-        val check = sessionDao.readSession(1)
+        val check = sessionDao.readSession(session1Id)
         whenReady(check) { result =>
           result.isSuccess shouldBe true
           result.get shouldBe new GameSession(
@@ -432,12 +528,12 @@ class SessionDAOSpec
           )
         }
       }
-      val session2 = sessionDao.updateSession(2, session4)
+      val session2 = sessionDao.updateSession(session2Id, session4)
       whenReady(session2) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe session4
 
-        val check = sessionDao.readSession(2)
+        val check = sessionDao.readSession(session2Id)
         whenReady(check) { result =>
           result.isSuccess shouldBe true
           result.get shouldBe new GameSession(
@@ -454,7 +550,7 @@ class SessionDAOSpec
       }
     }
     "allow to delete sessions" in {
-      val session = sessionDao.deleteSession(1)
+      val session = sessionDao.deleteSession(session1Id)
       whenReady(session) { result =>
         result.isSuccess shouldBe true
         result.get shouldBe new GameSession(
@@ -463,7 +559,7 @@ class SessionDAOSpec
           fen2
         )
 
-        val check = sessionDao.readSession(1)
+        val check = sessionDao.readSession(session1Id)
         whenReady(check) { result =>
           result.isFailure shouldBe true
           a[NoSuchElementException] shouldBe thrownBy(result.get)
@@ -472,5 +568,6 @@ class SessionDAOSpec
     }
     "close" in {
       sessionDao.close()
+      userDao.close()
     }
   }
