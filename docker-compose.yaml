@@ -44,6 +44,12 @@ services:
       - mongodb-data:/data/db
     env_file:
       - ./docker/secrets/mongo.env
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 30s
 
   persistence:
     image: chess-persistence
@@ -60,11 +66,11 @@ services:
     networks:
       - chess-network
     env_file:
-      - ./docker/secrets/postgres.env
+      - ./docker/secrets/mongo.env
     environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_CONFIG: postgres
+      DATABASE_HOST: mongodb
+      DATABASE_PORT: 27017
+      DATABASE_CONFIG: mongo
     healthcheck:
       test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/saves"]
       interval: 5s
@@ -72,7 +78,8 @@ services:
       retries: 10
       start_period: 5s
     depends_on:
-      - postgres
+      mongodb:
+        condition: service_healthy
 
   controller:
     image: chess-controller
@@ -141,3 +148,4 @@ networks:
 
 volumes:
   chess-database:
+  mongodb-data:
