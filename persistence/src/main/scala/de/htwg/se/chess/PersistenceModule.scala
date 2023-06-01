@@ -18,12 +18,11 @@ import scala.concurrent.{ExecutionContextExecutor, ExecutionContext}
 import persistence._
 import persistence.databaseComponent._
 import slick.lifted.TableQuery
+import com.typesafe.config.ConfigFactory
+import com.typesafe.config.Config
 
 
 object PersistenceModule:
-  println("===================================")
-  println("PersistenceModule")
-  println("env: " + sys.env)
   val sqliteDbFile = java.io.File("./saves/databases/sqlite/chess-persistence.db")
     if !sqliteDbFile.exists then 
         sqliteDbFile.getParentFile.mkdirs()
@@ -32,11 +31,24 @@ object PersistenceModule:
   given jdbcProfile: slick.jdbc.JdbcProfile = if sys.env.getOrElse("DATABASE_CONFIG", "sqlite") == "sqlite"
     then slick.jdbc.SQLiteProfile
     else slick.jdbc.PostgresProfile
+
+  val offline_config = ConfigFactory.parseFile(new java.io.File("./persistence/src/main/resources/offline_application.conf"))
+  given UserDao = if sys.env.get("DATABASE_CONFIG").isDefined
+    then
+      //new slickImpl.SlickUserDao
+      new mongoImpl.MongoUserDao
+    else 
+      //new slickImpl.SlickUserDao(offline_config)
+      new mongoImpl.MongoUserDao(offline_config)
         
-  given UserDao = new slickImpl.SlickUserDao
-  given SessionDao = new slickImpl.SlickSessionDao
-  //given UserDao = new mongoImpl.MongoUserDao
-  //given SessionDao = new mongoImpl.MongoSessionDao
+  given SessionDao = if sys.env.get("DATABASE_CONFIG").isDefined
+    then
+      //new slickImpl.SlickSessionDao
+      new mongoImpl.MongoSessionDao
+    else
+      //new slickImpl.SlickSessionDao(offline_config)
+      new mongoImpl.MongoSessionDao(offline_config)
+
   given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "PersistenceService")
   given executionContext: ExecutionContext = system.executionContext
 
