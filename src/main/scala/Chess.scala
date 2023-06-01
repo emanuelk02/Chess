@@ -39,7 +39,7 @@ object starter:
     persistenceApi.run
     val chessApi = ChessService("localhost", 8080)
     chessApi.run
-    Thread.sleep(10000)
+    Thread.sleep(5000)
     val controllerApi = ControllerService("localhost", 8081)
     controllerApi.run
 }
