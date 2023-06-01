@@ -33,10 +33,10 @@ object PersistenceModule:
     then slick.jdbc.SQLiteProfile
     else slick.jdbc.PostgresProfile
         
-  //given UserDao = new slickImpl.SlickUserDao
-  //given SessionDao = new slickImpl.SlickSessionDao
-  given UserDao = new mongoImpl.MongoUserDao
-  given SessionDao = new mongoImpl.MongoSessionDao
+  given UserDao = new slickImpl.SlickUserDao
+  given SessionDao = new slickImpl.SlickSessionDao
+  //given UserDao = new mongoImpl.MongoUserDao
+  //given SessionDao = new mongoImpl.MongoSessionDao
   given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "PersistenceService")
   given executionContext: ExecutionContext = system.executionContext
 
