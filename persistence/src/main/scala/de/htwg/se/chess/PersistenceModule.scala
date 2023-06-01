@@ -34,20 +34,26 @@ object PersistenceModule:
 
   val offline_config = ConfigFactory.parseFile(new java.io.File("./persistence/src/main/resources/offline_application.conf"))
   given UserDao = if sys.env.get("DATABASE_CONFIG").isDefined
-    then
-      //new slickImpl.SlickUserDao
-      new mongoImpl.MongoUserDao
-    else 
-      //new slickImpl.SlickUserDao(offline_config)
-      new mongoImpl.MongoUserDao(offline_config)
+    then if sys.env.get("DATABASE_CONFIG").get == "mongodb"
+      then {
+        new mongoImpl.MongoUserDao
+      } else {
+        new slickImpl.SlickUserDao
+      }
+    else
+      new slickImpl.SlickUserDao(offline_config)
+      //new mongoImpl.MongoUserDao(offline_config)
         
   given SessionDao = if sys.env.get("DATABASE_CONFIG").isDefined
-    then
-      //new slickImpl.SlickSessionDao
-      new mongoImpl.MongoSessionDao
+    then if sys.env.get("DATABASE_CONFIG").get == "mongodb"
+      then {
+        new mongoImpl.MongoSessionDao
+      } else {
+        new slickImpl.SlickSessionDao
+      }
     else
-      //new slickImpl.SlickSessionDao(offline_config)
-      new mongoImpl.MongoSessionDao(offline_config)
+      new slickImpl.SlickSessionDao(offline_config)
+      //new mongoImpl.MongoSessionDao(offline_config)
 
   given system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "PersistenceService")
   given executionContext: ExecutionContext = system.executionContext

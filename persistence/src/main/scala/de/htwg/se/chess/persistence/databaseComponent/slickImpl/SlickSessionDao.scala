@@ -72,6 +72,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
     }
 
     private val db = Database.forConfig("dbs.slick."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite"), config)
+    println("Connecting to database: "+config.getString("dbs.slick."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite")+".url"))
         
     private val users = new TableQuery(UserTable(_))
     private val sessions = new TableQuery(SessionTable(_))

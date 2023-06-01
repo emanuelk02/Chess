@@ -1,0 +1,51 @@
+services:
+
+  postgres:
+    image: postgres:15.3-alpine
+    ports:
+      - "5432:5432"
+    networks:
+      - chess-network
+    volumes:
+      - chess-database:/var/lib/postgresql/data
+    env_file:
+      - ./docker/secrets/postgres.env
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 30s
+
+  persistence:
+    image: chess-persistence:postgres
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        - SERVICE=persistence
+        - SERVICE_API_PORT=8083
+      cache_from:
+        - chess-persistence
+    ports:
+      - "8083:8083"
+    networks:
+      - chess-network
+    env_file:
+      - ./docker/secrets/postgres.env
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_CONFIG: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 35s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  chess-database:
