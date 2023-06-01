@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
       case PathList("META-INF", xs @ _*) => MergeStrategy.discard
       case PathList("module-info.class") => MergeStrategy.discard
       case x => 
-        val oldStrategy = (assembly / assemblyMergeStrategy).value
+        val oldStrategy = (_root_.sbtassembly.AssemblyPlugin.autoImport.assembly / assemblyMergeStrategy).value
         oldStrategy(x)
     }
 )

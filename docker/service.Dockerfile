@@ -75,6 +75,8 @@ ENV SERVICE_API_PORT=${SERVICE_API_PORT}
 EXPOSE ${SERVICE_API_PORT}
 
 COPY --link --from=builder ${SERVICEDIR}/target/scala-*/${SERVICE}-*.jar lib/
+COPY --link persistence/src/main/resources/ ${SERVICEDIR}/persistence/src/main/resources/ 
+COPY --link password.txt ${SERVICEDIR}/ 
 COPY certs/ certs/
 RUN apk update \
  && apk add --clean-protected curl

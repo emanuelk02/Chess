@@ -277,39 +277,8 @@ case class PersistenceService(
     }
   )
 
-  def readPasswordFromFile: Array[Char] = {
-    val source = scala.io.Source.fromFile("password.txt")
-    val password = source.mkString.toCharArray
-    source.close()
-    password
-  }
-
-  val ks: KeyStore = KeyStore.getInstance("JKS")
-  val keystore: InputStream = FileInputStream(
-    java.io.File("persistence/src/main/resources/persistence.jks")
-  )
-  val password: Array[Char] = readPasswordFromFile
-
-  require(keystore != null, "Keystore required!")
-  ks.load(keystore, password)
-
-  val keyManagerFactory: KeyManagerFactory =
-    KeyManagerFactory.getInstance("SunX509")
-  keyManagerFactory.init(ks, password)
-
-  val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
-  tmf.init(ks)
-
-  val sslContext: SSLContext = SSLContext.getInstance("TLS")
-  sslContext.init(
-    keyManagerFactory.getKeyManagers,
-    tmf.getTrustManagers,
-    new SecureRandom
-  )
-  val https: HttpsConnectionContext = ConnectionContext.https(sslContext)
-
   def run: Unit =
-    bind = Http().newServerAt(ip, port).enableHttps(https).bind(route)
+    bind = Http().newServerAt(ip, port).bind(route)
 
   def terminate: Unit =
     bind

@@ -40,7 +40,7 @@ import de.htwg.se.chess.util.data.GameSession
 
 case class ControllerCommunicator(
     persistenceService: Uri = 
-        Uri(s"https://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}")
+        Uri(s"http://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}")
     )
     (implicit system: ActorSystem[Any], executionContext: ExecutionContextExecutor):
 

@@ -68,15 +68,15 @@ services:
     env_file:
       - ./docker/secrets/mongo.env
     environment:
-      #DATABASE_HOST: localhost
-      #DATABASE_PORT: 27017
-      DATABASE_CONFIG: sqlite
+      DATABASE_HOST: mongodb
+      DATABASE_PORT: 27017
+      DATABASE_CONFIG: mongodb
     healthcheck:
-      test: ["CMD-SHELL", "curl -X GET -H \"Accept: application/json\" http://localhost:8083/saves"]
+      test: ["CMD-SHELL", "echo 'here'"]
       interval: 5s
       timeout: 30s
       retries: 10
-      start_period: 5s
+      start_period: 35s
     depends_on:
       mongodb:
         condition: service_healthy

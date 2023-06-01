@@ -1,5 +1,6 @@
 import sbt._
 import Keys._
+import sbt.librarymanagement.InclExclRule
 
 
 object dependencies {
@@ -9,6 +10,7 @@ object dependencies {
 
     val scalactic = "org.scalactic" %% "scalactic" % "3.2.10"
     val scalatest = "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+    val scalatest_it = "org.scalatest" %% "scalatest" % "3.2.10" % "it,test"
     val akkaActor = "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion
     val akkaSteam = "com.typesafe.akka" %% "akka-stream" % AkkaVersion
     val akkaHttp  = "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
@@ -27,6 +29,9 @@ object dependencies {
     val testcontainer  = "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.15"
     val jbcrypt   = "org.mindrot" % "jbcrypt" % "0.4"
     val mongodb   = ("org.mongodb.scala" %% "mongo-scala-driver" % "4.8.0").cross(CrossVersion.for3Use2_13)
+    val gatlingExclude = Seq(("com.typesafe.akka", "akka-actor_2.13"), ("org.scala-lang.modules", "scala-java8-compat_2.13"), ("com.typesafe.akka","akka-slf4j_2.13")).toVector.map((org_name: Tuple2[String,String]) => InclExclRule(org_name._1, org_name._2))
+    val gatlingHigh = ("io.gatling.highcharts" % "gatling-charts-highcharts" % "3.9.5" % "it,test").withExclusions(gatlingExclude)
+    val gatlingTest = ("io.gatling" % "gatling-test-framework" % "3.9.5" % "it,test").withExclusions(gatlingExclude)
 
     val commonDependency = Seq(
         scalactic,

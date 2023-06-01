@@ -55,7 +55,7 @@ case class ChessService(
         s"http://${sys.env.get("LEGALITY_API_HOST").getOrElse("localhost")}:${sys.env.get("LEGALITY_API_PORT").getOrElse("8082")}"
     ),
     persistence: Uri = Uri(
-        s"https://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}"
+        s"http://${sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost")}:${sys.env.get("PERSISTENCE_API_PORT").getOrElse("8083")}"
     )
 )(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
 
@@ -112,33 +112,7 @@ case class ChessService(
     def redirectToController(path: String, req: HttpRequest): Future[HttpResponse] =
         redirectTo(controller, "controller/" + path, req)
 
-    val certFactory = CertificateFactory.getInstance("X.509")
-    val trustStore = KeyStore.getInstance("PKCS12")
-    trustStore.load(null)
-    trustStore.setEntry(
-        sys.env.get("PERSISTENCE_API_HOST").getOrElse("localhost"),
-        new KeyStore.TrustedCertificateEntry(
-            certFactory.generateCertificate(
-                java.io.FileInputStream(java.io.File("certs/persistence.cer"))
-            )
-        ),
-        null
-    )
-    trustStore.aliases().asScala.foreach { alias =>
-        println(alias)
-    }
-    val tmf = TrustManagerFactory.getInstance("SunX509")
-    tmf.init(trustStore)
-    val trustManagers = tmf.getTrustManagers
-
-    val sslContext = SSLContext.getInstance("TLS")
-    sslContext.init(null, trustManagers, null)
-    val httpsConnectionContext = ConnectionContext.httpsClient(
-        context = sslContext
-    )
-
     def run: Unit =
-        Http().setDefaultClientHttpsContext(httpsConnectionContext)
         bind = Http().newServerAt(ip, port).bind(route)
         println(s"Chess API running. Please navigate to http://" + ip + ":" + port)
 
