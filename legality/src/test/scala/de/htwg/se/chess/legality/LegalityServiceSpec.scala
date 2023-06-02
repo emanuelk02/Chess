@@ -48,7 +48,7 @@ class LegalityServiceSpec extends AnyWordSpec with BeforeAndAfterAll with Scalat
      * It returns a json array of with the tiles the piece on the given tile can move to
      */
     "respond with legal moves for a Get request with a FEN on route /moves with parameter `tile`" in {
-      fen = "8/6r1/8/8/8/3Q2K1/8/8 w - 0 1"
+      fen = "8/6r1/8/8/8/3Q2K1/8/8 w - - 0 1"
       Get("/moves?tile=\"D3\"", s"""{"fen":"$fen"}""") ~> route ~> check {
         status shouldEqual StatusCodes.OK
         contentType shouldEqual ContentTypes.`application/json`

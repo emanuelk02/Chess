@@ -214,7 +214,7 @@ class ChessStateSpec extends AnyWordSpec:
 
                 an [IllegalArgumentException] should be thrownBy state.evaluateFen("... 1 2")
                 an [IllegalArgumentException] should be thrownBy state.evaluateFen("... c Kq - 1 2")
-                an [AssertionError] should be thrownBy state.evaluateFen("... b kQ - 1 2")
+                an [IllegalArgumentException] should be thrownBy state.evaluateFen("... b kQ - 1 2")
                 an [AssertionError] should be thrownBy state.evaluateFen("... b Qk A9 1 2")
                 an [AssertionError] should be thrownBy state.evaluateFen("... b Qk I3 1 2")
 
@@ -332,7 +332,7 @@ class ChessStateSpec extends AnyWordSpec:
                 state.copy(color = Black).toFenPart shouldBe "b KQkq - 0 1"
                 state.copy(whiteCastle = Castles(false, true)).toFenPart shouldBe "w Kkq - 0 1"
                 state.copy(blackCastle = Castles(true, false)).toFenPart shouldBe "w KQq - 0 1"
-                state.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toFenPart shouldBe "w  - 0 1"
+                state.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toFenPart shouldBe "w - - 0 1"
                 state.copy(enPassant = Some(Tile("F3"))).toFenPart shouldBe "w KQkq f3 0 1"
                 state.copy(halfMoves = 19).toFenPart shouldBe "w KQkq - 19 1"
                 state.copy(fullMoves = 42).toFenPart shouldBe "w KQkq - 0 42"
@@ -350,7 +350,7 @@ class ChessStateSpec extends AnyWordSpec:
                 state.copy(color = Black).toString shouldBe "idle selected: -\nb KQkq - 0 1"
                 state.copy(whiteCastle = Castles(false, true)).toString shouldBe "idle selected: -\nw Kkq - 0 1"
                 state.copy(blackCastle = Castles(true, false)).toString shouldBe "idle selected: -\nw KQq - 0 1"
-                state.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toString shouldBe "idle selected: -\nw  - 0 1"
+                state.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toString shouldBe "idle selected: -\nw - - 0 1"
                 state.copy(enPassant = Some(Tile("F3"))).toString shouldBe "idle selected: -\nw KQkq f3 0 1"
                 state.copy(halfMoves = 19).toString shouldBe "idle selected: -\nw KQkq - 19 1"
                 state.copy(fullMoves = 42).toString shouldBe "idle selected: -\nw KQkq - 0 42"
@@ -361,7 +361,7 @@ class ChessStateSpec extends AnyWordSpec:
                 state2.copy(color = Black).toString shouldBe "playing selected: -\nb KQkq - 0 1"
                 state2.copy(whiteCastle = Castles(false, true)).toString shouldBe "playing selected: -\nw Kkq - 0 1"
                 state2.copy(blackCastle = Castles(true, false)).toString shouldBe "playing selected: -\nw KQq - 0 1"
-                state2.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toString shouldBe "playing selected: -\nw  - 0 1"
+                state2.copy(whiteCastle = Castles(false, false), blackCastle = Castles(false, false)).toString shouldBe "playing selected: -\nw - - 0 1"
                 state2.copy(enPassant = Some(Tile("F3"))).toString shouldBe "playing selected: -\nw KQkq f3 0 1"
                 state2.copy(halfMoves = 19).toString shouldBe "playing selected: -\nw KQkq - 19 1"
                 state2.copy(fullMoves = 42).toString shouldBe "playing selected: -\nw KQkq - 0 42"

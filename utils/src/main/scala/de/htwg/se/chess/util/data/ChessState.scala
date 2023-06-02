@@ -75,7 +75,7 @@ case class ChessState
 
     def toFenPart: String = 
         (if (color == PieceColor.White) then "w" else "b") + " " + 
-        whiteCastle.toString.toUpperCase + blackCastle.toString + " " +
+        (if (whiteCastle.toString + blackCastle.toString == "") then "-" else (whiteCastle.toString.toUpperCase() + blackCastle.toString)) + " " +
         (if (enPassant.isEmpty) then "-" else enPassant.get.toString.toLowerCase) + " " +
         halfMoves.toString + " " + fullMoves.toString
     
@@ -101,7 +101,7 @@ object ChessState:
             then White 
             else if (cutFen(0).toLower == 'b') 
                 then Black
-                else throw IllegalArgumentException()
+                else throw IllegalArgumentException("Invalid color")
         cutFen = cutFen.drop(2)
 
         val whiteC = 
@@ -115,7 +115,11 @@ object ChessState:
                 kingSide = if (cutFen(0) == 'k') then {cutFen = cutFen.drop(1); true} else false,
                 queenSide = if (cutFen(0) == 'q') then {cutFen = cutFen.drop(1); true} else false
             )
-        if (cutFen(0) == ' ') then cutFen = cutFen.drop(1)
+        if (cutFen(0) == '-')
+            then cutFen = cutFen.drop(2)
+            else if (cutFen(0) == ' ')
+                then cutFen = cutFen.drop(1)
+                else throw IllegalArgumentException("Invalid castles")
 
         val enP = if (cutFen(0) == '-') then None else Some(Tile(cutFen.substring(0, 2)))
         cutFen = if (enP.isDefined) then cutFen.drop(3) else cutFen.drop(2)

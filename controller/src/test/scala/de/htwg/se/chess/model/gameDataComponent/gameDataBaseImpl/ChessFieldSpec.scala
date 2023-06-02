@@ -479,7 +479,7 @@ class ChessFieldSpec extends AnyWordSpec:
          * the tile he could move on is attacked.
          * These cases will also be covered later.
          * */
-        cf = cf.loadFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1")
+        cf = cf.loadFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - - 0 1")
         cf.getLegalMoves(Tile("E2")).sorted shouldBe (
           Tile("D3") :: Tile("E3") :: /* Queen */
           Tile("D2") ::  /* King */   Tile("F2") :: /* Bishop */
@@ -494,7 +494,7 @@ class ChessFieldSpec extends AnyWordSpec:
          * her path ends on enemy pieces or before allied pieces
          * but is otherwise free to move any number of tiles.
          * */
-        cf = cf.loadFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1")
+        cf = cf.loadFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
                                                     Tile("D8") ::
                                                     Tile("D7") ::                                           Tile("H7") :: // rook
@@ -508,7 +508,7 @@ class ChessFieldSpec extends AnyWordSpec:
         ).sorted
 
         // Rook //
-        cf = cf.loadFromFen("8/8/8/8/8/3R2R1/8/8 w - 0 1")
+        cf = cf.loadFromFen("8/8/8/8/8/3R2R1/8/8 w - - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
                                                     Tile("D8") ::
                                                     Tile("D7") ::
@@ -526,7 +526,7 @@ class ChessFieldSpec extends AnyWordSpec:
          * Bishops move only diagonally.
          * Their path ends on enemy pieces or before allied pieces.
          * */
-        cf = cf.loadFromFen("8/8/6r1/8/8/3B4/8/8 w - 0 1")
+        cf = cf.loadFromFen("8/8/6r1/8/8/3B4/8/8 w - - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
           Tile("A6") ::                                                                       Tile("G6") :: // rook
                         Tile("B5") ::                                           Tile("F5") ::
@@ -544,7 +544,7 @@ class ChessFieldSpec extends AnyWordSpec:
          * meaning that his path can only be blocked by an allied piece occupying
          * the destination tile.
          * */
-        cf = cf.loadFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1")
+        cf = cf.loadFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - - 0 1")
         cf.getLegalMoves(Tile("D3")).sorted shouldBe (
                                       Tile("C5") ::                Tile("E5") ::
                         Tile("B4") ::  /* King */     /* King */   /* King */    Tile("F4") ::
@@ -560,7 +560,7 @@ class ChessFieldSpec extends AnyWordSpec:
          * and only towards the other end of the board.
          * On their first move, pawns are allowed to move two tiles at once.
          * */
-        cf = cf.loadFromFen("8/8/8/8/8/8/4r3/3P4 w - 0 1")
+        cf = cf.loadFromFen("8/8/8/8/8/8/4r3/3P4 w - - 0 1")
         cf.getLegalMoves(Tile("D1")).sorted shouldBe (
                         Tile("D2") :: Tile("E2") :: // rook
                         /* Pawn */
@@ -572,7 +572,7 @@ class ChessFieldSpec extends AnyWordSpec:
          * Black pawns simply move in the other direction than
          * the white ones.
          * */
-        cf = cf.loadFromFen("8/8/8/8/8/8/3p4/2R5 b - 0 1")
+        cf = cf.loadFromFen("8/8/8/8/8/8/3p4/2R5 b - - 0 1")
         cf.getLegalMoves(Tile("D2")).sorted shouldBe (
           // Rook        /* Pawn */
           Tile("C1") :: Tile("D1") ::
@@ -660,11 +660,11 @@ class ChessFieldSpec extends AnyWordSpec:
         cf.castleTiles.sorted shouldBe (Tile("C8") :: Tile("G8") :: Nil).sorted
 
         // No more castles available via state
-        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1")
+        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w - - 0 1")
         cf.getLegalMoves(Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Nil).sorted
         cf.castleTiles shouldBe Nil
 
-        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1")
+        cf = cf.loadFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b - - 0 1")
         cf.getLegalMoves(Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Nil).sorted
         cf.castleTiles shouldBe Nil
 

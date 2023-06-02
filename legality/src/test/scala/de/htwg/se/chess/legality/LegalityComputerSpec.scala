@@ -24,8 +24,8 @@ import util.data.FenParser.matrixFromFen
 
 class LegalityComputerSpec extends AnyWordSpec:
   "A LegalityComputer" should {
-    var matr = matrixFromFen("8/8/8/8/8/8/8/8 w - 0 1")
-    var state = ChessState("8/8/8/8/8/8/8/8 w - 0 1", 8)
+    var matr = matrixFromFen("8/8/8/8/8/8/8/8 w - - 0 1")
+    var state = ChessState("8/8/8/8/8/8/8/8 w - - 0 1", 8)
     "compute legal moves for a given tile" in {
       //---------------------------------------------------------------------------------- Individual Pieces
 
@@ -105,8 +105,8 @@ class LegalityComputerSpec extends AnyWordSpec:
        * the tile he could move on is attacked.
        * These cases will also be covered later.
        * */
-      matr = matrixFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1")
-      state = ChessState("8/8/8/8/8/5Q2/4K1b1/8 w - 0 1", 8)
+      matr = matrixFromFen("8/8/8/8/8/5Q2/4K1b1/8 w - - 0 1")
+      state = ChessState("8/8/8/8/8/5Q2/4K1b1/8 w - - 0 1", 8)
       getLegalMoves(matr, state, Tile("E2")).sorted shouldBe (
         Tile("D3") :: Tile("E3") :: /* Queen */
         Tile("D2") ::  /* King */   Tile("F2") :: /* Bishop */
@@ -121,8 +121,8 @@ class LegalityComputerSpec extends AnyWordSpec:
        * her path ends on enemy pieces or before allied pieces
        * but is otherwise free to move any number of tiles.
        * */
-      matr = matrixFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1")
-      state = ChessState("8/6r1/8/8/8/3Q1K1/8/8 w - 0 1", 8)
+      matr = matrixFromFen("8/6r1/8/8/8/3Q1K1/8/8 w - - 0 1")
+      state = ChessState("8/6r1/8/8/8/3Q1K1/8/8 w - - 0 1", 8)
       getLegalMoves(matr, state, Tile("D3")).sorted shouldBe (
                                                   Tile("D8") ::
                                                   Tile("D7") ::                                           Tile("H7") :: // rook
@@ -136,7 +136,7 @@ class LegalityComputerSpec extends AnyWordSpec:
       ).sorted
 
       // Rook //
-      getLegalMoves("8/8/8/8/8/3R2R1/8/8 w - 0 1", Tile("D3")).sorted shouldBe (
+      getLegalMoves("8/8/8/8/8/3R2R1/8/8 w - - 0 1", Tile("D3")).sorted shouldBe (
                                                   Tile("D8") ::
                                                   Tile("D7") ::
                                                   Tile("D6") ::
@@ -153,7 +153,7 @@ class LegalityComputerSpec extends AnyWordSpec:
        * Bishops move only diagonally.
        * Their path ends on enemy pieces or before allied pieces.
        * */
-      getLegalMoves("8/8/6r1/8/8/3B4/8/8 w - 0 1", Tile("D3")).sorted shouldBe (
+      getLegalMoves("8/8/6r1/8/8/3B4/8/8 w - - 0 1", Tile("D3")).sorted shouldBe (
         Tile("A6") ::                                                                       Tile("G6") :: // rook
                       Tile("B5") ::                                           Tile("F5") ::
                                     Tile("C4") ::               Tile("E4") ::
@@ -170,8 +170,8 @@ class LegalityComputerSpec extends AnyWordSpec:
        * meaning that his path can only be blocked by an allied piece occupying
        * the destination tile.
        * */
-      matr = matrixFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1")
-      state = ChessState("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - 0 1", 8)
+      matr = matrixFromFen("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - - 0 1")
+      state = ChessState("8/8/8/8/2KKK3/2KNK3/2KKK3/8 w - - 0 1", 8)
       getLegalMoves(matr, state, Tile("D3")).sorted shouldBe (
                                     Tile("C5") ::                Tile("E5") ::
                       Tile("B4") ::  /* King */     /* King */   /* King */    Tile("F4") ::
@@ -187,8 +187,8 @@ class LegalityComputerSpec extends AnyWordSpec:
        * and only towards the other end of the board.
        * On their first move, pawns are allowed to move two tiles at once.
        * */
-      matr = matrixFromFen("8/8/8/8/8/8/4r3/3P4 w - 0 1")
-      state = ChessState("8/8/8/8/8/8/4r3/3P4 w - 0 1", 8)
+      matr = matrixFromFen("8/8/8/8/8/8/4r3/3P4 w - - 0 1")
+      state = ChessState("8/8/8/8/8/8/4r3/3P4 w - - 0 1", 8)
       getLegalMoves(matr, state, Tile("D1")).sorted shouldBe (
                       Tile("D2") :: Tile("E2") :: // rook
                       /* Pawn */
@@ -200,8 +200,8 @@ class LegalityComputerSpec extends AnyWordSpec:
        * Black pawns simply move in the other direction than
        * the white ones.
        * */
-      matr = matrixFromFen("8/8/8/8/8/8/3p4/2R5 b - 0 1")
-      state = ChessState("8/8/8/8/8/8/3p4/2R5 b - 0 1", 8)
+      matr = matrixFromFen("8/8/8/8/8/8/3p4/2R5 b - - 0 1")
+      state = ChessState("8/8/8/8/8/8/3p4/2R5 b - - 0 1", 8)
       getLegalMoves(matr, state, Tile("D2")).sorted shouldBe (
         // Rook        /* Pawn */
         Tile("C1") :: Tile("D1") ::
@@ -291,12 +291,12 @@ class LegalityComputerSpec extends AnyWordSpec:
       getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("C8") :: Tile("D8") :: Tile("F8") :: Tile("G8") :: Nil).sorted
 
       // No more castles available via state
-      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1")
-      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w  - 0 1", 8)
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w - - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w - - 0 1", 8)
       getLegalMoves(matr, state, Tile("E1")).sorted shouldBe (Tile("D1") :: Tile("F1") :: Nil).sorted
 
-      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1")
-      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b  - 0 1", 8)
+      matr = matrixFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b - - 0 1")
+      state = ChessState("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R b - - 0 1", 8)
       getLegalMoves(matr, state, Tile("E8")).sorted shouldBe (Tile("D8") :: Tile("F8") :: Nil).sorted
 
       // Castles on either side

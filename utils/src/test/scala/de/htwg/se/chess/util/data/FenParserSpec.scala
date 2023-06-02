@@ -74,7 +74,7 @@ class FenParserSpec extends AnyWordSpec:
               * When using matrixFromFen, the end of the FEN string describing
               * the state is ignored and can even be omitted.
               */
-            matrixFromFen("8/8/8/8/8/8/8/8 w - 0 1") shouldBe new Matrix[Option[Piece]](8, None)
+            matrixFromFen("8/8/8/8/8/8/8/8 w - - 0 1") shouldBe new Matrix[Option[Piece]](8, None)
             matrixFromFen("8/8/8/8/8/8/8/8 b KQkq E2 5 13") shouldBe new Matrix[Option[Piece]](8, None)
             matrixFromFen("8/8/8/8/8/8/8/8") shouldBe new Matrix[Option[Piece]](8, None)
 
