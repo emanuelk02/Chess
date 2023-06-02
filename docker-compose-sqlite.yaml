@@ -9,7 +9,7 @@ services:
         - SERVICE=persistence
         - SERVICE_API_PORT=8083
       cache_from:
-        - chess-persistence
+        - chess-persistence:sqlite
     ports:
       - "8083:8083"
     networks:
