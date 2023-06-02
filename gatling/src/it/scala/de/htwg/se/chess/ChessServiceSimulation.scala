@@ -14,8 +14,9 @@ package gatling
 
 import com.dimafeng.testcontainers.{ContainerDef, DockerComposeContainer, ExposedService}
 import org.testcontainers.containers.wait.strategy.Wait
-import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+import io.netty.handler.codec.http.HttpMethod
+import io.gatling.core.Predef._
 import io.gatling.core.body.Body
 import io.gatling.core.structure.ChainBuilder
 import io.gatling.core.structure.PopulationBuilder
@@ -80,6 +81,7 @@ trait ChessServiceSimulation(
            dockerComposeFile,
            exposedServices = 
             this.exposedServices
+                .filter((_, port) => port > 0)
                 .map((service, port) => ExposedService(service, port, Wait.forListeningPort()))
                 .toVector
         )
@@ -103,22 +105,26 @@ trait ChessServiceSimulation(
         302, 304
     )
 
-    /** Returns a ChainBuilder with `exec` of a given operation with built-in error logging
+    /** Returns a ChainBuilder with `exec` of a given operation
      * 
-     * @param name  the name of the operation
-     * @param path  the URL path of the operation
-     * @param body  the request body
-     * @param pause the pause after the operation
+     * An error will be logged if the response status code is not in `acceptedHttpStatusCodes`.
+     * 
+     * @param name   the name of the operation
+     * @param path   the URL path of the operation
+     * @param method the HTTP method of the operation
+     * @param body   the request body
+     * @param pause  the pause after the operation
      */
     protected def buildOperation(
         name: String,
         path: => String,
+        method: HttpMethod,
         body: => Body,
         pause: FiniteDuration = 500.milliseconds
     ): ChainBuilder =
         exec(
             http(name)
-              .get(path)
+              .httpRequest(method, path)
               .body(body)
               .checkIf((response, _) => !acceptedHttpStatusCodes.contains(response.status.code())) {
                 bodyString.saveAs("bodyString")
@@ -126,7 +132,7 @@ trait ChessServiceSimulation(
               }
         ).exec { session =>
             session("bodyString").asOption[String] match {
-                case Some(bodyString) => println(s"ERROR: $name: #{status} - $bodyString"); session
+                case Some(bodyString) => println(s"ERROR: $name: $method(#{status} - $bodyString)"); session
                 case None => session
             }
         }.pause(pause)

@@ -19,6 +19,7 @@ import io.gatling.core.structure.ChainBuilder
 import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+import io.netty.handler.codec.http.HttpMethod
 import java.io.File
 import org.testcontainers.containers.wait.strategy.Wait
 import scala.concurrent.duration._
@@ -53,9 +54,10 @@ abstract class LegalitySimulation extends ChessServiceSimulation(
     override def buildOperation(
         name: String,
         path: => String,
+        method: HttpMethod = HttpMethod.GET,
         body: => Body = StringBody("""{"fen": "#{fen}"}"""),
         pause: FiniteDuration = 500.milliseconds
-    ): ChainBuilder = super.buildOperation(name, path, body, pause)
+    ): ChainBuilder = super.buildOperation(name, path, method, body, pause)
 
     override protected val operationChain =
         exec(
