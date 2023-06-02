@@ -40,7 +40,7 @@ lazy val utils = project
   .in(file("utils"))
   .settings(
     name := "utils",
-    commonSettings
+    commonSettings,
   )
   .enablePlugins(JacocoCoverallsPlugin)
 
@@ -49,15 +49,8 @@ lazy val legality = project
   .settings(
     name := "legality",
     commonSettings,
-    Defaults.itSettings,
-    IntegrationTest / fork := true,
-    libraryDependencies ++= Seq(
-      scalatest_it,
-      gatlingHigh,
-      gatlingTest
-    )
   )
-  .enablePlugins(JacocoCoverallsPlugin, GatlingPlugin)
+  .enablePlugins(JacocoCoverallsPlugin)
   .dependsOn(utils)
 
 lazy val persistence: Project = project
@@ -66,15 +59,8 @@ lazy val persistence: Project = project
     name := "persistence",
     commonSettings,
     Test / parallelExecution := false,
-    Defaults.itSettings,
-    IntegrationTest / fork := true,
-    libraryDependencies ++= Seq(
-      scalatest_it,
-      gatlingHigh,
-      gatlingTest
-    )
   )
-  .enablePlugins(JacocoCoverallsPlugin, GatlingPlugin)
+  .enablePlugins(JacocoCoverallsPlugin)
   .dependsOn(utils)
 
 lazy val controller = project
@@ -82,15 +68,8 @@ lazy val controller = project
   .settings(
     name := "controller",
     commonSettings,
-    Defaults.itSettings,
-    IntegrationTest / fork := true,
-    libraryDependencies ++= Seq(
-      scalatest_it,
-      gatlingHigh,
-      gatlingTest
-    )
   )
-  .enablePlugins(JacocoCoverallsPlugin, GatlingPlugin)
+  .enablePlugins(JacocoCoverallsPlugin)
   .dependsOn(utils, persistence, legality)
 
 lazy val ui = project
@@ -108,6 +87,16 @@ lazy val root = project
     name := "Chess",
     version := "2.0.0",
     commonSettings,
+  )
+  .enablePlugins(JacocoCoverallsPlugin, GatlingPlugin)
+  .aggregate(utils, persistence, legality, controller, ui, gatling)
+  .dependsOn(utils, persistence, legality, controller, ui)
+
+lazy val gatling = project
+  .in(file("gatling"))
+  .settings(
+    name := "gatling",
+    commonSettings,
     Defaults.itSettings,
     IntegrationTest / fork := true,
     libraryDependencies ++= Seq(
@@ -115,7 +104,5 @@ lazy val root = project
       gatlingHigh,
       gatlingTest
     )
-  )
-  .enablePlugins(JacocoCoverallsPlugin, GatlingPlugin)
-  .aggregate(utils, persistence, legality, controller, ui)
-  .dependsOn(utils, persistence, legality, controller, ui)
+  ).enablePlugins(GatlingPlugin)
+  .dependsOn(utils)
