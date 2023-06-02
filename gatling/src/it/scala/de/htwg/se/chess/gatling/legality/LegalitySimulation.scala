@@ -29,8 +29,7 @@ import util.data.Tile
 abstract class LegalitySimulation extends ChessServiceSimulation(
     serviceUrl = "http://localhost:8082",
     dockerComposeFile = new File("src/it/resources/legality/docker-compose.yaml"),
-    containerPort = 8082,
-    exposedServices = Seq("legality")
+    exposedServices = Map("legality" -> 8082)
 ):
 
     protected val defaultUserCount = 3000
