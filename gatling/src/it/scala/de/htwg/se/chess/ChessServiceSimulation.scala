@@ -119,7 +119,7 @@ trait ChessServiceSimulation(
         name: String,
         path: => String,
         method: HttpMethod,
-        body: => Body,
+        body: => Body = StringBody(""),
         pause: FiniteDuration = 500.milliseconds
     ): ChainBuilder =
         exec(
