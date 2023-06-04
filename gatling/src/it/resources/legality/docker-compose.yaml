@@ -3,7 +3,7 @@ services:
   legality:
     image: chess-legality
     build:
-      context: ../../../..
+      context: ../../../../../.
       dockerfile: docker/service.Dockerfile
       args:
         - SERVICE=legality
