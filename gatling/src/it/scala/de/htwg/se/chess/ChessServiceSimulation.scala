@@ -24,14 +24,14 @@ import io.gatling.core.structure.ScenarioBuilder
 import scala.concurrent.duration._
 
 import util.data._
+import ChessServiceSimulation._
 
 /** Abstract definiton of Gatling simulations for our Chess services
  * 
  * Defines the basic structure of a simulation and provides some utility methods.
  * 
  * Undefined values are:
-   - `operationChain`: a chain of Gatling `exec`s to run
-   - `scenarioBuilder`: a Gatling `scenario` for `operationChain`
+   - `scenarioBuilder`: a Gatling `scenario` for a `ChainBuilder`
    - `populationBuilder`: user population. Usually created from `scenarioBuilder.inject`
  *
  * Predefined values are:
@@ -95,16 +95,6 @@ trait ChessServiceSimulation(
         container.stop()
     }
 
-    /** List of HTTP status codes accepted by operations built with `buildOperation`
-     * 
-     * Gatling will log an error if the response status code is not in this list.
-     */
-    protected val acceptedHttpStatusCodes = List(
-        100, 102,
-        200, 201, 202,
-        302, 304
-    )
-
     /** Returns a ChainBuilder with `exec` of a given operation
      * 
      * An error will be logged if the response status code is not in `acceptedHttpStatusCodes`.
@@ -137,8 +127,47 @@ trait ChessServiceSimulation(
             }
         }.pause(pause)
 
-    /** The chain of Gatling operations to run */
-    protected val operationChain: ChainBuilder
+    /** Returns a ChainBuilder with `exec` of a given operation that saves the response
+     * 
+     * Responses have to be JSON compatible.
+     *
+     * An error will be logged if the response status code is not in `acceptedHttpStatusCodes`
+     * and the response body will NOT be stored.
+     * 
+     * @param name   the name of the operation
+     * @param path   the URL path of the operation
+     * @param method the HTTP method of the operation
+     * @param body   the request body
+     * @param pause  the pause after the operation
+     * @param resJmesPath the path inside the expression in the response body
+     * @param saveAsName  the name to save the response as inside the session
+     */
+    protected def buildResponseSaveOperation(
+        name: String,
+        path: => String,
+        method: HttpMethod,
+        body: => Body = StringBody(""),
+        pause: FiniteDuration = 500.milliseconds,
+        resJmesPath: String,
+        saveAsName: String
+    ) : ChainBuilder =
+        exec(
+            http(name)
+              .httpRequest(method, path)
+              .body(body)
+              .checkIf((response, _) => !acceptedHttpStatusCodes.contains(response.status.code())) {
+                bodyString.saveAs("bodyString")
+                status.saveAs("status")
+              }.checkIf((response, _) => acceptedHttpStatusCodes.contains(response.status.code())) {
+                jmesPath(resJmesPath).saveAs(saveAsName) 
+              }
+        ).exec { session =>
+            session("bodyString").asOption[String] match {
+                case Some(bodyString) => println(s"ERROR: $name: $method(#{status} - $bodyString)"); session
+                case None => session
+            }
+        }.pause(pause)
+
     /** The Gatling scenario
      * 
      * Usually created with `operationChain`.
@@ -155,11 +184,13 @@ trait ChessServiceSimulation(
         super.setUp(populationBuilder).protocols(httpProtocol)
 
 
-/** Contains some predefined feeders for Gatling `scenario`s
+/** Contains some predefined values for Gatling `scenario`s
  * 
+ * List of accepted HTTP status codes is defined in `acceptedHttpStatusCodes`.
+ * 
+ * List of predefined feeders:
  * - `constFenFeeder`: a feeder that always returns the same FEN
- *    (`r1bqrnk1/ppp3pp/2nbpp2/3pN2Q/3P1P2/2PBP1B1/PP4PP/RN2K2R w KQ - 1 0`)
- * - `constTileFeeder`: a feeder that always returns the same tile (H5)
+ * - `constTileFeeder`: a feeder that always returns the same tile
  * - `randomFenFeeder`: a feeder that returns random FENs from `gatling/src/it/resources/fenList.csv`.
  *   Values are taken from https://wtharvey.com/m8n[2/3/4].txt
  * - `randomTileFeeder`: a feeder that returns random tiles
@@ -167,17 +198,22 @@ trait ChessServiceSimulation(
  * @see [[https://gatling.io/docs/gatling/reference/current/session/feeder/]]
  */
 object ChessServiceSimulation:
-    /** A feeder that always returns the same FEN */
+    /** List of HTTP status codes accepted by operations built with `buildOperation`
+     * 
+     * Gatling will log an error if the response status code is not in this list.
+     */
+    protected val acceptedHttpStatusCodes = List(
+        100, 102,
+        200, 201, 202,
+        302, 304
+    )
     val constFenFeeder = Iterator.continually {
         Map("fen" -> "r1bqrnk1/ppp3pp/2nbpp2/3pN2Q/3P1P2/2PBP1B1/PP4PP/RN2K2R w KQ - 1 0")
     }
-    /** A feeder that always returns the same tile */
     val constTileFeeder = Iterator.continually {
         Map("tile" -> "H5")
     }
-    /** A feeder that returns random FENs from a list */
     val randomFenFeeder = csv("src/it/resources/fenList.csv").eager.random
-    /** A feeder that returns random tiles */
     val randomTileFeeder = Iterator.continually {
         Map("tile" -> s"${Tile(scala.util.Random.nextInt(8) + 1, scala.util.Random.nextInt(8) + 1, 8).toString}")
     }

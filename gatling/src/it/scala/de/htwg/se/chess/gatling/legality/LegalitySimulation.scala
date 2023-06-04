@@ -59,7 +59,7 @@ abstract class LegalitySimulation extends ChessServiceSimulation(
         pause: FiniteDuration = 500.milliseconds
     ): ChainBuilder = super.buildOperation(name, path, method, body, pause)
 
-    override protected val operationChain =
+    protected val operationChain =
         exec(
             allMoves,
             movesForTile,

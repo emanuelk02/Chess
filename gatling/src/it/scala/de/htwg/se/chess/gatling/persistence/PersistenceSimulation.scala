@@ -44,35 +44,85 @@ abstract class PersistenceSimulation(
     protected val defaultUserCount = 3000
     protected val defaultRampDuration = 1.minutes
 
-    val createUser = ??? //.post("/users?name=Gatling")
-        //.body(RawFileBody("gatling_Abgabe/recordedsimulation/0026_request.txt"))
-    val createSaveFromUserName = ??? // post("/saves?user=Gatling&name=gatlingtest")
-        //.body(RawFileBody("gatling_Abgabe/recordedsimulation/0023_request.json"))
-    val createSaveFromUserId = ??? // post("/saves?user-id=1")
-        //.body(RawFileBody("gatling_Abgabe/recordedsimulation/0024_request.json"))
-    val createSaveViaUserPath = ??? //.post("/users/1/saves?name=gatlingtest2")
-        //.body(RawFileBody("gatling_Abgabe/recordedsimulation/0025_request.json"))
+    protected val createUser = buildResponseSaveOperation(
+        name = "Create user",
+        path = "/users?name=#{username}",
+        method = HttpMethod.POST,
+        body = StringBody("#{password}"),
+        resJmesPath = "id",
+        saveAsName = "userid"
+    )
+    protected val createSaveFromUserName = buildResponseSaveOperation(
+        name = "Create save from user name",
+        path = "/saves?user=#{username}&name=gatlingtest",
+        method = HttpMethod.POST,
+        body = StringBody("#{fen}"),
+        resJmesPath = "id",
+        saveAsName = "saveid"
+    )
+    protected val createSaveFromUserId = buildOperation(
+        name = "Create save from user id",
+        path = "/saves?user=#{userid}&name=gatlingtest2",
+        method = HttpMethod.POST,
+        body = StringBody("#{fen}"),
+    )
+    protected val createSaveViaUserPath = buildOperation(
+        name = "Create save via user path",
+        path = "/users/#{userid}/saves?name=gatlingtest3",
+        method = HttpMethod.POST,
+        body = StringBody("#{fen}"),
+    )
     
-    val updateSave = ??? //.put("/saves?id=1")
-        //.body(RawFileBody("gatling_Abgabe/recordedsimulation/0027_request.txt"))
-    val updateUser = ??? //.put("/users?id=1&name=gatling1")
+    protected val updateSave = buildOperation(
+        name = "Update save",
+        path = "/saves?id=#{saveid}",
+        method = HttpMethod.PUT,
+        body = StringBody("#{fen}"),
+    )
+    protected val updateUser = buildOperation(
+        name = "Update user",
+        path = "/users?id=#{userid}&name=#{username}",
+        method = HttpMethod.PUT,
+        body = StringBody("#{fen}"),
+    )
 
-    val getSave = ???//.get("/saves?id=1")
-    val getUserFromId = ???//.get("/users?id=1")
-    val getUserFromName = ???//.get("/users?name=Gatling")
-    val getSaveViaUserPath = ???//.get("/users/2/saves")
-    val getHashCheck = ???//.get("/hash-checks?id=2")
+    protected val getSave = buildOperation(
+        name = "Get save",
+        path = "/users?id=#{saveid}",
+        method = HttpMethod.GET,
+    )
+    protected val getUserFromId = buildOperation(
+        name = "Get user by id",
+        path = "/users?id=#{userid}",
+        method = HttpMethod.GET,
+    )
+    protected val getUserFromName = buildOperation(
+        name = "Get user by name",
+        path = "/users?name=#{username}",
+        method = HttpMethod.GET,
+    )
+    protected val getSaveViaUserPath = buildOperation(
+        name = "Get save via user path",
+        path = "/users/#{userid}/saves",
+        method = HttpMethod.GET,
+    )
+    protected val getHashCheck = buildOperation(
+        name = "Get hash check",
+        path = "/hash-checks?id=#{userid}",
+        method = HttpMethod.GET,
+        body = StringBody("#{password}"),
+    )
 
-    val deleteSave = ???//.delete("/saves?id=1")
-    val deleteUser = ???//.delete("/users?id=1")
+    protected val deleteSave = buildOperation(
+        name = "Delete save",
+        path = "/saves?id=#{saveid}",
+        method = HttpMethod.DELETE,
+    )
+    protected val deleteUser = buildOperation(
+        name = "Delete save",
+        path = "/users?id=#{userid}",
+        method = HttpMethod.DELETE,
+    )
 
-    override def buildOperation(
-        name: String,
-        path: => String,
-        method: HttpMethod,
-        body: => Body = StringBody("""#{fen}"""),
-        pause: FiniteDuration = 500.milliseconds
-    ): ChainBuilder = super.buildOperation(name, path, method, body, pause)
-
-    override protected val operationChain = ???
+    protected val operationChain = ???
         
