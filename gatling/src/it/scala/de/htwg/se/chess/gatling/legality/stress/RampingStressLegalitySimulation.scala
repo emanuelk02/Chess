@@ -37,6 +37,6 @@ class RampingStressLegalitySimulation extends LegalitySimulation:
       .inject(rampUsersPerSec(1)
                 .to((defaultUserCount / defaultRampDuration.toSeconds) * 7.0)
                 .during(defaultRampDuration)
-      )
+      ).disablePauses
 
   setUp()

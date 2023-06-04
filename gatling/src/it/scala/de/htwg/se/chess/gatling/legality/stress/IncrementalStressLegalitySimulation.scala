@@ -38,6 +38,6 @@ class IncrementalStressLegalitySimulation extends LegalitySimulation:
       .eachLevelLasting(defaultRampDuration / 5)
       .separatedByRampsLasting(defaultRampDuration / 5)
       .startingFrom(10)
-    )
+    ).disablePauses
 
   setUp()
