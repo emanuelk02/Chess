@@ -24,9 +24,9 @@ import scala.concurrent.duration._
 import util.data.Tile
 import ChessServiceSimulation._
 
-class ConstantLoadLegalitySimulation extends LegalitySimulation:
+class ConstantLoadLegalitySimulation extends LegalitySimulation("ConstantLoad"):
 
-  override val scenarioBuilder = scenario("constant load LegalityScenario")
+  override val scenarioBuilder = scenario(name)
     .feed(constFenFeeder)
     .feed(constTileFeeder)
     .exec(operationChain)

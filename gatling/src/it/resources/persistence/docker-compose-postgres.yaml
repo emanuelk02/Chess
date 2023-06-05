@@ -11,14 +11,13 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     healthcheck:
-      test: ["CMD-SHELL", "echo 'here'"]
-      interval: 5s
-      timeout: 30s
-      retries: 10
-      start_period: 30s
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   persistence:
-    image: chess-persistence:postgres
+    image: chess-persistence
     build:
       context: ../../../../../.
       dockerfile: docker/service.Dockerfile
@@ -26,7 +25,7 @@ services:
         - SERVICE=persistence
         - SERVICE_API_PORT=8083
       cache_from:
-        - chess-persistence:postgres
+        - chess-persistence
     ports:
       - "8083:8083"
     networks:
@@ -41,6 +40,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 50s
 
 networks:
   postgres:

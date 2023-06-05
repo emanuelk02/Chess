@@ -1,7 +1,7 @@
 services:
 
   persistence:
-    image: chess-persistence:sqlite
+    image: chess-persistence
     build:
       context: .
       dockerfile: docker/service.Dockerfile
@@ -9,7 +9,7 @@ services:
         - SERVICE=persistence
         - SERVICE_API_PORT=8083
       cache_from:
-        - chess-persistence:sqlite
+        - chess-persistence
     ports:
       - "8083:8083"
     networks:

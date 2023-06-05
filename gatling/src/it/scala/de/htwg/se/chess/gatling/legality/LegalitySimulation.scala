@@ -27,14 +27,12 @@ import scala.concurrent.duration._
 import util.data.Tile
 
 
-abstract class LegalitySimulation extends ChessServiceSimulation(
+abstract class LegalitySimulation(name: String) extends ChessServiceSimulation(
+    name = name + "LegalitySimulation",
     serviceUrl = "http://localhost:8082",
     dockerComposeFile = new File("src/it/resources/legality/docker-compose.yaml"),
     exposedServices = Map("legality" -> 8082)
 ):
-
-    protected val defaultUserCount = 3000
-    protected val defaultRampDuration = 1.minutes
 
     protected val allMoves = buildOperation(
         name = "All moves",

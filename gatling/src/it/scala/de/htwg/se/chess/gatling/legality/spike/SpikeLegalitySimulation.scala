@@ -12,7 +12,7 @@
 package de.htwg.se.chess
 package gatling
 package legality
-package stress
+package spike
 
 import com.dimafeng.testcontainers.{ContainerDef, DockerComposeContainer, ExposedService}
 import io.gatling.core.Predef._
@@ -25,8 +25,9 @@ import util.data.Tile
 import ChessServiceSimulation._
 
 
-class RampingStressLegalitySimulation extends LegalitySimulation("RampingStress"):
+class SpikeLegalitySimulation extends LegalitySimulation("Spike"):
 
+  override protected val defaultUserCount: Int = 3000
   override val scenarioBuilder = scenario(name)
     .feed(randomFenFeeder)
     .feed(randomTileFeeder)
@@ -34,9 +35,14 @@ class RampingStressLegalitySimulation extends LegalitySimulation("RampingStress"
 
   override protected val populationBuilder = 
     scenarioBuilder
-      .inject(rampUsersPerSec(1)
-                .to((defaultUserCount / defaultRampDuration.toSeconds) * 7.0)
-                .during(defaultRampDuration)
-      ).disablePauses
+          .inject(
+            constantUsersPerSec(defaultUserCount / 10).during(10.seconds),
+            nothingFor(3.seconds),
+            atOnceUsers(defaultUserCount),
+            nothingFor(15.seconds),
+            atOnceUsers(defaultUserCount),
+            nothingFor(30.seconds),
+            stressPeakUsers(defaultUserCount * 4).during(defaultRampDuration / 2),
+        )
 
   setUp()

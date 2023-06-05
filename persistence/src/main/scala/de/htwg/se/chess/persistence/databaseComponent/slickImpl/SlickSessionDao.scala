@@ -99,6 +99,7 @@ case class SlickSessionDao(config: Config = ConfigFactory.load())
                 if (tries < 10) {
                     Thread.sleep(1000)
                     println("Failed to create tables, retrying...")
+                    println("Connecting to database: "+config.getString("dbs.slick."+sys.env.getOrElse("DATABASE_CONFIG", "sqlite")+".url"))
                     createTables(tries + 1)
                 } else {
                     println("Failed to create tables, giving up...")

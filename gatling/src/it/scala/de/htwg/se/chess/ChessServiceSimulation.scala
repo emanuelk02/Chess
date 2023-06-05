@@ -14,6 +14,8 @@ package gatling
 
 import com.dimafeng.testcontainers.{ContainerDef, DockerComposeContainer, ExposedService}
 import org.testcontainers.containers.wait.strategy.Wait
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import io.gatling.http.Predef._
 import io.netty.handler.codec.http.HttpMethod
 import io.gatling.core.Predef._
@@ -57,6 +59,7 @@ import ChessServiceSimulation._
  * @see [[https://wtharvey.com/m8n4.txt]]
  */
 trait ChessServiceSimulation(
+    protected val name: String,
     serviceUrl: String,
     dockerComposeFile: java.io.File,
     exposedServices: Map[String, Int]
@@ -82,7 +85,7 @@ trait ChessServiceSimulation(
            exposedServices = 
             this.exposedServices
                 .filter((_, port) => port > 0)
-                .map((service, port) => ExposedService(service, port, Wait.forListeningPort()))
+                .map((service, port) => ExposedService(service, port, Wait.forHealthcheck().withStartupTimeout(Duration.of(150, ChronoUnit.SECONDS))))
                 .toVector
         )
     
@@ -90,6 +93,7 @@ trait ChessServiceSimulation(
     protected var container: DockerComposeContainer = _
     before {
         container = testContainer.start()
+        Thread.sleep(35000)
     }
     after {
         container.stop()
@@ -110,19 +114,18 @@ trait ChessServiceSimulation(
         path: => String,
         method: HttpMethod,
         body: => Body = StringBody(""),
-        pause: FiniteDuration = 500.milliseconds
+        pause: FiniteDuration = defaultPauseDuration
     ): ChainBuilder =
         exec(
             http(name)
               .httpRequest(method, path)
               .body(body)
               .checkIf((response, _) => !acceptedHttpStatusCodes.contains(response.status.code())) {
-                bodyString.saveAs("bodyString")
-                status.saveAs("status")
-              }
+                bodyString.saveAs("errorBodyString")
+              }.check(status.in(acceptedHttpStatusCodes))
         ).exec { session =>
-            session("bodyString").asOption[String] match {
-                case Some(bodyString) => println(s"ERROR: $name: $method(#{status} - $bodyString)"); session
+            session("errorBodyString").asOption[String] match {
+                case Some(errorString) => println(s"ERROR: $name: $method($errorString) | session: $session"); session
                 case None => session
             }
         }.pause(pause)
@@ -147,7 +150,7 @@ trait ChessServiceSimulation(
         path: => String,
         method: HttpMethod,
         body: => Body = StringBody(""),
-        pause: FiniteDuration = 500.milliseconds,
+        pause: FiniteDuration = defaultPauseDuration,
         resJmesPath: String,
         saveAsName: String
     ) : ChainBuilder =
@@ -156,22 +159,21 @@ trait ChessServiceSimulation(
               .httpRequest(method, path)
               .body(body)
               .checkIf((response, _) => !acceptedHttpStatusCodes.contains(response.status.code())) {
-                bodyString.saveAs("bodyString")
-                status.saveAs("status")
+                bodyString.saveAs("errorBodyString")
               }.checkIf((response, _) => acceptedHttpStatusCodes.contains(response.status.code())) {
                 jmesPath(resJmesPath).saveAs(saveAsName) 
-              }
+              }.check(status.in(acceptedHttpStatusCodes))
         ).exec { session =>
-            session("bodyString").asOption[String] match {
-                case Some(bodyString) => println(s"ERROR: $name: $method(#{status} - $bodyString)"); session
+            session("errorBodyString").asOption[String] match {
+                case Some(errorString) => println(s"ERROR: $name: $method($errorString) | session: $session"); session
                 case None => session
             }
         }.pause(pause)
 
-    /** The Gatling scenario
-     * 
-     * Usually created with `operationChain`.
-     */
+    protected val defaultUserCount = 3000
+    protected val defaultRampDuration = 1.minutes
+    protected val defaultPauseDuration = 500.milliseconds
+    /** The Gatling scenario used to create a `PopulationBuilder` */
     protected val scenarioBuilder: ScenarioBuilder
     /** The Gatling user population
      * 
@@ -202,7 +204,7 @@ object ChessServiceSimulation:
      * 
      * Gatling will log an error if the response status code is not in this list.
      */
-    protected val acceptedHttpStatusCodes = List(
+    val acceptedHttpStatusCodes = List(
         100, 102,
         200, 201, 202,
         302, 304
@@ -216,4 +218,10 @@ object ChessServiceSimulation:
     val randomFenFeeder = csv("src/it/resources/fenList.csv").eager.random
     val randomTileFeeder = Iterator.continually {
         Map("tile" -> s"${Tile(scala.util.Random.nextInt(8) + 1, scala.util.Random.nextInt(8) + 1, 8).toString}")
+    }
+    val usernameFeeder = Iterator.from(0).map { int =>
+        Map("username" -> s"gatling$int")
+    }
+    val passwordFeeder = Iterator.from(0).map { int =>
+        Map("password" -> s"gatling$int")
     }

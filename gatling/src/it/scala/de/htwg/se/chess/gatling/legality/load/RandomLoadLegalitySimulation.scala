@@ -25,9 +25,9 @@ import util.data.Tile
 import ChessServiceSimulation._
 
 
-class RandomLoadLegalitySimulation extends LegalitySimulation:
+class RandomLoadLegalitySimulation extends LegalitySimulation("RandomLoad"):
 
-  override val scenarioBuilder = scenario("random load LegalityScenario")
+  override val scenarioBuilder = scenario(name)
     .feed(randomFenFeeder)
     .feed(randomTileFeeder)
     .exec(operationChain)

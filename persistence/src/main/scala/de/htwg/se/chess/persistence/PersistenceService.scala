@@ -76,7 +76,9 @@ case class PersistenceService(
           complete(NotFound, e.getMessage)
         else if e.isInstanceOf[IllegalArgumentException] then
           complete(BadRequest, e.getMessage)
-        else complete(InternalServerError, e.getMessage)
+        else 
+          e.printStackTrace()
+          complete(InternalServerError, e.getMessage)
     }
 
   val route = concat(

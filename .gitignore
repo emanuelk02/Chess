@@ -6,6 +6,7 @@
 .metals
 .bloop
 *.xml
+!logback.xml
 *.json
 metals.sbt
 *.db

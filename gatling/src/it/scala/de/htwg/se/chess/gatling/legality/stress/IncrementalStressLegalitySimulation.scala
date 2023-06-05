@@ -24,9 +24,9 @@ import scala.concurrent.duration._
 import util.data.Tile
 import ChessServiceSimulation._
 
-class IncrementalStressLegalitySimulation extends LegalitySimulation:
+class IncrementalStressLegalitySimulation extends LegalitySimulation("IncrementalStress"):
 
-  override val scenarioBuilder = scenario("incremental stress LegalityScenario")
+  override val scenarioBuilder = scenario(name)
     .feed(constFenFeeder)
     .feed(constTileFeeder)
     .exec(operationChain)

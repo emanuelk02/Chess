@@ -11,8 +11,8 @@
 
 package de.htwg.se.chess
 package gatling
-package legality
-package stress
+package persistence
+package spike
 
 import com.dimafeng.testcontainers.{ContainerDef, DockerComposeContainer, ExposedService}
 import io.gatling.core.Predef._
@@ -23,20 +23,28 @@ import scala.concurrent.duration._
 
 import util.data.Tile
 import ChessServiceSimulation._
+import Database._
+
+abstract class SpikePersistenceSimulation(database: Database) extends PersistenceSimulation("Spike", database):
+
+    override protected val defaultUserCount: Int = 1000
+    override val scenarioBuilder = scenario(name)
+        .feed(usernameFeeder)
+        .feed(passwordFeeder)
+        .exec(simpleOperationChain)
+
+    override protected val populationBuilder = 
+        scenarioBuilder
+          .inject(
+            nothingFor(3.seconds),
+            atOnceUsers(defaultUserCount),
+            nothingFor(defaultRampDuration),
+            atOnceUsers(defaultUserCount),
+        )
 
 
-class RampingStressLegalitySimulation extends LegalitySimulation("RampingStress"):
+class MongoDbSpikePersistenceSimulation extends SpikePersistenceSimulation(MongoDb):
+    setUp()
 
-  override val scenarioBuilder = scenario(name)
-    .feed(randomFenFeeder)
-    .feed(randomTileFeeder)
-    .exec(operationChain)
-
-  override protected val populationBuilder = 
-    scenarioBuilder
-      .inject(rampUsersPerSec(1)
-                .to((defaultUserCount / defaultRampDuration.toSeconds) * 7.0)
-                .during(defaultRampDuration)
-      ).disablePauses
-
-  setUp()
+class PostgresSpikePersistenceSimulation extends SpikePersistenceSimulation(Postgres):
+    setUp()
