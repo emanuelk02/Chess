@@ -27,7 +27,7 @@ import Database._
 
 abstract class SpikePersistenceSimulation(database: Database) extends PersistenceSimulation("Spike", database):
 
-    override protected val defaultUserCount: Int = 1000
+    override protected val defaultUserCount: Int = 300
     override val scenarioBuilder = scenario(name)
         .feed(usernameFeeder)
         .feed(passwordFeeder)
@@ -36,10 +36,12 @@ abstract class SpikePersistenceSimulation(database: Database) extends Persistenc
     override protected val populationBuilder = 
         scenarioBuilder
           .inject(
-            nothingFor(3.seconds),
+            nothingFor(5.seconds),
             atOnceUsers(defaultUserCount),
-            nothingFor(defaultRampDuration),
+            nothingFor(15.seconds),
             atOnceUsers(defaultUserCount),
+            nothingFor(defaultRampDuration / 2),
+            stressPeakUsers(defaultUserCount * 3).during(defaultRampDuration / 2),
         )
 
 

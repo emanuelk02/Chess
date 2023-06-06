@@ -16,6 +16,11 @@ import com.dimafeng.testcontainers.{ContainerDef, DockerComposeContainer, Expose
 import org.testcontainers.containers.wait.strategy.Wait
 import java.time.Duration
 import java.time.temporal.ChronoUnit
+import play.api.libs.json.{Json,JsString,JsValue,JsArray,JsObject}
+import java.io.File
+import scala.io.Source
+import scala.reflect.io.Directory
+import java.io.PrintWriter
 import io.gatling.http.Predef._
 import io.netty.handler.codec.http.HttpMethod
 import io.gatling.core.Predef._
@@ -89,6 +94,12 @@ trait ChessServiceSimulation(
                 .toVector
         )
     
+    private val reportsDir = Directory("./target/gatling-it/")
+    private def getReportsDirs: List[Directory] =
+        reportsDir.dirs.filter(
+            _.name.startsWith(name.toLowerCase())
+        ).toList
+
     /** The running container to `testContainer` */
     protected var container: DockerComposeContainer = _
     before {
@@ -97,6 +108,14 @@ trait ChessServiceSimulation(
     }
     after {
         container.stop()
+        val reportsSource = Source.fromFile(s"${reportsDir.path}/reports.json")
+        val reportsJson = Json.parse(reportsSource.mkString)
+        reportsSource.close()
+        val reports = (reportsJson \ name).getOrElse(JsArray()).as[JsArray]
+        val outputJson = reportsJson.as[JsObject] + (name -> reports.append(JsString(getReportsDirs.last.name))) 
+        val pw = new PrintWriter(new File(s"${reportsDir.path}/reports.json"))
+        pw.write(Json.prettyPrint(outputJson))
+        pw.close()
     }
 
     /** Returns a ChainBuilder with `exec` of a given operation
