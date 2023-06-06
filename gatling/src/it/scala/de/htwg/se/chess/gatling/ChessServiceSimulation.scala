@@ -105,11 +105,11 @@ trait ChessServiceSimulation(
     protected var container: DockerComposeContainer = _
     before {
         if !reportsDir.exists then reportsDir.createDirectory()
-        if !reportsFile.exists
-            then reportsFile.createFile()
-                val pw = new PrintWriter(new File(s"${reportsFile.path}"))
-                pw.write("{}")
-                pw.close()
+        if !reportsFile.exists then
+            reportsFile.createFile()
+            val pw = new PrintWriter(new File(s"${reportsFile.path}"))
+            pw.write("{}")
+            pw.close()
         container = testContainer.start()
         Thread.sleep(35000)
     }
