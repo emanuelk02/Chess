@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Results</title>
+  <style>
+    .category-column {
+      float: left;
+      width: 50%;
+    }
+    .test-column {
+      float: left;
+      width: 100%;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $.getJSON('reports.json', function(data) {
+        var legalityList = [];
+        var persistenceList = [];
+
+        $.each(data, function(key, value) {
+          if (key.endsWith("LegalitySimulation")) {
+            legalityList.push(key);
+          } else if (key.endsWith("PersistenceSimulation")) {
+            persistenceList.push(key);
+          }
+        });
+
+        renderCategories("legality-links", "Legality Simulation", legalityList, data);
+        renderCategories("persistence-links", "Persistence Simulation", persistenceList, data);
+      });
+
+      function renderCategories(containerId, categoryHeading, list, data) {
+        var container = document.getElementById(containerId);
+        var categoryColumn = document.createElement("div");
+        categoryColumn.className = "category-column";
+        container.appendChild(categoryColumn);
+
+        var heading = document.createElement("h2");
+        heading.innerText = categoryHeading;
+        categoryColumn.appendChild(heading);
+
+        var loadList = [];
+        var stressList = [];
+        var spikeList = [];
+
+        for (var i = 0; i < list.length; i++) {
+          var test = list[i];
+          var folders = data[test];
+
+          for (var j = 0; j < folders.length; j++) {
+            var folder = folders[j];
+
+            if (folder.includes("load")) {
+              loadList.push(folder);
+            } else if (folder.includes("stress")) {
+              stressList.push(folder);
+            } else if (folder.includes("spike")) {
+              spikeList.push(folder);
+            }
+          }
+        }
+
+        renderLinks(categoryColumn, "Load Tests", loadList);
+        renderLinks(categoryColumn, "Stress Tests", stressList);
+        renderLinks(categoryColumn, "Spike Tests", spikeList);
+      }
+
+      function renderLinks(container, headingText, list) {
+        if (list.length > 0) {
+          var heading = document.createElement("h3");
+          heading.innerText = headingText;
+          container.appendChild(heading);
+
+          for (var i = 0; i < list.length; i++) {
+            var folder = list[i];
+            var link = document.createElement("a");
+            link.href = folder + "/index.html";
+            link.innerText = folder;
+            container.appendChild(link);
+            container.appendChild(document.createElement("br"));
+          }
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Test Results</h1>
+  <div id="legality-links"></div>
+  <div id="persistence-links"></div>
+</body>
+</html>
+
+
+
+
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Results</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $.getJSON('reports.json', function(data) {
+        var legalityList = [];
+        var persistenceList = [];
+
+        $.each(data, function(key, value) {
+          if (key.endsWith("LegalitySimulation")) {
+            legalityList.push(key);
+          } else if (key.endsWith("PersistenceSimulation")) {
+            persistenceList.push(key);
+          }
+        });
+
+        renderLinks("legality-links", legalityList, data);
+        renderLinks("persistence-links", persistenceList, data);
+      });
+
+      function renderLinks(containerId, list, data) {
+        var container = document.getElementById(containerId);
+        for (var i = 0; i < list.length; i++) {
+          var test = list[i];
+          var folders = data[test];
+
+          for (var j = 0; j < folders.length; j++) {
+            var folder = folders[j];
+            var link = document.createElement("a");
+            link.href = folder + "/index.html";
+            link.innerText = folder;
+            container.appendChild(link);
+            container.appendChild(document.createElement("br"));
+          }
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Test Results</h1>
+  <h2>Legality Simulation</h2>
+  <div id="legality-links"></div>
+  <h2>Persistence Simulation</h2>
+  <div id="persistence-links"></div>
+</body>
+</html>
+-->

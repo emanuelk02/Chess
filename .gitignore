@@ -28,3 +28,8 @@ project/project
 **/target/task-temp-directory
 **/target/test-reports
 **/target/.history3
+
+!gatling/target/
+gatling/target/gatling-it/**simulation**
+gatling/target/it-reports
+gatling/target/scala-3.2.2
