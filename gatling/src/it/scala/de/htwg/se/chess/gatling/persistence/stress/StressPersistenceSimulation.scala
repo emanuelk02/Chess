@@ -27,7 +27,7 @@ import Database._
 
 abstract class StressPersistenceSimulation(database: Database) extends PersistenceSimulation("Stress", database):
 
-    override protected val defaultUserCount: Int = 500
+    override protected val defaultUserCount: Int = 50
     override val scenarioBuilder = scenario(name)
         .feed(usernameFeeder)
         .feed(passwordFeeder)
@@ -35,10 +35,10 @@ abstract class StressPersistenceSimulation(database: Database) extends Persisten
 
     override protected val populationBuilder = 
         scenarioBuilder
-          .inject(incrementConcurrentUsers(defaultUserCount / 7)
-          .times(4)
-          .eachLevelLasting(defaultRampDuration)
-          .separatedByRampsLasting(defaultRampDuration)
+          .inject(incrementConcurrentUsers(defaultUserCount)
+          .times(5)
+          .eachLevelLasting(defaultRampDuration / 4)
+          .separatedByRampsLasting(defaultRampDuration / 4)
           .startingFrom(10)
         ).disablePauses
 

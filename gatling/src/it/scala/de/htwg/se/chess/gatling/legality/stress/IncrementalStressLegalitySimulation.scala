@@ -27,14 +27,14 @@ import ChessServiceSimulation._
 class IncrementalStressLegalitySimulation extends LegalitySimulation("IncrementalStress"):
 
   override val scenarioBuilder = scenario(name)
-    .feed(constFenFeeder)
-    .feed(constTileFeeder)
+    .feed(randomFenFeeder)
+    .feed(randomTileFeeder)
     .exec(operationChain)
 
   override protected val populationBuilder =
     scenarioBuilder
-      .inject(incrementConcurrentUsers(defaultUserCount / 5)
-      .times(10)
+      .inject(incrementConcurrentUsers(defaultUserCount / 10)
+      .times(5)
       .eachLevelLasting(defaultRampDuration / 5)
       .separatedByRampsLasting(defaultRampDuration / 5)
       .startingFrom(10)
