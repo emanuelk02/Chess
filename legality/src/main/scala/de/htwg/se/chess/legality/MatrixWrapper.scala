@@ -21,7 +21,9 @@ import util.data.PieceType._
 import util.patterns.ChainHandler
 
 
-case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState, val size: Int):
+case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState):
+    def size: Int = field.size
+
     def cell(tile: Tile): Option[Piece] = field.cell(tile.row, tile.col)
 
     private def reverseAttackCheck(pieceType: PieceType, chain: Tile => List[Tile])(in: Tile) : Option[Boolean] =
@@ -284,7 +286,7 @@ case class MatrixWrapper(field: Matrix[Option[Piece]], state: ChessState, val si
 object MatrixWrapper:
     private val startingPrototypeFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     val prototype: MatrixWrapper = 
-        MatrixWrapper(FenParser.matrixFromFen(startingPrototypeFen), ChessState(startingPrototypeFen), 8)
+        new MatrixWrapper(FenParser.matrixFromFen(startingPrototypeFen), ChessState(startingPrototypeFen))
 
     def apply(fen: String): MatrixWrapper = 
         prototype.copy(field = FenParser.matrixFromFen(fen), state = ChessState(fen))
