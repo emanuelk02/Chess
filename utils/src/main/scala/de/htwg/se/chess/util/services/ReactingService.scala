@@ -43,7 +43,7 @@ trait ReactingService(implicit ex: ExecutionContext) extends JsonHandlerService:
       ),
       ( (values: Array[JsValue]) => {
             subscriptions = Uri(values(0).convertTo[String]) :: subscriptions
-            "Registered"
+            complete(OK, "Registered")
       })
     )
 
@@ -53,7 +53,7 @@ trait ReactingService(implicit ex: ExecutionContext) extends JsonHandlerService:
       ),
       ( (values: Array[JsValue]) => {
             subscriptions = subscriptions.filterNot(_ equals(Uri(values(0).convertTo[String])))
-            "Deregistered"
+            complete(OK,"Deregistered")
       })
     )
 

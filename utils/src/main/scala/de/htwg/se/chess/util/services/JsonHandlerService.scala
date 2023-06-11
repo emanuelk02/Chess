@@ -29,6 +29,7 @@ import scala.util.{Try,Success,Failure}
 import data.ChessJsonProtocol._
 import patterns.ChainHandler
 import spray.json.JsonFormat
+import akka.http.scaladsl.server.Directive
 
 
 trait JsonHandlerService:
@@ -43,17 +44,14 @@ trait JsonHandlerService:
     
     def getValidatingJsonHandler(
       fieldValidators: Map[String, (String, JsObject) => Option[StandardRoute]],
-      resolveFunction: Array[JsValue] => String
-      ) : ChainHandler[JsObject, StandardRoute] = ChainHandler(
+      resolveFunction: Array[JsValue] => Route
+      ) : ChainHandler[JsObject, Route] = ChainHandler(
         checkForJsonFields(fieldValidators.keys.toList) _
         :: fieldValidators.map((field, validator) => validator(field, _)).toList
         ::: ( (json: JsObject) =>
-              Some(complete(
-                HttpEntity(
-                  ContentTypes.`application/json`,
+              Some(
                   resolveFunction(fieldValidators.map((field, _) => json.getFields(field).head).toArray)
-                )
-              ))
+              )
             )
         :: Nil
       )
@@ -69,7 +67,7 @@ trait JsonHandlerService:
                     else Some(complete(BadRequest, s"""Invalid $field: ${json.getFields(field).head}"""))
             case Failure(_) => Some(complete(BadRequest, s"""Invalid $field: ${json.getFields(field).head}"""))
 
-    def handleRequestEntity(handler: ChainHandler[JsObject, StandardRoute], errorMessage: String = "Something went wrong"): Route =
+    def handleRequestEntity(handler: ChainHandler[JsObject, Route], errorMessage: String = "Something went wrong"): Route =
         entity(as[String]) { str =>
             handler.handleRequest(str.parseJson.asJsObject)
               .getOrElse(complete {

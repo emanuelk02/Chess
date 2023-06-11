@@ -43,7 +43,7 @@ trait SubscricableService(implicit ex: ExecutionContext) extends JsonHandlerServ
       ),
       ( (values: Array[JsValue]) => {
             subscribers = Uri(values(0).convertTo[String]) :: subscribers
-            "Registered"
+            complete(OK, "Registered")
       })
     )
 
@@ -53,7 +53,7 @@ trait SubscricableService(implicit ex: ExecutionContext) extends JsonHandlerServ
       ),
       ( (values: Array[JsValue]) => {
             subscribers = subscribers.filterNot(_ equals(Uri(values(0).convertTo[String])))
-            "Deregistered"
+            complete(OK, "Deregistered")
       })
     )
 

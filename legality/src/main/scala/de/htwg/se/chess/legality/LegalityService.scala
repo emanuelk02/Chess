@@ -8,11 +8,10 @@
 **                                                                                      **
 \*                                                                                      */
 
-
 package de.htwg.se.chess
 package legality
 
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior, PostStop}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -21,10 +20,14 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import scala.concurrent.{Future,ExecutionContextExecutor,ExecutionContext}
-import scala.util.{Try,Success,Failure}
-import scala.quoted._
+import akka.util.Timeout
+import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.duration._
+import scala.util.{Try, Success, Failure}
 import spray.json._
+
+import actors.LegalityActor
+import messages.LegalityMessages._
 
 import util.data.Tile
 import util.data.FenParser
@@ -33,77 +36,62 @@ import util.patterns.ChainHandler
 import util.services.JsonHandlerService
 
 
-case class LegalityService(bind: Future[ServerBinding], ip: String, port: Int)(implicit system: ActorSystem[Any], executionContext: ExecutionContext):
-    println(s"LegalityComputer running. Please navigate to http://" + ip + ":" + port)
-
-    def terminate: Unit =
-        bind
-          .flatMap(_.unbind()) // trigger unbinding from the port
-          .onComplete(_ => system.terminate()) // and shutdown when done
-
-
 object LegalityService extends JsonHandlerService:
 
-    private def computeForTileHandler(tile: Tile) = getValidatingJsonHandler(
-      Map(
-        "fen" -> jsonFieldValidator[String](FenParser.checkFen)
-      ),
-      (values: Array[JsValue]) => 
-        LegalityComputer.getLegalMoves(
-          values(0).convertTo[String],
-          tile
-        ).toJson.toString
-    )
+  sealed trait Message
+  private final case class StartFailed(cause: Throwable) extends Message
+  private final case class Started(binding: ServerBinding) extends Message
+  case object Stop extends Message
 
-    private val computeForAllHandler = getValidatingJsonHandler(
-      Map(
-        "fen" -> jsonFieldValidator[String](FenParser.checkFen)
-      ),
-      (values: Array[JsValue]) => 
-        LegalityComputer.getLegalMoves(
-          values(0).convertTo[String]
-        ).toJson.toString
-    )
+  def getBehaviour(host: String, port: Int): Behavior[Message] = Behaviors.setup { ctx =>
+    implicit val system = ctx.system
 
-    private def isAttackedTileHander(tile: Tile) = getValidatingJsonHandler(
-      Map(
-        "fen" -> jsonFieldValidator[String](FenParser.checkFen)
-      ),
-      (values: Array[JsValue]) => 
-        LegalityComputer.isAttacked(
-          values(0).convertTo[String],
-          tile
-        ).toJson.toString
-    )
+    val legalityActor = ctx.spawn(LegalityActor(), "LegalityActor")
+    val legalityRoutes = new LegalityRoutes(legalityActor)
 
-    val error500 = 
-        "Something went wrong while trying to compute legal moves"
-
-    val route = concat(
-      pathPrefix("moves") {
-        get {
-          parameter("tile".as[Tile].optional) { tile =>
-            tile match
-                case Some(t) => handleRequestEntity(computeForTileHandler(t), error500)
-                case None    => handleRequestEntity(computeForAllHandler, error500)
-            }
-          }
-        },
-      pathPrefix("attacks") {
-        get {
-          parameter("tile".as[Tile]) { tile =>
-            handleRequestEntity(isAttackedTileHander(tile), error500)
-          }
-        }
+    val serverBinding: Future[Http.ServerBinding] =
+      Http().newServerAt(host, port).bind(legalityRoutes.routes)
+    ctx.pipeToSelf(serverBinding) {
+        case Success(binding) => Started(binding)
+        case Failure(ex)      => StartFailed(ex)
       }
-    )
 
-    def apply(ip: String, port: Int): LegalityService =
-        implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "LegalityComputerService")
-        implicit val executionContext: ExecutionContext = system.executionContext
-        LegalityService(Http().newServerAt(ip, port).bind(route), ip, port)
+    def running(binding: ServerBinding): Behavior[Message] =
+      Behaviors
+        .receiveMessagePartial[Message] { case Stop =>
+          ctx.log.info(
+            "Stopping server http://{}:{}/",
+            binding.localAddress.getHostString,
+            binding.localAddress.getPort
+          )
+          Behaviors.stopped
+        }
+        .receiveSignal { case (_, PostStop) =>
+          binding.unbind()
+          Behaviors.same
+        }
 
-    def apply(): LegalityService =
-        implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "LegalityComputerService")
-        implicit val executionContext: ExecutionContext = system.executionContext
-        LegalityService(Http().newServerAt("localhost", 8080).bind(route), "localhost", 8080)
+    def starting(wasStopped: Boolean): Behaviors.Receive[Message] =
+      Behaviors.receiveMessage[Message] {
+        case StartFailed(cause) =>
+          throw new RuntimeException("Server failed to start", cause)
+        case Started(binding) =>
+          ctx.log.info(
+            "Server online at http://{}:{}/",
+            binding.localAddress.getHostString,
+            binding.localAddress.getPort
+          )
+          if (wasStopped) ctx.self ! Stop
+          running(binding)
+        case Stop =>
+          starting(wasStopped = true)
+      }
+
+    starting(wasStopped = false)
+  }
+
+  def apply(host: String, port: Int): ActorSystem[Message] =
+    ActorSystem(getBehaviour(host, port), "LegalityService")
+
+  def apply(): ActorSystem[Message] =
+    LegalityService("localhost", 8080)
