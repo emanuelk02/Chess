@@ -36,12 +36,13 @@ abstract class SpikePersistenceSimulation(database: Database) extends Persistenc
     override protected val populationBuilder = 
         scenarioBuilder
           .inject(
-            nothingFor(5.seconds),
+            constantUsersPerSec(defaultUserCount / 10).during(10.seconds),
+            nothingFor(3.seconds),
             atOnceUsers(defaultUserCount),
             nothingFor(15.seconds),
             atOnceUsers(defaultUserCount),
-            nothingFor(defaultRampDuration / 2),
-            stressPeakUsers(defaultUserCount * 3).during(defaultRampDuration / 2),
+            nothingFor(30.seconds),
+            stressPeakUsers(defaultUserCount * 4).during(defaultRampDuration / 2),
         )
 
 

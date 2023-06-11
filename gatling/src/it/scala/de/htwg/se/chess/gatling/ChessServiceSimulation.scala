@@ -95,6 +95,7 @@ trait ChessServiceSimulation(
         )
     
     private val reportsDir = Directory("./target/gatling-it/")
+    private val reportsFile = scala.reflect.io.File(s"${reportsDir.path}/reports.json")
     private def getReportsDirs: List[Directory] =
         reportsDir.dirs.filter(
             _.name.startsWith(name.toLowerCase())
@@ -103,17 +104,23 @@ trait ChessServiceSimulation(
     /** The running container to `testContainer` */
     protected var container: DockerComposeContainer = _
     before {
+        if !reportsDir.exists then reportsDir.createDirectory()
+        if !reportsFile.exists then
+            reportsFile.createFile()
+            val pw = new PrintWriter(new File(s"${reportsFile.path}"))
+            pw.write("{}")
+            pw.close()
         container = testContainer.start()
         Thread.sleep(35000)
     }
     after {
         container.stop()
-        val reportsSource = Source.fromFile(s"${reportsDir.path}/reports.json")
+        val reportsSource = Source.fromFile(s"${reportsFile.path}")
         val reportsJson = Json.parse(reportsSource.mkString)
         reportsSource.close()
         val reports = (reportsJson \ name).getOrElse(JsArray()).as[JsArray]
         val outputJson = reportsJson.as[JsObject] + (name -> reports.append(JsString(getReportsDirs.last.name))) 
-        val pw = new PrintWriter(new File(s"${reportsDir.path}/reports.json"))
+        val pw = new PrintWriter(new File(s"${reportsFile.path}"))
         pw.write(Json.prettyPrint(outputJson))
         pw.close()
     }
