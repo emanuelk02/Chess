@@ -21,7 +21,12 @@ import messages.LegalityMessages._
 
 
 object LegalityActor:
-    def apply(): Behavior[LegalityRequest] = Behaviors.receiveMessage {
+    def apply(): Behavior[LegalityRequest] = Behaviors.receive { (context, message) =>
+            context.spawnAnonymous(childBehavior) ! message
+            Behaviors.same
+    }
+
+    private val childBehavior: Behavior[LegalityRequest] = Behaviors.receiveMessage {
         case ComputeForTile(fen, tile, replyTo) =>
             replyTo ! LegalMoves(Map(tile -> LegalityComputer.getLegalMoves(fen, tile)))
             Behaviors.same
