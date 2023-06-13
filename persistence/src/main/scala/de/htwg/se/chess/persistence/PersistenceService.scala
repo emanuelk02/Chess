@@ -18,6 +18,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.StandardRoute
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -68,8 +69,8 @@ case class PersistenceService(
 
   def processRequest[I, O: JsonWriter](
       params: I
-  )(process: I => Future[Try[O]]): StandardRoute =
-    Await.result(process(params), Duration.Inf) match {
+  )(process: I => Future[Try[O]]): Route =
+    onSuccess(process(params)) {
       case Success(result) => complete(OK, result.toJson)
       case Failure(e) =>
         if e.isInstanceOf[NoSuchElementException] then
