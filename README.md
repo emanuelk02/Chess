@@ -24,6 +24,8 @@
 ---
 
 # Table of Contents
+### *Still at the stage of the Software Engineering lecture*
+### *See [below](#additional-information-for-software-architecture) for more on Software Architecture*
 
 | **Component** | **Feature/Documentation** | **Code** | **Tests** |
 | :------     | :------     |   -----: |   ------: |
@@ -48,6 +50,39 @@
    | | [Invoker for Commands](https://stackoverflow.com/questions/37512006/role-of-invoker-class-in-command-pattern) | [CommandInvoker.scala](utils/src/main/scala/de/htwg/se/chess/util/patterns/CommandInvoker.scala) | [CommandInvokerSpec.scala](utils/src/test/scala/de/htwg/se/chess/util/patterns/CommandInvokerSpec.scala)
 
 ---
+
+# Additional Information for Software Architecture
+
+## Services
+
+- [controller](controller/): Offers control over a game session and everything needed to play a match of Chess
+- [legality](legality/): Computes legal moves for a given position
+- [persistence](persistence/): Stores user and game session data in a database
+- [chess](src/main/scala/ChessService.scala): encapsules all three other services and creates on big REST API
+
+## How to build and run the project
+
+### Docker
+
+The project defines [Docker images](docker/service.Dockerfile) for the services to run in.
+As well as a general [docker compose file](docker-compose.yaml) with one additional docker-compose
+for each available database:
+- [postgres](docker-compose-postgres.yaml)
+- [mongodb](docker-compose-mongodb.yaml)
+- [sqlite](docker-compose-sqlite.yaml)
+
+To build the images, use the `docker compose build` command and pass it the database file you need.
+E.g.: `docker compose -f docker-compose-sqlite.yaml -f docker-compose.yaml build`.
+Alternatively, we have a [powershell script](buildDockerCompose.ps1) that you can call.
+Simply enter the services you want to build or use `all` when asked what you want to build.
+
+After that, you can start the services in the same way, using `docker compose up`.
+
+### Scala sbt
+
+If docker is too slow or complicated, you can also run the services directly in Scala.
+Simply execute [`MainApi`](src/main/scala/Chess.scala) with sbt.
+We recommend using VScode with the metals plugin, which allows you to run Apps from the editor.
 
 # General Information
 
