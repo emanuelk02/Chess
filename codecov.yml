@@ -14,6 +14,8 @@ ignore:
   - "**/PersistenceModule.scala"
   - "**/*Communicating*/"
   - "**/**Service.scala"
+  - "**/**Routes.scala"
+  - "**/messages/**"
   - "**/**Interface.scala"
   - "**/GameData.scala"
   - "**/UserDao.scala"
