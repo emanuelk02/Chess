@@ -19,7 +19,7 @@
 ## [GameData](gamedata)
 
  - The **_GameData_** holds all the information needed to _run_ a **Game of Chess**
- - The main **Interface** to that data is defined by **_[GameField](../../controller/src/main/scala/de/htwg/se/chess/gameDataComponent/GameData.scala)_**
+ - The main **Interface** to that data is defined by **_[GameField](../../controller/src/main/scala/de/htwg/se/chess/model/gameDataComponent/GameData.scala)_**
  - **GameField** stores a _[Matrix](../../utils/src/main/scala/de/htwg/se/chess/util/data/Matrix.scala)_ of **_Option\[Piece\]_** which stores every **Piece** of the _Board_
 
 ---
