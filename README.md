@@ -16,8 +16,8 @@
 ### This project was made for the course **_Software Engineering_** at **_HTWG Constance_** in **Winter 2021-2022**
 
 ---
-
-## *README and Documentation is a work in progress!*
+ 
+## *README and Documentation is a work in progress !*
 
 ### See our **_[Documentation](docs)_** or the **_Tests_** for more information on individual **Components**
 
