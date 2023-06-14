@@ -1,55 +1,108 @@
-val scala3Version = "3.2.2"
+import dependencies._
+
+lazy val commonSettings = Seq(
+  ThisBuild / Compile / javaOptions += "-Xmx2G",
+  scalaVersion := scala3Version,
+  libraryDependencies ++= commonDependency,
+  ThisBuild / assemblyMergeStrategy := {
+    case PathList("reference.conf")    => MergeStrategy.concat
+    case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+    case PathList("module-info.class") => MergeStrategy.discard
+    case x =>
+      val oldStrategy =
+        (_root_.sbtassembly.AssemblyPlugin.autoImport.assembly / assemblyMergeStrategy).value
+      oldStrategy(x)
+  },
+  jacocoReportSettings := JacocoReportSettings(
+    "Jacoco Coverage Report",
+    None,
+    JacocoThresholds(),
+    Seq(
+      JacocoReportFormats.ScalaHTML,
+      JacocoReportFormats.XML
+    ), // note XML formatter
+    "utf-8"
+  ),
+  jacocoExcludes := Seq(
+    "*aview.*",
+    "*Chess.*",
+    "*GameData.*",
+    "*ControllerInterface.*",
+    "*Service*"
+  ),
+  jacocoCoverallsServiceName := "github-actions",
+  jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
+  jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
+  jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN")
+)
+
+lazy val utils = project
+  .in(file("utils"))
+  .settings(
+    name := "utils",
+    commonSettings,
+  )
+  .enablePlugins(JacocoCoverallsPlugin)
+
+lazy val legality = project
+  .in(file("legality"))
+  .settings(
+    name := "legality",
+    commonSettings,
+  )
+  .enablePlugins(JacocoCoverallsPlugin)
+  .dependsOn(utils)
+
+lazy val persistence: Project = project
+  .in(file("persistence"))
+  .settings(
+    name := "persistence",
+    commonSettings,
+    Test / parallelExecution := false,
+  )
+  .enablePlugins(JacocoCoverallsPlugin)
+  .dependsOn(utils)
+
+lazy val controller = project
+  .in(file("controller"))
+  .settings(
+    name := "controller",
+    commonSettings,
+  )
+  .enablePlugins(JacocoCoverallsPlugin)
+  .dependsOn(utils, persistence, legality)
+
+lazy val ui = project
+  .in(file("ui"))
+  .settings(
+    name := "ui",
+    commonSettings
+  )
+  .enablePlugins(JacocoCoverallsPlugin)
+  .dependsOn(utils, persistence, legality, controller)
 
 lazy val root = project
   .in(file("."))
   .settings(
     name := "Chess",
-    version := "1.0.1",
-
-    scalaVersion := scala3Version,
-    libraryDependencies ++= Seq("com.novocode" % "junit-interface" % "0.11" % "test",
-      "org.scalactic" %% "scalactic" % "3.2.10",
-      "org.scalatest" %% "scalatest" % "3.2.10" % "test",
-      "org.scalafx" %% "scalafx" % "16.0.0-R25",
-      "com.google.inject" % "guice" % "4.2.3",
-      "org.scala-lang.modules" %% "scala-xml" % "2.0.1"),
-    libraryDependencies += ("org.scala-lang.modules" %% "scala-swing" % "3.0.0").cross(CrossVersion.for3Use2_13),
-    libraryDependencies += ("net.codingwell" %% "scala-guice" % "5.0.2").cross(CrossVersion.for3Use2_13),
-    
-    libraryDependencies ++= {
-    // Determine OS version of JavaFX binaries
-    lazy val osName = System.getProperty("os.name") match {
-      case n if n.startsWith("Linux") => "linux"
-      case n if n.startsWith("Mac") => "mac"
-      case n if n.startsWith("Windows") => "win"
-      case _ => throw new Exception("Unknown platform!")
-    }
-      Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
-        .map(m => "org.openjfx" % s"javafx-$m" % "16" classifier osName)
-    },
-    
-    jacocoReportSettings := JacocoReportSettings(
-      "Jacoco Coverage Report",
-      None,
-      JacocoThresholds(),
-      Seq(JacocoReportFormats.ScalaHTML, JacocoReportFormats.XML), // note XML formatter
-    "utf-8"),
-    
-    jacocoExcludes := Seq(
-      "*aview.*",
-      "*Chess.*",
-      "*GameData.*",
-      "*ControllerInterface.*"
-    ),
-
-    jacocoCoverallsServiceName := "github-actions",
-    jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
-    jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
-    jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN")
+    version := "2.0.0",
+    commonSettings,
   )
-  .enablePlugins(JacocoCoverallsPlugin)
-parallelExecution in Test := false
-assemblyMergeStrategy in assembly := {
- case PathList("META-INF", _*) => MergeStrategy.discard
- case _                        => MergeStrategy.first
-}
+  .enablePlugins(JacocoCoverallsPlugin, GatlingPlugin)
+  .aggregate(utils, persistence, legality, controller, ui, gatling)
+  .dependsOn(utils, persistence, legality, controller, ui)
+
+lazy val gatling = project
+  .in(file("gatling"))
+  .settings(
+    name := "gatling",
+    commonSettings,
+    Defaults.itSettings,
+    IntegrationTest / fork := true,
+    libraryDependencies ++= Seq(
+      scalatest_it,
+      gatlingHigh,
+      gatlingTest
+    )
+  ).enablePlugins(GatlingPlugin)
+  .dependsOn(utils)

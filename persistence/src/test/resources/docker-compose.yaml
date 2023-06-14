@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:15.3-alpine
+    ports:
+      - "50000:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+  mongodb:
+    image: mongo:6.0.5
+    ports:
+      - "50001:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
