@@ -84,6 +84,13 @@ If docker is too slow or complicated, you can also run the services directly in 
 Simply execute [`MainApi`](src/main/scala/Chess.scala) with sbt.
 We recommend using VScode with the metals plugin, which allows you to run Apps from the editor.
 
+---
+
+Note, that the TUI and GUI still use the base implementation of the game and do not leverage the new microservices.
+The main part that this concerns is persistence, where they use the fileIoComponent instead of databases.
+Another spot is within the gameDataComponent, where we have a base (cooperating) implementation and a communicating implementation.
+Implementations are injected as dependencies.
+
 # General Information
 
  ### For information on the **rules of Chess**, see: [chessprogramming.org](https://www.chessprogramming.org/Rules_of_Chess)
