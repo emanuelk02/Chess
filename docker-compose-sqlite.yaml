@@ -1,0 +1,24 @@
+services:
+
+  persistence:
+    image: chess-persistence
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        - SERVICE=persistence
+        - SERVICE_API_PORT=8083
+      cache_from:
+        - chess-persistence
+    ports:
+      - "8083:8083"
+    networks:
+      - chess-network
+    environment:
+      DATABASE_CONFIG: sqlite
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 35s

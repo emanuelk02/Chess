@@ -1,0 +1,52 @@
+services:
+
+  mongodb:  
+    image: mongo:6.0.5
+    restart: always
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 50s
+
+  persistence:
+    image: chess-persistence
+    build:
+      context: ../../../../../.
+      dockerfile: docker/service.Dockerfile
+      args:
+        - SERVICE=persistence
+        - SERVICE_API_PORT=8083
+      cache_from:
+        - chess-persistence
+    ports:
+      - "8083:8083"
+    networks:
+      - mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      DATABASE_HOST: mongodb
+      DATABASE_PORT: 27017
+      DATABASE_CONFIG: mongodb
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'here'"]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 50s
+
+networks:
+  mongo:

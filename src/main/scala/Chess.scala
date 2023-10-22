@@ -1,6 +1,6 @@
 /*                                                                                      *\
 **     _________  ______________________                                                **
-**    /  ___/  / /  /  ____/  ___/  ___/        2021 Emanuel Kupke & Marcel Biselli     **
+**    /  ___/  / /  /  ____/  ___/  ___/        2023 Emanuel Kupke & Marcel Biselli     **
 **   /  /  /  /_/  /  /__  \  \  \  \           https://github.com/emanuelk02/Chess     **
 **  /  /__/  __   /  /___ __\  \__\  \                                                  **
 **  \    /__/ /__/______/______/\    /         Software Engineering | HTWG Constance    **
@@ -12,26 +12,44 @@
 package de.htwg.se.chess
 
 import scala.io.StdIn.readLine
-import scalafx.application.JFXApp3
+import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.Http
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.client.RequestBuilding._
 
-import com.google.inject.Guice
-
+import util.client.BlockingClient._
+import persistence.PersistenceService
+import legality.LegalityService
+import service.ChessService
+import service.ControllerService
 import aview.TUI
 import aview.gui.SwingGUI
-import controller.controllerComponent.ControllerInterface
+
+import ChessModule.given
 
 
-object starter {
-  val injector = Guice.createInjector(new ChessModule)
-  val controller = injector.getInstance(classOf[ControllerInterface])
-  val tui = TUI(controller)
-  def runTUI: Unit = tui.run
-  def runSwingGUI = SwingGUI(controller).startup(Array())
+object starter:
+  val legalityApi = LegalityService("localhost", 8082)
+  implicit val sys: ActorSystem[Any] = ActorSystem(Behaviors.empty, "Main-Api")
+  implicit val ex: ExecutionContext = sys.executionContext
+  
+  def runApi: Unit = {
+    val persistenceApi = PersistenceService("localhost", 8083)
+    persistenceApi.run
+    val chessApi = ChessService("localhost", 8080)
+    chessApi.run
+    Thread.sleep(5000)
+    val controllerApi = ControllerService("localhost", 8081)
+    controllerApi.run
 }
-object MainTUI extends App {
-    starter.runTUI
-}
-object MainSwingGUI extends App {
-    starter.runSwingGUI
-    starter.runTUI
-}
+
+object MainApi extends App:
+    starter.runApi
+object MainTUI extends App:
+    val tui = TUI(controller)
+    tui.run
+object MainSwingGUI extends App:
+    val tui = TUI(controller)
+    SwingGUI(controller).startup(Array())
+    tui.run
