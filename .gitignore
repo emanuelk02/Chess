@@ -32,8 +32,4 @@ project/project
 !gatling/target/
 gatling/target/gatling-it/**simulation**
 gatling/target/it-reports
-<<<<<<< HEAD
 gatling/target/scala-3.2.2
-=======
-gatling/target/scala-3.2.2
->>>>>>> 4fffd508253ca63af1a6772dbda49029d1c29455
