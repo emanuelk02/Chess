@@ -84,7 +84,8 @@ object CommunicatingChessField:
       state,
       tmpField.getKingSquare match
         case Some(kingSq) => tmpField.isAttacked(kingSq)
-        case None => false,
+        case None => false
+      ,
       tmpField.legalMoves.flatMap( entry => entry._2).toList.sorted,
       forwarder = ChessFieldForwarder()
     )
@@ -96,7 +97,8 @@ object CommunicatingChessField:
       state,
       tmpField.getKingSquare match
         case Some(kingSq) => tmpField.isAttacked(kingSq)
-        case None => false,
+        case None => false
+      ,
       tmpField.legalMoves.flatMap( entry => entry._2).toList.sorted,
       forwarder = ChessFieldForwarder(legalityServiceUri)
     )

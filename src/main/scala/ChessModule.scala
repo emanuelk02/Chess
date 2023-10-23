@@ -15,4 +15,4 @@ import controller.controllerComponent.ControllerInterface
 
 
 object ChessModule:
-  given controller: ControllerInterface = BaseControllerModule.controller
+  given controller: ControllerInterface = ControllerModule.controller

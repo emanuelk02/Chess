@@ -27,6 +27,7 @@ import aview.TUI
 import aview.gui.SwingGUI
 
 import ChessModule.given
+import de.htwg.se.chess.controller.controllerComponent.ControllerInterface
 
 
 object starter:
@@ -46,10 +47,23 @@ object starter:
 
 object MainApi extends App:
     starter.runApi
-object MainTUI extends App:
+
+object MainApiTUI extends App:
+    starter.runApi
     val tui = TUI(controller)
     tui.run
-object MainSwingGUI extends App:
+object MainApiSwingGUI extends App:
+    starter.runApi
     val tui = TUI(controller)
     SwingGUI(controller).startup(Array())
     tui.run
+
+object BaseTui extends App:
+  given controller: ControllerInterface = BaseControllerModule.controller
+  val tui = TUI(controller)
+  tui.run
+object BaseGui extends App:
+  given controller: ControllerInterface = BaseControllerModule.controller
+  val tui = TUI(controller)
+  SwingGUI(controller).startup(Array())
+  tui.run

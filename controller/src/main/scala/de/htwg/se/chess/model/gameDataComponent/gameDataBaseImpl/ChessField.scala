@@ -232,7 +232,8 @@ object ChessField:
       state,
       tmpField.getKingSquare match
         case Some(kingSq) => tmpField.isAttacked(kingSq)
-        case None => false,
+        case None => false
+      ,
       tmpField.setColor(state.color.invert).legalMoves.flatMap( entry => entry._2).toList.sorted
     )
   
