@@ -15,6 +15,7 @@ package controllerComponent
 package controllerMockImpl
 
 import model.gameDataComponent.GameField
+import model.gameDataComponent.GameState
 import util.data.Tile
 import util.data.Piece
 import util.data.Matrix
@@ -54,3 +55,4 @@ class MockController extends ControllerInterface:
   def inCheck: Boolean = false
   def save = {}
   def load = {}
+  def gameState: GameState = GameState.RUNNING

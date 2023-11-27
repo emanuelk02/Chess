@@ -87,6 +87,8 @@ case class ControllerService(
             query match
               case "check" =>
                 complete(HttpResponse(OK, entity = controller.inCheck.toString))
+              case "game-state" =>
+                complete(HttpResponse(OK, entity = controller.gameState.toString))
               case "playing" =>
                 complete(HttpResponse(OK, entity = controller.isPlaying.toString))
               case "size" =>
@@ -176,6 +178,7 @@ case class ControllerService(
               case "selected" =>
                 parameter("tile".as[Tile].optional) { tile =>
                   complete {
+                    print("Received: " + tile)
                     controller.executeAndNotify(controller.select, tile)
                     HttpResponse(OK, entity = controller.fieldToFen)
                   }

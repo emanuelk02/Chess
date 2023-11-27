@@ -22,6 +22,7 @@ import util.data.Piece
 import util.data.PieceColor
 import util.patterns.Command
 import model.gameDataComponent.GameField
+import model.gameDataComponent.GameState
 
 
 /**
@@ -160,6 +161,8 @@ trait ControllerInterface extends Publisher:
     def inCheck: Boolean
     /** Returns true if the game is active @return game activity state */
     def isPlaying: Boolean
+    /** Returns CHECKMATE, DRAW or RUNNING @return current GameState */
+    def gameState: GameState
 
 /**
  * A subtype of the Command Pattern, executing over a GameField.

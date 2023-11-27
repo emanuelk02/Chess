@@ -20,6 +20,7 @@ import scala.concurrent.Future
 
 import BaseControllerModule.given
 import model.gameDataComponent.GameField
+import model.gameDataComponent.GameState
 import persistence.fileIOComponent.FileIOInterface
 import util.data.Tile
 import util.data.Piece
@@ -79,3 +80,4 @@ case class Controller (var field: GameField, val commandHandler: ChessCommandInv
   def isPlaying: Boolean = field.playing
   def getKingSquare: Option[Tile] = field.getKingSquare
   def inCheck: Boolean = field.inCheck
+  def gameState: GameState = field.gameState
