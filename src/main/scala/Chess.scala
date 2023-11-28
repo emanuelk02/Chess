@@ -48,22 +48,10 @@ object starter:
 object MainApi extends App:
     starter.runApi
 
-object MainApiTUI extends App:
-    starter.runApi
-    val tui = TUI(controller)
-    tui.run
-object MainApiSwingGUI extends App:
-    starter.runApi
-    val tui = TUI(controller)
-    SwingGUI(controller).startup(Array())
-    tui.run
-
 object BaseTui extends App:
-  given controller: ControllerInterface = BaseControllerModule.controller
   val tui = TUI(controller)
   tui.run
 object BaseGui extends App:
-  given controller: ControllerInterface = BaseControllerModule.controller
   val tui = TUI(controller)
   SwingGUI(controller).startup(Array())
   tui.run

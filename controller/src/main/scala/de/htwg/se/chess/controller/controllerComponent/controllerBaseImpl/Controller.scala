@@ -24,6 +24,7 @@ import model.gameDataComponent.GameState
 import persistence.fileIOComponent.FileIOInterface
 import util.data.Tile
 import util.data.Piece
+import util.data.PieceColor
 import util.patterns.Command
 
 
@@ -81,3 +82,4 @@ case class Controller (var field: GameField, val commandHandler: ChessCommandInv
   def getKingSquare: Option[Tile] = field.getKingSquare
   def inCheck: Boolean = field.inCheck
   def gameState: GameState = field.gameState
+  def colorToMove: PieceColor = field.color

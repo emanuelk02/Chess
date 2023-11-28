@@ -8,11 +8,21 @@
 **                                                                                      **
 \*                                                                                      */
 
-
 package de.htwg.se.chess
+package controller
+package controllerComponent
+package controllerSessionsImpl
 
-import controller.controllerComponent.ControllerInterface
+import java.util.UUID
+
+import util.data.PieceColor
 
 
-object ChessModule:
-  given controller: ControllerInterface = BaseControllerModule.controller
+class Controller(
+    val whitePlayerSocketId: Option[UUID],
+    val blackPlayerSocketId: Option[UUID]
+) extends controllerCommunicatingImpl.Controller():
+    def hasTurn(socketId: UUID): Boolean =
+        if (colorToMove == PieceColor.White) whitePlayerSocketId.contains(socketId)
+        else blackPlayerSocketId.contains(socketId)
+
