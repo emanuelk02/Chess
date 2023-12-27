@@ -36,6 +36,7 @@ import spray.json._
 import controller.controllerComponent._
 import util.data.Tile
 import util.data.Piece
+import util.data.PieceColor
 import util.data.FenParser
 import util.data.ChessJsonProtocol._
 import util.patterns.ChainHandler
@@ -121,6 +122,33 @@ case class ControllerService(
                 "session" -> JsString(sessionId),
                 "player" -> JsString(playerSocketId.toString)
               ).toString)
+          }
+        }
+      }
+    },
+    path("session" / "player-color") {
+      get {
+        parameter("session".as[String], "player".as[String]) { (sessionId, playerId) =>
+          complete {
+            val controller: Option[Controller] = sessions.get(sessionId)
+            if controller.isEmpty then
+              HttpResponse(NotFound, entity = "Invalid session id")
+            else
+              val playerSocketId = UUID.fromString(playerId)
+              val whiteColorId = controller.get.whitePlayerSocketId
+              val blackColorId = controller.get.blackPlayerSocketId
+              val color: Option[PieceColor] =
+                if whiteColorId.contains(playerSocketId) then Some(PieceColor.White)
+                else if blackColorId.contains(playerSocketId) then Some(PieceColor.Black)
+                else None
+              if color.isEmpty then
+                HttpResponse(NotFound, entity = "Invalid player id")
+              else
+                HttpResponse(OK, entity = JsObject(
+                  "session" -> JsString(sessionId),
+                  "player" -> JsString(playerId),
+                  "color" -> JsString(color.get.toFenChar)
+                ).toString)
           }
         }
       }
