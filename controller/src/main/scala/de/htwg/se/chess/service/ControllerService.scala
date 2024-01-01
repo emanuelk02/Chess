@@ -126,7 +126,7 @@ case class ControllerService(
         }
       }
     },
-    path("session" / "player-color") {
+    path("session" / "player-state") {
       get {
         parameter("session".as[String], "player".as[String]) { (sessionId, playerId) =>
           complete {
@@ -147,6 +147,7 @@ case class ControllerService(
                 HttpResponse(OK, entity = JsObject(
                   "session" -> JsString(sessionId),
                   "player" -> JsString(playerId),
+                  "field" -> JsString(controller.get.fieldToFen),
                   "color" -> JsString(color.get.toFenChar)
                 ).toString)
           }
