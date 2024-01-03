@@ -61,8 +61,8 @@ case class ControllerService(
     concat(
       fieldPath,
       commandPath,
-      subscribeRoute,
-      persistenceRoute
+      subscribeRoute
+      //,persistenceRoute
     )
   }
 
