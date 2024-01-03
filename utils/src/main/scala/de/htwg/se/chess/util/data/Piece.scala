@@ -20,6 +20,10 @@ enum PieceType:
 enum PieceColor:
   case Black, White
 
+  def toFenChar: String = this match
+    case White => "w"
+    case Black => "b"
+
 extension (color: PieceColor)
     def invert: PieceColor = if color == PieceColor.White then PieceColor.Black else PieceColor.White
 

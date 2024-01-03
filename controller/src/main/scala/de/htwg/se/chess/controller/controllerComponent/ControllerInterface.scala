@@ -163,6 +163,8 @@ trait ControllerInterface extends Publisher:
     def isPlaying: Boolean
     /** Returns CHECKMATE, DRAW or RUNNING @return current GameState */
     def gameState: GameState
+    /** Returns the current color to move @return Black or White */
+    def colorToMove: PieceColor
 
 /**
  * A subtype of the Command Pattern, executing over a GameField.
