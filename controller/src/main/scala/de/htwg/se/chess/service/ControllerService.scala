@@ -15,6 +15,8 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.StandardRoute
@@ -50,7 +52,10 @@ import ControllerModule.given
 case class ControllerService(
   var bind: Future[ServerBinding],
   ip: String,
-  port: Int
+  port: Int,
+  legality: Uri = Uri(
+        s"http://${sys.env.get("LEGALITY_API_HOST").getOrElse("localhost")}:${sys.env.get("LEGALITY_API_PORT").getOrElse("8082")}"
+    ),
 )
 ( using
     getController: ((Option[UUID], Option[UUID]) => Controller),
@@ -61,7 +66,13 @@ case class ControllerService(
 
   println(s"Controller running. Please navigate to http://" + ip + ":" + port)
 
-  val route = pathPrefix("controller") {
+  def redirectTo(service: Uri, path: String, req: HttpRequest): Future[HttpResponse] =
+        Http().singleRequest(req.copy(
+            uri = service.withPath(Path("/" + path)).withQuery(Query(req.uri.rawQueryString))
+        ))
+
+  val route = concat(
+    pathPrefix("controller") {
     concat(
       sessionsPath,
       fieldPath,
@@ -69,7 +80,15 @@ case class ControllerService(
       subscribeRoute
       //,persistenceRoute
     )
-  }
+    },
+    path("legality" / Remaining) { path =>
+            extractRequest { req =>
+                onSuccess(redirectTo(legality, path, req)) { res =>
+                    complete(res)
+                }
+            }
+        }
+  )
 
   val sessions = scala.collection.mutable.Map[String, Controller]()
 
